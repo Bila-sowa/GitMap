@@ -19,18 +19,34 @@ class GitHubClient {
         };
     };
 
-    static async getRawData() {
-        const branchesRes = await fetch(this.branchLink, { headers: this.headers });
-        const commitsRes = await fetch(this.commitsLink, { headers: this.headers });
+    async getRawData() {
+        try {
+            const branchesRes = await fetch(this.branchLink, { headers: this.headers });
+            const commitsRes = await fetch(this.commitsLink, { headers: this.headers });
+            console.log(branchesRes.status)
+            if (!branchesRes.ok || !commitsRes.ok) {
+                throw new Error(`GitHub API error: ${branchesRes.status} / ${commitsRes.status}`);
+            }
 
-        const branches = await branchesRes.json();
-        const commits = await commitsRes.json();
-        return { branches, commits };
+            const branches = await branchesRes.json();
+            const commits = await commitsRes.json();
+
+            return { branches, commits };
+        } catch(err) {
+            console.log("The repo must be public.");
+            // showState("error", `GitHub API error: ${branchesRes.status} / ${commitsRes.status}`);
+            throw new Error(`Invalid GitHub Repo ${err.message}`);
+        }
     };
 
     async getData () {
-        const { branches, commits } = await this.getRawData();
+        const rawData = await this.getRawData();
+
+        if(!rawData) return null;
+
+        const { branches, commits } = rawData;
         let commitsDetails = [];
+        let branchesDetails = [];
 
         commits.forEach(commit => {
             const details = {
@@ -42,10 +58,16 @@ class GitHubClient {
             commitsDetails.push(details);
         });
 
+        branches.forEach(branch => {
+            const details = { name: branch.name };
+
+            branchesDetails.push(details);
+        })
+
         return {
             commitsDetails: commitsDetails,
+            branchesDetails: branchesDetails,
         };
     };
-}
+};
 
-const client = new GitHubClient("https://github.com/Bila-sowa/Web-player-");
