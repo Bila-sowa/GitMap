@@ -3,7 +3,7 @@ class GitHubClient {
         const { branchLink, commitsLink } = GitHubClient.formatGitHubUrl(url);
         this.branchLink = branchLink;
         this.commitsLink = commitsLink;
-        this.headers = { 'Accept': 'application/vnd.github+json', };
+        this.headers = { 'Accept': 'application/vnd.github+json' };
     }
 
     static formatGitHubUrl(url) {
@@ -26,7 +26,8 @@ class GitHubClient {
 
             if (!branchesRes.ok || !commitsRes.ok) {
                 if (branchesRes.status === 403 || commits.status === 403) {
-                    throw new Error(`Hourly request limit reached. Status: ${branchesRes.status} / ${commitsRes.status}`)
+                    // showMessage("")
+                    throw new Error(`Hourly request limit reached. Status: ${branchesRes.status} / ${commitsRes.status}`);
                 } else {
                     throw new Error(`GitHub API error: ${branchesRes.status} / ${commitsRes.status}`);
                 };
@@ -38,7 +39,7 @@ class GitHubClient {
             return { branches, commits, success: true };
 
         } catch(err) {
-            // showState("error", err.message);
+            // showError(err.message);
             console.error(err.message);
             return { error: err.message, success: false};
         }
@@ -73,6 +74,14 @@ class GitHubClient {
             branchesDetails: branchesDetails,
         };
     };
+
+    setToken(token) {
+        if (token) {
+            this.headers.Authorization = `Bearer ${token}`;
+        } else {
+            delete this.headers.Authorization;
+        }
+    }
 };
 
 const client = new GitHubClient("https://github.com/Bila-sowa/Web-player-");
