@@ -23,28 +23,32 @@ class GitHubClient {
         try {
             const branchesRes = await fetch(this.branchLink, { headers: this.headers });
             const commitsRes = await fetch(this.commitsLink, { headers: this.headers });
-            console.log(branchesRes.status)
+
             if (!branchesRes.ok || !commitsRes.ok) {
-                throw new Error(`GitHub API error: ${branchesRes.status} / ${commitsRes.status}`);
+                if (branchesRes.status === 403 || commits.status === 403) {
+                    throw new Error(`Hourly request limit reached. Status: ${branchesRes.status} / ${commitsRes.status}`)
+                } else {
+                    throw new Error(`GitHub API error: ${branchesRes.status} / ${commitsRes.status}`);
+                };
             }
 
             const branches = await branchesRes.json();
             const commits = await commitsRes.json();
 
-            return { branches, commits };
+            return { branches, commits, success: true };
+
         } catch(err) {
-            console.log("The repo must be public.");
-            // showState("error", `GitHub API error: ${branchesRes.status} / ${commitsRes.status}`);
-            throw new Error(`Invalid GitHub Repo ${err.message}`);
+            // showState("error", err.message);
+            console.error(err.message);
+            return { error: err.message, success: false};
         }
     };
 
     async getData () {
-        const rawData = await this.getRawData();
+        const data = await this.getRawData();
+        if (!data.success) return;
 
-        if(!rawData) return null;
-
-        const { branches, commits } = rawData;
+        const { branches, commits } = data;
         let commitsDetails = [];
         let branchesDetails = [];
 
@@ -71,3 +75,6 @@ class GitHubClient {
     };
 };
 
+const client = new GitHubClient("https://github.com/Bila-sowa/Web-player-");
+
+console.log(await client.getData());
