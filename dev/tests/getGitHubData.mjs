@@ -25,9 +25,9 @@ class GitHubClient {
             const commitsRes = await fetch(this.commitsLink, { headers: this.headers });
 
             if (!branchesRes.ok || !commitsRes.ok) {
-                if (branchesRes.status === 403 || commits.status === 403) {
+                if (branchesRes.status === 403 || commitsRes.status === 403 ) {
                     // showMessage("")
-                    throw new Error(`Hourly request limit reached. Status: ${branchesRes.status} / ${commitsRes.status}`);
+                    throw new Error(`Hourly request limit reached or invalid URL. Status: ${branchesRes.status} / ${commitsRes.status}`);
                 } else {
                     throw new Error(`GitHub API error: ${branchesRes.status} / ${commitsRes.status}`);
                 };
@@ -47,9 +47,14 @@ class GitHubClient {
 
     async getData () {
         const data = await this.getRawData();
-        if (!data.success) return;
+        if (!data.success) return { error: data.error, success: false };
 
         const { branches, commits } = data;
+
+        if (!Array.isArray(branches) || !Array.isArray(commits)) {
+            return { error: 'Unexpected GitHub API response format', success: false };
+        }
+
         let commitsDetails = [];
         let branchesDetails = [];
 
@@ -72,6 +77,7 @@ class GitHubClient {
         return {
             commitsDetails: commitsDetails,
             branchesDetails: branchesDetails,
+            success: true,
         };
     };
 
@@ -81,9 +87,7 @@ class GitHubClient {
         } else {
             delete this.headers.Authorization;
         }
-    }
+    };
 };
 
-const client = new GitHubClient("https://github.com/Bila-sowa/Web-player-");
-
-console.log(await client.getData());
+export { GitHubClient }
