@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .workspace {
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+            background: #2a2a2a;
+            cursor: grab;
+        }
+
+        .workspace:active {
+            cursor: grabbing;
+        }
+
+        .canvas {
+            user-select: none;
+            width: 100dvw;
+            height: 100dvh;
+            border: 1px solid white;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transform: translate(0px, 0px);
+        }
+        
+        .scale-controller-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="workspace" class="workspace">
+    <div id="canvas" class="canvas">
+        Test
+    </div>
+</div>
+
+<div id="scale-controller" class="scale-controller-container">
+    <button id="increase-scale-button" aria-label="Increase scale">+</button>
+    <span>100%</span>
+    <button id="reduce-scale-button" aria-label="Reduce scale">-</button>
+</div>
+
+<script>
+const workspace = document.querySelector("#workspace")
+const canvas = document.querySelector("#canvas")
+const increaseScaleButton = document.querySelector("#increase-scale-button")
+
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+let offsetX = 0;
+let offsetY = 0;
+let scale = 1;
+
+function updateCanvas() {
+    canvas.style.transform =
+        `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+}
+
+workspace.addEventListener('mousedown', (event) => {
+    isDragging = true;
+    startX = event.clientX;
+    startY = event.clientY;
+});
+
+window.addEventListener('mousemove', (event) => {
+    if (!isDragging) return;
+    const deltaX = event.clientX - startX;
+    const deltaY = event.clientY - startY;
+
+    offsetX += deltaX;
+    offsetY += deltaY;
+
+    updateCanvas();
+
+    startX = event.clientX;
+    startY = event.clientY;
+});
+
+window.addEventListener('mouseup', () => { isDragging = false; });
+
+window.addEventListener('keydown', (event) => {
+    event.preventDefault()
+
+    if (!event.ctrlKey) return;
+    if (event.key === '+' || event.key === '=') scale += 0.1;
+    if (event.key === '-') scale -= 0.1;
+
+    scale = Math.min(Math.max(scale, 0.2), 3);
+
+    updateCanvas();
+});
+
+</script>
+</body>
+</html>
