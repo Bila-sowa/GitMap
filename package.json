@@ -1,0 +1,20 @@
+{
+    "name": "gitmap",
+    "version": "1.0.0",
+    "description": "",
+    "homepage": "https://github.com/Bila-sowa/GitMap#readme",
+    "bugs": {
+        "url": "https://github.com/Bila-sowa/GitMap/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Bila-sowa/GitMap.git"
+    },
+    "license": "MIT",
+    "author": "Bila_sowa",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    }
+}

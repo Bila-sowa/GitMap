@@ -1,8 +1,8 @@
-import { GitHubClient } from "./getGitHubData.mjs"
-import { TestFeedBack } from "./testFeedBack.mjs";
+import { GitHubClient } from "./getGitHubData.js"
+import { TestFeedBack } from "./testFeedBack.js";
 
 export default async function test() {
-    const client = new GitHubClient("https://github.com/Bila-sowa/Registration-servicewdwd");
+    const client = new GitHubClient("https://github.com/Bila-sowa/Registration-service");
 
     try {
         const [rawData, parsedData] = await Promise.all([
