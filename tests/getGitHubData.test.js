@@ -1,4 +1,4 @@
-import { GitHubClient } from "./getGitHubData.js"
+import { GitHubClient } from "../src/js/services/getGitHubData.js"
 import { TestFeedBack } from "./testFeedBack.js";
 
 export default async function test() {
