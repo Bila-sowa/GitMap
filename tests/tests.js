@@ -15,7 +15,9 @@ async function runTests() {
     console.log(`Tests done: ${results.length - failed.length} passed, ${failed.length} failed.`);
     if (failed.length > 0) {
         console.error("Failed tests:", failed.map(({ name }) => name));
-    } else { console.dir(results); };
+    };
+    
+    console.dir(results)
     return results;
 }
 

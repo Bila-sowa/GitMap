@@ -80,11 +80,32 @@ class GitHubClient {
         };
     };
 
-    setToken(token) {
-        if (token) {
-            this.headers.Authorization = `Bearer ${token}`;
-        } else {
+    async setToken(token) {
+        if (!token) {
             delete this.headers.Authorization;
+            return;
+        }
+
+        this.headers.Authorization = `Bearer ${token}`;
+        const validation = await this.validateToken();
+
+        if (!validation.success) {
+            delete this.headers.Authorization;
+            console.error(`Invalid token: ${validation.error}. Falling back to no-token mode.`);
+        }
+    };
+
+    async validateToken() {
+        try {
+            const res = await fetch('https://api.github.com/user', { headers: this.headers });
+
+            if (res.status === 401) throw new Error('Token is invalid or expired');
+            if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+
+            const { login } = await res.json();
+            return { success: true, login };
+        } catch (err) {
+            return { success: false, error: err.message };
         }
     };
 

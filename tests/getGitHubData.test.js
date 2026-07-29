@@ -4,7 +4,7 @@ import { TestFeedBack } from "./testFeedBack.js";
 
 export default async function test_001() {
     const client = new GitHubClient("https://github.com/Bila-sowa/Registration-service");
-    client.setToken(GITHUB_TOKEN)
+    await client.setToken(GITHUB_TOKEN);
     try {
         const [rawData, parsedData, rateLimitData] = await Promise.all([
             client.getRawData(),
