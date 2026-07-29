@@ -87,6 +87,30 @@ class GitHubClient {
             delete this.headers.Authorization;
         }
     };
+
+    async getRateLimit() {
+        try {
+            const tokenRes = await fetch('https://api.github.com/rate_limit', { headers: this.headers });
+
+            if (!tokenRes.ok) {
+                throw new Error(`GitHub API error: ${tokenRes.status}`);
+            }
+
+            const data = await tokenRes.json();
+            const { limit, remaining, reset, used } = data.rate;
+            
+            return {
+                limit,
+                remaining,
+                used,
+                resetDate: new Date(reset * 1000),
+                success: true,
+            };
+        } catch (err) {
+            return { error: err.message, success: false };
+        }
+    };
+
 };
 
 export { GitHubClient }
