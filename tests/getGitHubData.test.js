@@ -1,9 +1,10 @@
 import { GitHubClient } from "../src/js/services/getGitHubData.js"
+import GITHUB_TOKEN from "../src/js/services/gitHubToken.js";
 import { TestFeedBack } from "./testFeedBack.js";
 
-export default async function test() {
+export default async function test_001() {
     const client = new GitHubClient("https://github.com/Bila-sowa/Registration-service");
-
+    client.setToken(GITHUB_TOKEN)
     try {
         const [rawData, parsedData] = await Promise.all([
             client.getRawData(),
@@ -19,4 +20,4 @@ export default async function test() {
     } catch (err) { return new TestFeedBack("getGitHubData.mjs", "GitHubClient", "class", false, err.message) }
 }
 
-console.log(await test())
+

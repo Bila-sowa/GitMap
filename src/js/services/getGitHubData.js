@@ -40,7 +40,6 @@ class GitHubClient {
 
         } catch(err) {
             // showError(err.message);
-            console.error(err.message);
             return { error: err.message, success: false};
         }
     };
