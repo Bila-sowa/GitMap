@@ -1,4 +1,4 @@
-<div style="width: 100%;">
+<div style="width: 100%; text-align: center">
     <img style="width: 50%; display: block; margin: 0 auto;" src="./readme/banner.webp" alt="banner">
 </div>
 
