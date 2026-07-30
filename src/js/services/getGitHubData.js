@@ -56,12 +56,14 @@ class GitHubClient {
 
         let commitsDetails = [];
         let branchesDetails = [];
+        
 
         commits.forEach(commit => {
+            
             const details = {
                 author: commit.commit.author,
                 message: commit.commit.message,
-                url: commit.commit.url,
+                url: commit.html_url,
             };
             
             commitsDetails.push(details);
