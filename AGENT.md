@@ -1,6 +1,7 @@
 # Project Instructions
 
 ## General
+- Comments only under the most important circumstances
 - Always preserve the existing project structure.
 - Explain significant changes before making them.
 - Prefer minimal changes over complete rewrites.
