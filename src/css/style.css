@@ -68,7 +68,7 @@ body {
 
 header {
     background: var(--color-1);
-    height: 100px;
+    height: 75px;
     max-width: 100%;
     border-bottom: 2px solid var(--border-color-1);
     display: flex;
@@ -84,7 +84,7 @@ header {
 }
 
 .logo-title h1 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 600;
 }
 
@@ -108,8 +108,8 @@ header {
 
 .link-input-container input {
     width: 350px;
-    height: 50px;
-    font-size: 0.9rem;
+    height: 40px;
+    font-size: 0.8rem;
     padding-left: 16px;
     padding-right: 44px;
     background: var(--color-3);
@@ -124,6 +124,7 @@ header {
 .link-input-container a {
     background: none;
     position: absolute;
+    border-radius: 999px;
     right: 10px;
     display: flex;
     align-items: center;
@@ -131,9 +132,9 @@ header {
 }
 
 .nav-button {
-    width: 40px;
-    height: 40px;
-    padding: 10px;
+    width: 32px;
+    height: 32px;
+    padding: 2px;
     box-sizing: content-box;
     border-radius: 999px;
 }
