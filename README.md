@@ -1,5 +1,5 @@
-<div style="width: 100%; text-align: center">
-    <img style="width: 50%; display: block; margin: 0 auto;" src="./readme/banner.webp" alt="banner">
+<div align="center">
+    <img width="1200" src="./readme/banner.webp" alt="banner">
 </div>
 
 <h1>
@@ -12,13 +12,13 @@ You can also add a <a href="https://github.com/settings/personal-access-tokens" 
 <h2>
     Demo
 </h2>
-<div style="width: 100%;">
+<div>
     <h3>Drag & Drop Canvas</h3>
-    <img style="width: 100%; display: block; margin: 0 auto;" src="" alt="">
+    <img src="" alt="">
     <h3>Graph</h3>
-    <img style="width: 100%; display: block; margin: 0 auto;" src="" alt="">
+    <img src="" alt="">
     <h3>Settings</h3>
-    <img style="width: 100%; display: block; margin: 0 auto;" src="" alt="">
+    <img src="" alt="">
 </div>
 
 <h2>
@@ -38,10 +38,10 @@ You can also add a <a href="https://github.com/settings/personal-access-tokens" 
 <h2>
     Stack
 </h2>
-<ul style="list-style: none; margin: 0; padding: 0;">
-    <li><img style="list-style: none;" src="https://img.shields.io/badge/-HTML-090909?style=for-the-badge&logo=HTML5&logoColor=%3F" alt="HTML5"></li>
-    <li><img style="list-style: none;" src="https://img.shields.io/badge/-CSS-090909?style=for-the-badge&logo=CSS&logoColor=204be4" alt="CSS3"></li>
-    <li><img style="list-style: none;" src="https://img.shields.io/badge/-JavaScript-090909?style=for-the-badge&logo=JavaScript&logoColor=%3F" alt="JavaScript"></li>
+<ul>
+    <li><img src="https://img.shields.io/badge/-HTML-090909?style=for-the-badge&logo=HTML5&logoColor=%3F" alt="HTML5"></li>
+    <li><img src="https://img.shields.io/badge/-CSS-090909?style=for-the-badge&logo=CSS&logoColor=204be4" alt="CSS3"></li>
+    <li><img src="https://img.shields.io/badge/-JavaScript-090909?style=for-the-badge&logo=JavaScript&logoColor=%3F" alt="JavaScript"></li>
 </ul>
 
 <h2>
