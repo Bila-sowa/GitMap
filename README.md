@@ -1,5 +1,5 @@
 <div align="center">
-    <img width="1200" src="./readme/banner.webp" alt="banner">
+    <img width="600" src="./readme/banner.webp" alt="banner">
 </div>
 
 <h1>
