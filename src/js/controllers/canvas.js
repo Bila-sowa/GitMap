@@ -1,5 +1,3 @@
-import { viewport, canvas } from "./dom.js";
-
 export class CanvasController {
     constructor(viewport, canvas) {
         this.viewport = viewport;
@@ -171,6 +169,6 @@ export class CanvasController {
         this.scale = newScale;
         this.#applyTransform();
     }
-}
+};
 
-const canvasController = new CanvasController(viewport, canvas);
+

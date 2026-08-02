@@ -1,5 +1,6 @@
-import './controllers/canvas.js';
-
+import * as DOM from "./controllers/dom.js";
 import { renderGraph } from './controllers/render.js';
 
-renderGraph("https://github.com/microsoft/vscode");
+import { CanvasController } from './controllers/canvas.js';
+
+const canvasController = new CanvasController(DOM.viewport, DOM.canvas);
