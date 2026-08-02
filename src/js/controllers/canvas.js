@@ -1,4 +1,4 @@
-export class CanvasController {
+export default class Canvas {
     constructor(viewport, canvas) {
         this.viewport = viewport;
         this.canvas = canvas;
@@ -170,5 +170,3 @@ export class CanvasController {
         this.#applyTransform();
     }
 };
-
-

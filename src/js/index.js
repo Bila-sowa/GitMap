@@ -1,6 +1,11 @@
 import * as DOM from "./controllers/dom.js";
 import { renderGraph } from './controllers/render.js';
 
-import { CanvasController } from './controllers/canvas.js';
+import Graph from "./controllers/graph.js";
+import Canvas from './controllers/canvas.js';
 
-const canvasController = new CanvasController(DOM.viewport, DOM.canvas);
+const graph = new Graph(DOM.graph);
+const canvas = new Canvas(DOM.viewport, DOM.canvas);
+
+// For Testing
+graph.render("https://github.com/Bila-sowa/GitMap");
