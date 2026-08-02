@@ -136,4 +136,4 @@ class GitHubClient {
 
 };
 
-export { GitHubClient }
+export default GitHubClient;

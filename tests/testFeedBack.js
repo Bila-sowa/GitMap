@@ -1,4 +1,4 @@
-export class TestFeedBack {
+export default class TestFeedBack {
     constructor(file, name, type, success, data) {
         this.file = file;
         this.name = name;

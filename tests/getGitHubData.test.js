@@ -1,6 +1,6 @@
-import { GitHubClient } from "../src/js/services/getGitHubData.js"
+import GitHubClient from "../src/js/services/getGitHubData.js"
 import GITHUB_TOKEN from "../src/js/services/gitHubToken.js";
-import { TestFeedBack } from "./testFeedBack.js";
+import TestFeedBack from "./testFeedBack.js";
 
 export default async function test_001() {
     const client = new GitHubClient("https://github.com/Bila-sowa/Registration-service");
