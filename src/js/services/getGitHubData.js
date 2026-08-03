@@ -53,19 +53,29 @@ class GitHubClient {
         if (!Array.isArray(branches) || !Array.isArray(commits)) {
             return { error: 'Unexpected GitHub API response format', success: false };
         }
-
+        
         let commitsDetails = [];
         let branchesDetails = [];
         
 
         commits.forEach(commit => {
-            
+            const formattedTitle = commit.commit.message.split('\n')[0];
+            const formattedDescription = commit.commit.message.split('\n').slice(1).join('\n');
+            const formattedDate = new Date(`${commit.commit.author.date}`).toLocaleString();
+            const shortHash = commit.sha.slice(0, 7);
+
             const details = {
-                author: commit.commit.author,
-                message: commit.commit.message,
+                author: {
+                    name: commit.commit.author.name,
+                    email: commit.commit.author.email,
+                    date: formattedDate,
+                },
+                title: formattedTitle,
+                description: formattedDescription ? formattedDescription : "",
+                hash: shortHash,
                 url: commit.html_url,
             };
-            
+
             commitsDetails.push(details);
         });
 
@@ -126,7 +136,6 @@ class GitHubClient {
                 limit,
                 remaining,
                 used,
-                resetDate: new Date(reset * 1000),
                 success: true,
             };
         } catch (err) {

@@ -24,11 +24,10 @@ export default class Graph {
         this.#graph.innerHTML = '';
 
         this.#data.commitsDetails.forEach((commit, index) => {
-            const formattedTitle = commit.message.split('\n')[0];
             const isLast = index === this.#data.commitsDetails.length - 1;
 
             const commitCard = `
-                <button class="commit" data-id="${index}" aria-label="Open commit: ${formattedTitle}" title="Open commit: ${formattedTitle}"></button>
+                <button class="commit" data-id="${index}" aria-label="Open commit: ${commit.title}" title="Open commit: ${commit.title}"></button>
                 ${isLast ? '' : `
                 <div class="connection">
                     <span></span>
@@ -52,7 +51,7 @@ export default class Graph {
         this.#data = await this.#client.getData();
     }
 
-#openFullCommitModal = (e) => {
+    #openFullCommitModal = (e) => {
         const commitButton = e.target.closest('.commit');
         const commit = this.#data?.commitsDetails[+commitButton?.dataset.id];
 
@@ -65,6 +64,26 @@ export default class Graph {
 
         console.log(commit)
 
+        const card = `
+            <div class="full-commit-modal">
+                <h2>${commit.title}</h2>
+                <p>${commit.description ? "Description" + commit.description : ""} </p>
+                <div class="data-container">
+                    <span title="Email: ${commit.author.email}">Author: ${commit.author.name}</span>
+                    <span>Hash: ${commit.hash}</span>
+                    <span>Date: ${commit.author.date}</span>
+                </div>
+                <div class="changes-container">
+                    <h3>Changes</h3>
+                    <div>
+
+                    </div>
+                    <a href="${commit.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b></a>
+                </div>
+            </div>
+        `;
+
+        // this.#body.insertAdjacentHTML("beforeend", card);
         this.#isFullOpen = true;
     }
 
