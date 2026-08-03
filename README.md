@@ -58,10 +58,10 @@ You can also add a <a href="https://github.com/settings/personal-access-tokens" 
 </h2>
 
 <h3>Options for open</h3>
+<span><b>Only by:</b></span>
 <ul>
-    <li>By <a href="https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer" target="_blank">Live Server</a></li>
-    <li>By <a href="#" target="_blank">GitHub Pages</a></li>
-    <li>By opening <code>index.html</code> directly in your browser</li>
+    <li><a href="https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer" target="_blank">Live Server</a></li>
+    <li><a href="#" target="_blank">GitHub Pages</a></li>
 </ul>
 
 <h3>Using</h3>

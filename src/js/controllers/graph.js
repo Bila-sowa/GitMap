@@ -9,6 +9,7 @@ export default class Graph {
     #isFullOpen = false;
     #isHoverOpen = false;
     #hoverTimeoutId = null;
+    #lastFocusedCommit = null;
 
     constructor(graphElement) {
         this.#body = document.querySelector("body")
@@ -27,7 +28,7 @@ export default class Graph {
             const isLast = index === this.#data.commitsDetails.length - 1;
 
             const commitCard = `
-                <button class="commit" data-id="${index}" aria-label="Open commit: ${commit.title}" title="Open commit: ${commit.title}"></button>
+                <button class="commit" data-id="${index}" name="${commit.title}" aria-expanded="false" aria-label="Open commit: ${commit.title}" title="Open commit: ${commit.title}"></button>
                 ${isLast ? '' : `
                 <div class="connection">
                     <span></span>
@@ -43,7 +44,7 @@ export default class Graph {
     #bindEvents() {
         this.#graph.addEventListener('click', this.#openFullCommitModal);
         this.#graph.addEventListener('mouseover', this.#openHoverCommitModal);
-        this.#graph.addEventListener('mouseout', this.#closeCommitModal);
+        this.#graph.addEventListener('mouseout', this.#closeHoverCommitModal);
     }
 
     async #getData(link) {
@@ -55,19 +56,24 @@ export default class Graph {
         const commitButton = e.target.closest('.commit');
         const commit = this.#data?.commitsDetails[+commitButton?.dataset.id];
 
-        if (!commit || this.#isFullOpen || this.#isHoverOpen) return;
+        if (!commit) return;
 
         if (this.#hoverTimeoutId) {
             clearTimeout(this.#hoverTimeoutId);
             this.#hoverTimeoutId = null;
         }
 
-        console.log(commit)
+        document.querySelector("#hover-commit-modal")?.remove();
+        this.#isHoverOpen = false;
+
+        document.querySelector("#full-modal-window")?.remove();
+        this.#lastFocusedCommit?.setAttribute("aria-expanded", "false");
 
         const card = `
-            <div class="full-commit-modal">
+            <div class="full-commit-modal" id="full-modal-window" role="dialog">
+                <button id="close-button" aria-label="close">&times;</button>
                 <h2>${commit.title}</h2>
-                <p>${commit.description ? "Description" + commit.description : ""} </p>
+                <p>${commit.description ? "Description: " + commit.description : ""} </p>
                 <div class="data-container">
                     <span title="Email: ${commit.author.email}">Author: ${commit.author.name}</span>
                     <span>Hash: ${commit.hash}</span>
@@ -78,13 +84,27 @@ export default class Graph {
                     <div>
 
                     </div>
-                    <a href="${commit.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b></a>
+                    <a href="${commit.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="./images/github_logo.webp" alt></a>
                 </div>
             </div>
         `;
 
-        // this.#body.insertAdjacentHTML("beforeend", card);
+        commitButton.setAttribute("aria-expanded", "true");
+        this.#body.insertAdjacentHTML("beforeend", card);
         this.#isFullOpen = true;
+        this.#lastFocusedCommit = commitButton;
+
+        const modal = document.querySelector("#full-modal-window");
+        const closeButton = document.querySelector("#close-button");
+
+        closeButton.focus();
+
+        closeButton.addEventListener("click", () => {
+            modal.remove();
+            this.#isFullOpen = false;
+            commitButton.setAttribute("aria-expanded", "false");
+            commitButton.focus();
+        });
     }
 
     #openHoverCommitModal = (e) => {
@@ -104,16 +124,16 @@ export default class Graph {
             if (this.#isFullOpen) return;
 
             this.#isHoverOpen = true;
-            console.log(commit)
         }, this.#delay);
     }
 
-    #closeCommitModal = () => {
+    #closeHoverCommitModal = () => {
         if (this.#hoverTimeoutId) {
             clearTimeout(this.#hoverTimeoutId);
             this.#hoverTimeoutId = null;
         }
 
+        document.querySelector("#hover-commit-modal")?.remove();
         this.#isHoverOpen = false;
     }
 }

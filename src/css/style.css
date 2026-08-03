@@ -178,10 +178,20 @@ main {
 }
 
 .commit {
+    position: relative;
     width: 64px;
     height: 64px;
     border: 5px solid var(--accent-color-1);
     border-radius: 999px;
+}
+
+.commit::before {
+    font-size: 1.2rem;
+    content: attr(name);
+    position: absolute;
+    right: 120px;
+    top: 12px;
+    width: 250px;
 }
 
 .commit:hover, .commit:active { background: none; }
@@ -196,4 +206,86 @@ main {
 .connection span {
     margin: -8px 0px;
     border: 2px solid var(--accent-color-1);
+}
+
+.full-commit-modal {
+    position: fixed;
+    z-index: 20;
+    top: 77px;
+    right: 0;
+    height: calc(100dvh - 77px);
+    width: 30dvw;
+    box-sizing: border-box;
+    padding: 20px;
+    background: var(--color-3);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* animation: modal-pop; */
+}
+
+.full-commit-modal button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 2rem;
+    margin: 2px;
+    width: 50px;
+    height: 50px;
+    border-radius: 999px;
+    transition: background 0.3s ease;
+}
+
+.full-commit-modal h2 {
+    font-size: 1.75rem; 
+}
+
+.full-commit-modal p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color-2);
+}
+
+.full-commit-modal .data-container {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.full-commit-modal .changes-container {
+    margin-top: auto;
+    height: 300px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.full-commit-modal .changes-container h3 { 
+    width: 100%;
+    padding-bottom: 5px;
+    font-size: 1.35rem;
+    border-bottom: var(--border-color-1) 2px solid;
+}
+
+.full-commit-modal .changes-container div { overflow-y: scroll; }
+
+.full-commit-modal .changes-container a { 
+    background: var(--color-4);
+    width: 260px;
+    height: 50px;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+
+.full-commit-modal .changes-container a:hover { 
+    background: var(--hover-color-1);
 }
