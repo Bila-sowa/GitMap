@@ -1,16 +1,19 @@
 import GitHubClient from "../services/getGitHubData.js";
 
 export default class Graph {
+    #body;
     #graph;
     #client;
     #data;
-    #cooldown;
-    #isOpen;
+    #delay;
+    #isFullOpen = false;
+    #isHoverOpen = false;
     #hoverTimeoutId = null;
 
     constructor(graphElement) {
+        this.#body = document.querySelector("body")
         this.#graph = graphElement;
-        this.#cooldown = 1500;
+        this.#delay = 1500;
         this.#bindEvents();
     }
 
@@ -25,7 +28,7 @@ export default class Graph {
             const isLast = index === this.#data.commitsDetails.length - 1;
 
             const commitCard = `
-                <button class="commit" data-id="${index}" aria-label="Open commit ${formattedTitle}" title="Open commit ${formattedTitle}"></button>
+                <button class="commit" data-id="${index}" aria-label="Open commit: ${formattedTitle}" title="Open commit: ${formattedTitle}"></button>
                 ${isLast ? '' : `
                 <div class="connection">
                     <span></span>
@@ -39,9 +42,9 @@ export default class Graph {
     }
 
     #bindEvents() {
-        this.#graph.addEventListener('click', this.#handleCommitClick);
-        this.#graph.addEventListener('mouseover', this.#handleCommitHover);
-        this.#graph.addEventListener('mouseout', this.#handleCommitLeave);
+        this.#graph.addEventListener('click', this.#openFullCommitModal);
+        this.#graph.addEventListener('mouseover', this.#openHoverCommitModal);
+        this.#graph.addEventListener('mouseout', this.#closeCommitModal);
     }
 
     async #getData(link) {
@@ -49,55 +52,49 @@ export default class Graph {
         this.#data = await this.#client.getData();
     }
 
-    #handleCommitClick = (e) => {
+#openFullCommitModal = (e) => {
         const commitButton = e.target.closest('.commit');
-        if (!commitButton) return;
+        const commit = this.#data?.commitsDetails[+commitButton?.dataset.id];
 
-        const commitIndex = +commitButton.dataset.id;
-        this.#openFullCommitModal(commitIndex);
-    };
-
-    #handleCommitHover = (e) => {
-        const commitButton = e.target.closest('.commit');
-        if (!commitButton || this.#isOpen) return;
-
-        const commitIndex = +commitButton.dataset.id;
-
-        this.#hoverTimeoutId = setTimeout(() => {
-            this.#openHoverCommitModal(commitIndex);
-            this.#hoverTimeoutId = null;
-        }, this.#cooldown);
-    };
-
-    #handleCommitLeave = (e) => {
-        const commitButton = e.target.closest('.commit');
-        if (!commitButton) return;
+        if (!commit || this.#isFullOpen || this.#isHoverOpen) return;
 
         if (this.#hoverTimeoutId) {
             clearTimeout(this.#hoverTimeoutId);
             this.#hoverTimeoutId = null;
         }
 
-        if (this.#isOpen) {
-            this.#closeCommitModal();
-        }
-    };
+        console.log(commit)
 
-    #openFullCommitModal = (commitIndex) => {
-        const commit = this.#data?.commitsDetails[commitIndex];
-        if (!commit || this.#isOpen) return;
-
-        this.#isOpen = true;
+        this.#isFullOpen = true;
     }
 
-    #openHoverCommitModal = (commitIndex) => {
-        const commit = this.#data?.commitsDetails[commitIndex];
-        if (!commit || this.#isOpen) return;
+    #openHoverCommitModal = (e) => {
+        const commitButton = e.target.closest('.commit');
+        const commit = this.#data?.commitsDetails[+commitButton?.dataset.id];
 
-        this.#isOpen = true;
+        if (!commit || this.#isFullOpen || this.#isHoverOpen) return;
+
+        if (this.#hoverTimeoutId) {
+            clearTimeout(this.#hoverTimeoutId);
+            this.#hoverTimeoutId = null;
+        }
+
+        this.#hoverTimeoutId = setTimeout(() => {
+            this.#hoverTimeoutId = null;
+
+            if (this.#isFullOpen) return;
+
+            this.#isHoverOpen = true;
+            console.log(commit)
+        }, this.#delay);
     }
 
     #closeCommitModal = () => {
-        this.#isOpen = false;
+        if (this.#hoverTimeoutId) {
+            clearTimeout(this.#hoverTimeoutId);
+            this.#hoverTimeoutId = null;
+        }
+
+        this.#isHoverOpen = false;
     }
 }
