@@ -1,20 +1,20 @@
 import GitHubClient from "../services/getGitHubData.js";
 
 export default class Graph {
-    #body;
-    #graph;
-    #client;
-    #data;
-    #delay;
+    #body = null;
+    #graph = null;
+    #client = null;
+    #data = null;
+    #delay = 1500;
     #isFullOpen = false;
     #isHoverOpen = false;
     #hoverTimeoutId = null;
     #lastFocusedCommit = null;
+    #keydownHandler = null;
 
     constructor(graphElement) {
         this.#body = document.querySelector("body")
         this.#graph = graphElement;
-        this.#delay = 1500;
         this.#bindEvents();
     }
 
@@ -69,6 +69,11 @@ export default class Graph {
         document.querySelector("#full-modal-window")?.remove();
         this.#lastFocusedCommit?.setAttribute("aria-expanded", "false");
 
+        if (this.#keydownHandler) {
+            document.removeEventListener("keydown", this.#keydownHandler);
+            this.#keydownHandler = null;
+        }
+
         const files = await this.#client.getCommitFiles(commit.sha);
         console.log(files)
     
@@ -78,8 +83,8 @@ export default class Graph {
                 <h2>${commit.title}</h2>
                 <p>${commit.description ? "Description: " + commit.description : ""} </p>
                 <div class="data-container">
-                    <span title="Email: ${commit.author.email}">Author: ${commit.author.name}</span>
-                    <span>Hash: ${commit.hash}</span>
+                    <a href="${commit.author.url}" class="author-container"  target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">Author: ${commit.author.name} <img src="${commit.author.avatar}" alt></a>
+                    <span>Hash: #${commit.hash}</span>
                     <span>Date: ${commit.author.date}</span>
                 </div>
                 <div class="changes-container">
@@ -113,12 +118,22 @@ export default class Graph {
 
         closeButton.focus();
 
-        closeButton.addEventListener("click", () => {
+        const closeModal = () => {
             modal.remove();
             this.#isFullOpen = false;
             commitButton.setAttribute("aria-expanded", "false");
             commitButton.focus();
-        });
+            document.removeEventListener("keydown", this.#keydownHandler);
+            this.#keydownHandler = null;
+        };
+
+        this.#keydownHandler = (e) => {
+            if (e.key !== "Escape") return;
+            closeModal();
+        };
+
+        closeButton.addEventListener("click", closeModal);
+        document.addEventListener("keydown", this.#keydownHandler);
     }
 
     #openHoverCommitModal = (e) => {
