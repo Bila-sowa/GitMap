@@ -12,7 +12,6 @@
 
 :root {
     --accent-color-1: #3DED6B;
-    
     --error-color: #FF4040;
     --info-color: #40A9FF;
     --success-color: #2BFF60;
@@ -255,7 +254,7 @@ main {
 
 .full-commit-modal .changes-container {
     margin-top: auto;
-    height: 300px;
+    height: 400px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -269,8 +268,6 @@ main {
     font-size: 1.35rem;
     border-bottom: var(--border-color-1) 2px solid;
 }
-
-.full-commit-modal .changes-container div { overflow-y: scroll; }
 
 .full-commit-modal .changes-container a { 
     background: var(--color-4);
@@ -289,3 +286,38 @@ main {
 .full-commit-modal .changes-container a:hover { 
     background: var(--hover-color-1);
 }
+
+.files-container {
+    width: 100%;
+    height: 200px;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.file-container {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 2px solid var(--text-color-2);
+    border-radius: 10px;
+}
+
+.file-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    width: 70%;
+}
+
+.file-changes {
+    margin-left: auto;
+    font-size: 0.8rem;
+    display: flex;
+    gap: 8px;
+    font-weight: bolder;
+}
+
+.file-additions { color: #1f6feb; }
+.file-deletions { color: #da3633; }

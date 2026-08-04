@@ -52,7 +52,7 @@ export default class Graph {
         this.#data = await this.#client.getData();
     }
 
-    #openFullCommitModal = (e) => {
+    #openFullCommitModal = async (e) => {
         const commitButton = e.target.closest('.commit');
         const commit = this.#data?.commitsDetails[+commitButton?.dataset.id];
 
@@ -69,6 +69,9 @@ export default class Graph {
         document.querySelector("#full-modal-window")?.remove();
         this.#lastFocusedCommit?.setAttribute("aria-expanded", "false");
 
+        const files = await this.#client.getCommitFiles(commit.sha);
+        console.log(files)
+    
         const card = `
             <div class="full-commit-modal" id="full-modal-window" role="dialog">
                 <button id="close-button" aria-label="close">&times;</button>
@@ -81,8 +84,19 @@ export default class Graph {
                 </div>
                 <div class="changes-container">
                     <h3>Changes</h3>
-                    <div>
-
+                    <div class="files-container">
+                        ${files.success ? files.files.map(file => `
+                            <div class="file-container">
+                                <img class="file-icon" src="./svg/${file.extension}.svg" alt>
+                                <span class="file-name">${file.name}</span>
+                                <div class="file-changes">
+                                    <span class="file-additions">+${file.additions}</span>
+                                    <span class="file-deletions">-${file.deletions}</span>
+                                </div>
+                            </div>
+                            `).join("")
+                            : ""
+                        }
                     </div>
                     <a href="${commit.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="./images/github_logo.webp" alt></a>
                 </div>

@@ -68,12 +68,15 @@ class GitHubClient {
                 author: {
                     name: commit.commit.author.name,
                     email: commit.commit.author.email,
+                    avatar: commit.author.avatar_url,
+                    url: commit.author.html_url,
                     date: formattedDate,
                 },
                 title: formattedTitle,
                 description: formattedDescription ? formattedDescription : "",
                 hash: shortHash,
                 url: commit.html_url,
+                sha: commit.sha
             };
 
             commitsDetails.push(details);
@@ -90,6 +93,61 @@ class GitHubClient {
             branchesDetails: branchesDetails,
             success: true,
         };
+    };
+
+    async getRateLimit() {
+        try {
+            const tokenRes = await fetch('https://api.github.com/rate_limit', { headers: this.headers });
+
+            if (!tokenRes.ok) {
+                throw new Error(`GitHub API error: ${tokenRes.status}`);
+            }
+
+            const data = await tokenRes.json();
+            const { limit, remaining, reset, used } = data.rate;
+            
+            return {
+                limit,
+                remaining,
+                used,
+                success: true,
+            };
+        } catch (err) {
+            return { error: err.message, success: false };
+        }
+    };
+
+
+
+    async getCommitFiles(sha) {
+        try {
+            const fileRes = await fetch(`${this.commitsLink}/${sha}`, { headers: this.headers });
+
+            if (!fileRes.ok) throw new Error(`GitHub API error: ${res.status}`);
+
+            const data = await fileRes.json();
+            let formattedData = [];
+
+            data.files.forEach(file => {
+                const extension = file.filename.slice(file.filename.lastIndexOf('.') + 1);
+                const fileData = {
+                    name: file.filename,
+                    additions: file.additions,
+                    deletions: file.deletions,
+                    extension: extension,
+                };
+
+                formattedData.push(fileData);
+            });
+
+            return {
+                files: formattedData, 
+                success: true,
+            };
+        } catch (err) {
+            console.error(`Failed to fetch files for commit ${sha}: ${err.message}`);
+            return { error: err.message, success: false };
+        }
     };
 
     async setToken(token) {
@@ -121,27 +179,6 @@ class GitHubClient {
         }
     };
 
-    async getRateLimit() {
-        try {
-            const tokenRes = await fetch('https://api.github.com/rate_limit', { headers: this.headers });
-
-            if (!tokenRes.ok) {
-                throw new Error(`GitHub API error: ${tokenRes.status}`);
-            }
-
-            const data = await tokenRes.json();
-            const { limit, remaining, reset, used } = data.rate;
-            
-            return {
-                limit,
-                remaining,
-                used,
-                success: true,
-            };
-        } catch (err) {
-            return { error: err.message, success: false };
-        }
-    };
 
 };
 
