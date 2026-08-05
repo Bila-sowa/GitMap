@@ -11,4 +11,4 @@ const canvas = new Canvas(DOM.viewport, DOM.canvas);
 const theme = new Theme(DOM.themeButton)
 
 // For Testing
-graph.render("https://github.com/Bila-sowa/GitMap");
+graph.render("https://github.com/trycompai/crm");

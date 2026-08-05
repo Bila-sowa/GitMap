@@ -28,7 +28,7 @@ export default class Graph {
             const isLast = index === this.#data.commitsDetails.length - 1;
 
             const commitCard = `
-                <button class="commit" data-id="${index}" name="${commit.title}" aria-expanded="false" aria-label="Open commit: ${commit.title}" title="Open commit: ${commit.title}"></button>
+                <button class="commit" data-id="${index}" name="${commit.title}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
                 ${isLast ? '' : `
                 <div class="connection">
                     <span></span>
@@ -75,7 +75,6 @@ export default class Graph {
         }
 
         const files = await this.#client.getCommitFiles(commit.sha);
-        console.log(files)
     
         const card = `
             <div class="full-commit-modal" id="full-modal-window" role="dialog">
@@ -83,7 +82,7 @@ export default class Graph {
                 <h2>${commit.title}</h2>
                 <p>${commit.description ? "Description: " + commit.description : ""} </p>
                 <div class="data-container">
-                    <a href="${commit.author.url}" class="author-container"  target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">Author: ${commit.author.name} <img src="${commit.author.avatar}" alt></a>
+                    <a href="${commit.author.url}" class="author-container"  target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">Author: ${commit.author.name} <img class="avatar-big" src="${commit.author.avatar}" alt="${commit.author}'s Avatar"></a>
                     <span>Hash: #${commit.hash}</span>
                     <span>Date: ${commit.author.date}</span>
                 </div>
@@ -149,10 +148,26 @@ export default class Graph {
 
         this.#hoverTimeoutId = setTimeout(() => {
             this.#hoverTimeoutId = null;
-
             if (this.#isFullOpen) return;
-
             this.#isHoverOpen = true;
+
+            const card = `
+                <div class="hover-commit-modal" id="hover-commit-modal" role="dialog">
+                    <h2>${commit.title}</h2>
+                    <div class="hover-commit-body">
+                        <div class="hover-commit-meta">
+                            <span href="${commit.author.url}" class="author-container" target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">
+                                <span>Author: ${commit.author.name}</span>
+                                <img class="avatar-small" src="${commit.author.avatar}" alt="${commit.author.name} avatar">
+                            </span>
+                            <span class="hover-meta-item">Hash: #${commit.hash}</span>
+                            <span class="hover-meta-item">Date: ${commit.author.date}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            commitButton.insertAdjacentHTML("beforeend", card);
         }, this.#delay);
     }
 

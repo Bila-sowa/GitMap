@@ -66,6 +66,7 @@ body {
 }
 
 header {
+    position: relative;
     background: var(--color-1);
     height: 75px;
     max-width: 100%;
@@ -247,18 +248,25 @@ main {
     color: var(--text-color-2);
 }
 
-.author-container {
+.full-commit-modal .author-container {
+    background: var(--color-4);
     border-radius: 10px;
     display: flex;
     gap: 10px;
     align-items: center;
     justify-content: space-between;
-    transition: background 0.3s ease;
 }
 
-.author-container img {
+.avatar-big {
     border-radius: 999px;
     width: 64px;
+    object-fit: cover;
+}
+
+.avatar-small {
+    border-radius: 999px;
+    width: 32px;
+    object-fit: cover;
 }
 
 .full-commit-modal .data-container {
@@ -340,3 +348,74 @@ main {
 
 .file-additions { color: #1f6feb; }
 .file-deletions { color: #da3633; }
+
+.hover-commit-modal {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 18px);
+    transform: translateY(-50%);
+    width: 460px;
+    min-height: 190px;
+    background: var(--color-3);
+    border: 2px solid var(--border-color-1);
+    border-radius: 10px;
+    padding: 18px;
+    color: var(--text-color-1);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    text-align: center;
+}
+
+.commit {
+    position: relative;
+}
+
+.hover-commit-modal h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    width: 100%;
+    border-bottom: 2px solid var(--border-color-1);
+    padding-bottom: 10px;
+}
+
+.hover-commit-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    align-items: center;
+}
+
+.hover-commit-meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.hover-commit-meta .author-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--color-4);
+    padding: 12px 14px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: var(--text-color-1);
+}
+
+.hover-commit-meta .author-container span {
+    color: var(--text-color-1);
+    font-size: 0.8rem;
+}
+
+.hover-meta-item {
+    font-size: 0.95rem;
+    color: var(--text-color-2);
+    display: block;
+}
+
