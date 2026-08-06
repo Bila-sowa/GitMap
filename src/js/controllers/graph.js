@@ -75,7 +75,11 @@ export default class Graph {
         }
 
         const files = await this.#client.getCommitFiles(commit.sha);
-    
+        const theme = this.#body.classList.contains("dark-theme")
+            ? "dark"
+            : "light";
+
+        
         const card = `
             <div class="full-commit-modal" id="full-modal-window" role="dialog">
                 <button id="close-button" aria-label="close">&times;</button>
@@ -91,7 +95,7 @@ export default class Graph {
                     <div class="files-container">
                         ${files.success ? files.files.map(file => `
                             <div class="file-container">
-                                <img class="file-icon" src="./svg/${file.extension}.svg" alt>
+                                <img class="file-icon" style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
                                 <span class="file-name">${file.name}</span>
                                 <div class="file-changes">
                                     <span class="file-additions">+${file.additions}</span>
@@ -114,6 +118,15 @@ export default class Graph {
 
         const modal = document.querySelector("#full-modal-window");
         const closeButton = document.querySelector("#close-button");
+        const icons = [...document.querySelectorAll(".file-icon")];
+
+        icons.forEach(icon => {
+            icon.addEventListener("error", () => {
+                icon.onerror = null;
+
+                icon.src = `https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/file.svg`;
+            });
+        });
 
         closeButton.focus();
 

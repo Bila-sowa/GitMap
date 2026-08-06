@@ -346,6 +346,10 @@ main {
     font-weight: bolder;
 }
 
+.file-icon {
+    color: var(--text-color-1);
+}
+
 .file-additions { color: #1f6feb; }
 .file-deletions { color: #da3633; }
 
