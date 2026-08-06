@@ -1,8 +1,10 @@
 const body = document.querySelector("body")
 const viewport = document.querySelector("#viewport");
 const canvas = document.querySelector("#canvas");
-const themeButton = document.querySelector("#theme")
-const graph = document.querySelector("#graph")
+const refreshButton = document.querySelector("#refresh");
+const themeButton = document.querySelector("#theme");
+const settingsButton = document.querySelector("#settings")
+const graph = document.querySelector("#graph");
 let pageFocusElements = [];
 
 const updateElements = () => {
@@ -17,7 +19,9 @@ export {
     pageFocusElements,
     canvas,
     viewport,
+    refreshButton,
     themeButton,
+    settingsButton,
     graph,
     updateElements,
 };

@@ -5,7 +5,16 @@ class Input {
 }
 
 class Refresh {
-    
+    #button
+    #graph 
+
+    constructor (button, graph) {
+        this.#button = button;
+        this.#graph = graph;
+        this.#bindEvents()
+    }
+
+    #bindEvents() { this.#button.addEventListener("click", () => this.#graph.render(storage.link) )}
 }
 
 class Theme {

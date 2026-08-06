@@ -1,3 +1,4 @@
+import storage from "../data/storage.js";
 import GitHubClient from "../services/getGitHubData.js";
 
 export default class Graph {
@@ -18,10 +19,10 @@ export default class Graph {
         this.#bindEvents();
     }
 
-    async render(link) {
-        if (!link) return;
+    async render() {
+        if (!storage.link) return;
 
-        await this.#getData(link);
+        await this.#getData(storage.link);
         this.#graph.innerHTML = '';
 
         this.#data.commitsDetails.forEach((commit, index) => {
