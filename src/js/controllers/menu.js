@@ -1,7 +1,28 @@
 import storage from "../data/storage.js";
+import LocalStorage from "./localStorage.js";
 
 class Input {
+    #input
+    #graph
+    #localStorage
 
+    constructor(input, graph) {
+        this.#input = input;
+        this.#graph = graph;
+        this.#localStorage = new LocalStorage();
+        this.#bindEvents();
+    }
+
+    #bindEvents () {
+        this.#input.addEventListener("blur", () => {
+            // if (storage.settings.saveLink) {
+            //     this.#localStorage = this.#input.value;
+            // }
+
+            storage.link = this.#input.value;
+            this.#graph.render()
+        })
+    }
 }
 
 class Refresh {

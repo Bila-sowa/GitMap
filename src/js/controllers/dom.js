@@ -1,6 +1,7 @@
 const body = document.querySelector("body")
 const viewport = document.querySelector("#viewport");
 const canvas = document.querySelector("#canvas");
+const linkInput = document.querySelector("#linkInput");
 const refreshButton = document.querySelector("#refresh");
 const themeButton = document.querySelector("#theme");
 const settingsButton = document.querySelector("#settings")
@@ -19,6 +20,7 @@ export {
     pageFocusElements,
     canvas,
     viewport,
+    linkInput,
     refreshButton,
     themeButton,
     settingsButton,
