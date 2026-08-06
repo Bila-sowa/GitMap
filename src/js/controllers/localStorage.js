@@ -1,15 +1,12 @@
+import storage from "../data/storage.js";
+
 export default class LocalStorage {
     #body = null;
-    #graph = null;
+    #storage = null;
 
-    constructor (graph, gitHubClient) {
-        this.#body = document.body;
-        this.#graph = graph
-    }
+    constructor () { this.#body = document.body; }
 
-    set (data) {
-        localStorage.setItem("GitMap", JSON.stringify(data));
-    }
+    save () { localStorage.setItem("GitMap", JSON.stringify(storage)); }
 
     get () {
         try {
@@ -25,14 +22,5 @@ export default class LocalStorage {
         }
     }
 
-    load () {
-        const data = this.#get
-
-        if (data.theme) {
-            this.#body.classList.remove("dark-theme", "light-theme");
-            this.#body.classList.add(data.theme)
-        };
-        if (data.repo) this.#graph?.render(data.repo);
-        if (data.token) this.gitHubClient.setToken(data.token);
-    }
+    load () { data = storage }
 }

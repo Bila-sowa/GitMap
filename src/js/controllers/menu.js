@@ -1,4 +1,4 @@
-
+import storage from "../data/storage.js";
 
 class Input {
 
@@ -21,22 +21,12 @@ class Theme {
     #setTheme (theme) {
         document.body.classList.remove("dark-theme", "light-theme");
         document.body.classList.add(theme);
+        storage.theme = theme;
     }
 
     #changeTheme () {
-        console.log('click')
-        // const data = getLocalStorageData();
-
-        // if (data) {
-        //     this.#setTheme(data.theme);
-        //     return;
-        // }
-
-        const theme = document.body.classList.contains("dark-theme")
-            ? "light-theme"
-            : "dark-theme";
-
-        this.#setTheme(theme);
+        const theme = storage.theme === "dark-theme" ? "light-theme" : "dark-theme";
+        this.#setTheme(theme)
     }
 }
 
