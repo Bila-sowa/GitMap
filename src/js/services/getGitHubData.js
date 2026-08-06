@@ -130,11 +130,15 @@ class GitHubClient {
 
             data.files.forEach(file => {
                 const extension = file.filename.slice(file.filename.lastIndexOf('.') + 1);
+                const status = file.status.slice(0, 1).toUpperCase();
+
                 const fileData = {
                     name: file.filename,
                     additions: file.additions,
                     deletions: file.deletions,
                     extension: extension,
+                    fullStatus: file.status,
+                    status: status,
                 };
 
                 formattedData.push(fileData);

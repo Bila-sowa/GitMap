@@ -79,6 +79,24 @@ export default class Graph {
             ? "dark"
             : "light";
 
+        const statusColors = {
+            light: {
+                added: "#2DA44E",
+                modified: "#BF8700",
+                removed: "#CF222E",
+                renamed: "#0969DA",
+                copied: "#8250DF",
+                changed: "#656D76"
+            },
+            dark: {
+                added: "#3FB950",
+                modified: "#D29922",
+                removed: "#F85149",
+                renamed: "#58A6FF",
+                copied: "#A371F7",
+                changed: "#8B949E"
+            }
+        };
         
         const card = `
             <div class="full-commit-modal" id="full-modal-window" role="dialog">
@@ -98,8 +116,13 @@ export default class Graph {
                                 <img class="file-icon" style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
                                 <span class="file-name">${file.name}</span>
                                 <div class="file-changes">
-                                    <span class="file-additions">+${file.additions}</span>
-                                    <span class="file-deletions">-${file.deletions}</span>
+                                    ${file.status === "R" ? `<span style="color: ${statusColors[theme][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>` : 
+                                        `
+                                        <span class="file-additions">+${file.additions}</span>
+                                        <span class="file-deletions">-${file.deletions}</span>
+                                        <span style="color: ${statusColors[theme]?.[file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</span>
+                                        `
+                                    }
                                 </div>
                             </div>
                             `).join("")
