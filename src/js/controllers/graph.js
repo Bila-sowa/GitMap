@@ -27,11 +27,13 @@ export default class Graph {
 
         this.#data.commitsDetails.forEach((commit, index) => {
             const isLast = index === this.#data.commitsDetails.length - 1;
+            const words = commit.title.trim().split(/\s+/);
+            const formattedTitle = words.length > 5 ? words.slice(0, 3).join(" ") + "..." : commit.title;
 
             const commitCard = `
-                <button class="commit" data-id="${index}" name="${commit.title}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
+                <button class="commit neon" data-id="${index}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
                 ${isLast ? '' : `
-                <div class="connection">
+                <div class="connection neon">
                     <span></span>
                     <span></span>
                 </div>
@@ -98,6 +100,7 @@ export default class Graph {
                 changed: "#8B949E"
             }
         };
+        
         
         const card = `
             <div class="full-commit-modal" id="full-modal-window" role="dialog">

@@ -14,3 +14,4 @@ const refresh = new Refresh(DOM.refreshButton, graph);
 const settings = new Settings(DOM.settingsButton);
 
 // For Testing
+graph.render()
