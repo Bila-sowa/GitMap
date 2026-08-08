@@ -16,6 +16,8 @@
     --error-color: #FF4040;
     --info-color: #40A9FF;
     --success-color: #2BFF60;
+    --additions-color: #1f6feb;
+    --deletions-color: #da3633;
 }
 
 .dark-theme {
@@ -49,31 +51,36 @@ h1 {
 }
 
 h2 {
-    font-size: 1.4rem !important;
-    font-weight: normal !important;
-    letter-spacing: 2% !important;
+    font-size: 1.4rem;
+    font-weight: normal;
+    letter-spacing: 2%;
 }
 
 h3 {
-    font-size: 1.2rem !important;
-    font-weight: normal !important;
+    font-size: 1.2rem;
+    font-weight: normal;
     letter-spacing: 1.5%;
 }
 
-span, p {
-    font-size: 1rem !important;
-    font-weight: normal !important;
-    letter-spacing: 1% !important;
+span, p, a, button {
+    font-size: 1rem;
+    font-weight: normal;
+    letter-spacing: 1%;
 }
+
+input { font-size: 0.8rem; }
+input::placeholder { color: var(--text-color-2); }
 
 .border-sm { border: 1px solid var(--border-color-1); }
 .border-normal { border: 2px solid var(--border-color-1); }
 .rounded-normal { border-radius: 10px;}
-.rounded-full { border: 999px; }
+.rounded-full { border-radius: 999px; }
 .neon { box-shadow: 0px 0px 10px var(--shadow-color-1); }
+.copied { color: var(--text-color-2); }
+.file-additions { color: var(--additions-color); }
+.file-deletions { color: var(--deletions-color); }
 
 button, a, input {
-   
     text-decoration: none;
     border: none;
     outline: none;
@@ -81,10 +88,10 @@ button, a, input {
     color: var(--text-color-1);
     transition: background .3 ease-in;
 }
-input { font-size: 0.8rem; }
+
 button, a { cursor: pointer; font-size: 1rem; }
 
-button:hover, a:hover { background: var(--hover-color-1); }
+button:hover, a:hover:not(.author-container) { background: var(--hover-color-1); }
 
 ul, li { list-style: none; }
 
@@ -116,6 +123,8 @@ header {
     gap: 10px
 }
 
+.logo img { user-select: none; }
+
 .logo-title label {
     font-weight: bold;
     color: var(--accent-color-1);
@@ -141,7 +150,6 @@ header {
     padding-right: 44px;
     background: var(--color-3);
     border: 1px solid var(--border-color-1);
-    border-radius: 10px;
 }
 
 .link-input-container input::placeholder {
@@ -151,7 +159,6 @@ header {
 .link-input-container a {
     background: none;
     position: absolute;
-    border-radius: 999px;
     right: 10px;
     display: flex;
     align-items: center;
@@ -165,7 +172,6 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 999px;
 }
 
 main {
@@ -211,7 +217,6 @@ main {
     width: 40px;
     height: 40px;
     border: 6px solid var(--accent-color-1);
-    border-radius: 999px;
 }
 
 .commit::before {
@@ -240,9 +245,30 @@ main {
     border: 2px solid var(--accent-color-1);
 }
 
+.close-button {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.avatar {
+    width: 32px;
+    object-fit: cover;
+}
+
+.author-container {
+    display: flex;
+    gap:10px;
+}
+
 .full-commit-modal {
     position: fixed;
-    z-index: 20;
+    z-index: 10;
     top: 77px;
     right: 0;
     height: calc(100dvh - 77px);
@@ -258,57 +284,34 @@ main {
     animation: elongation .1s ease;
 }
 
-.full-commit-modal button {
-    position: absolute;
-    right: 0;
-    top: 0;
-    font-size: 2rem;
-    margin: 2px;
-    width: 50px;
-    height: 50px;
-    border-radius: 999px;
-    transition: background 0.3s ease;
+.full-commit-header {
+    display: flex;
+    align-items: start;
+    justify-content: center;
 }
 
-.full-commit-modal h2 {
-    font-size: 1.75rem; 
-}
+.full-commit-header button { margin: 10px; }
+.full-commit-modal p { color: var(--text-color-2); }
 
-.full-commit-modal p {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-color-2);
-}
-
-.full-commit-modal .author-container {
+.full-commit-item {
     background: var(--color-4);
     border-radius: 10px;
+    padding: 0px 20px;
+    min-height: 50px;
+    max-height: fit-content;
     display: flex;
-    gap: 10px;
     align-items: center;
     justify-content: space-between;
 }
 
-.avatar-big {
-    border-radius: 999px;
-    width: 64px;
-    object-fit: cover;
-}
-
-.avatar-small {
-    border-radius: 999px;
-    width: 32px;
-    object-fit: cover;
-}
-
-.full-commit-modal .data-container {
+.full-commit-data {
     margin-top: 40px;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.full-commit-modal .changes-container {
+.full-commit-changes {
     margin-top: auto;
     height: 400px;
     width: 100%;
@@ -318,14 +321,13 @@ main {
     justify-content: space-between;
 }
 
-.full-commit-modal .changes-container h3 { 
+.full-commit-changes h3 { 
     width: 100%;
     padding-bottom: 5px;
-    font-size: 1.35rem;
     border-bottom: var(--border-color-1) 2px solid;
 }
 
-.full-commit-modal .changes-container a { 
+.full-commit-changes a { 
     background: var(--color-4);
     width: 260px;
     height: 50px;
@@ -338,12 +340,7 @@ main {
     transition: background 0.3s ease;
 }
 
-
-.full-commit-modal .changes-container a:hover { 
-    background: var(--hover-color-1);
-}
-
-.files-container {
+.full-commit-files {
     width: 100%;
     height: 200px;
     overflow-y: scroll;
@@ -354,7 +351,7 @@ main {
     gap: 10px;
 }
 
-.file-container {
+.full-commit-file {
     padding: 10px;
     display: flex;
     align-items: center;
@@ -363,27 +360,20 @@ main {
     border-radius: 10px;
 }
 
-.file-name {
+.full-commit-file-name {
     font-size: 0.8rem;
     font-weight: 600;
     width: 70%;
     overflow-wrap: break-word;
 }
 
-.file-changes {
+.full-commit-file-changes {
     margin-left: auto;
     font-size: 0.8rem;
     display: flex;
     gap: 8px;
     font-weight: bolder;
 }
-
-.file-icon {
-    color: var(--text-color-1);
-}
-
-.file-additions { color: #1f6feb; }
-.file-deletions { color: #da3633; }
 
 .hover-commit-modal {
     position: absolute;
@@ -459,7 +449,7 @@ main {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
-    z-index: 4;
+    z-index: 20;
     margin: auto;
     display: flex;
     justify-content: center;

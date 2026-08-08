@@ -31,7 +31,7 @@ export default class Graph {
             const formattedTitle = words.length > 5 ? words.slice(0, 3).join(" ") + "..." : commit.title;
 
             const commitCard = `
-                <button class="commit neon" data-id="${index}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
+                <button class="commit neon rounded-full" data-id="${index}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
                 ${isLast ? '' : `
                 <div class="connection neon">
                     <span></span>
@@ -104,22 +104,36 @@ export default class Graph {
         
         const card = `
             <div class="full-commit-modal" id="full-modal-window" role="dialog">
-                <button id="close-button" aria-label="close">&times;</button>
-                <h2>${commit.title}</h2>
-                <p>${commit.description ? "Description: " + commit.description : ""} </p>
-                <div class="data-container">
-                    <a href="${commit.author.url}" class="author-container" target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">Author: ${commit.author.name} <img class="avatar-big" src="${commit.author.avatar}" alt="${commit.author}'s Avatar"></a>
-                    <span>Hash: #${commit.hash}</span>
-                    <span>Date: ${commit.author.date}</span>
+                <div class="full-commit-header">
+                    <h2>${commit.title}</h2>
+                    <button class="close-button rounded-full" id="close-button" aria-label="Close">&times;</button>
                 </div>
-                <div class="changes-container">
+                <p>${commit.description ? "Description: " + commit.description : ""} </p>
+                <div class="full-commit-data">
+                    <a class="full-commit-item rounded-normal " href="${commit.author.url}" target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">
+                        <span>Author: </span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            ${commit.author.name} 
+                            <img class="avatar rounded-full" src="${commit.author.avatar}" alt="${commit.author}'s Avatar">
+                        </div>
+                    </a>
+                    <button class="full-commit-item rounded-normal copyable" data-copy-value="${commit.hash}" aria-label="Copy commit hash to clipboard">
+                        <span>Hash: </span>
+                        <span>#${commit.hash}</span>
+                    </button>
+                    <button class="full-commit-item rounded-normal copyable" data-copy-value="${commit.author.date}" aria-label="Copy commit date to clipboard">
+                        <span>Date: </span>
+                        <span>${commit.author.date}</span>
+                    </button>
+                </div>
+                <div class="full-commit-changes">
                     <h3>Changes</h3>
-                    <div class="files-container">
+                    <div class="full-commit-files">
                         ${files.success ? files.files.map(file => `
-                            <div class="file-container">
-                                <img class="file-icon" style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
-                                <span class="file-name">${file.name}</span>
-                                <div class="file-changes">
+                            <div class="full-commit-file rounded-normal">
+                                <img style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
+                                <span class="full-commit-file-name">${file.name}</span>
+                                <div class="full-commit-file-changes">
                                     ${file.status === "R" ? `<span style="color: ${statusColors[theme][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>` : 
                                         `
                                         <span class="file-additions">+${file.additions}</span>
@@ -146,15 +160,33 @@ export default class Graph {
         const modal = document.querySelector("#full-modal-window");
         const closeButton = document.querySelector("#close-button");
         const icons = [...document.querySelectorAll(".file-icon")];
+        const copyableItems = [...modal.querySelectorAll(".copyable")];
+        const COOLDOWN = 1500;
 
         icons.forEach(icon => {
             icon.addEventListener("error", () => {
                 icon.onerror = null;
-
                 icon.src = `https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/file.svg`;
             });
         });
 
+        const copyValueToClipboard = async (element) => {
+            const value = element.dataset.copyValue;
+            if (!value) return;
+
+            try {
+                await navigator.clipboard.writeText(value); // Don't work in http, and local host.
+                element.classList.add("copied");
+                setTimeout(() => element.classList.remove("copied"), COOLDOWN);
+                // showSuccess
+            } catch (err) {
+                console.log(err);
+                // showError
+            }
+        };
+
+        copyableItems.forEach( item => {item.addEventListener("click", () => copyValueToClipboard(item));} );
+        
         closeButton.focus();
 
         const closeModal = () => {
