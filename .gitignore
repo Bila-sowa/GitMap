@@ -1,3 +1,4 @@
 **/gitHubToken.js
-*.excalidraw
+**.excalidraw
 .vscode/settings.json
+**.note
