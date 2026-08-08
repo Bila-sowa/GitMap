@@ -79,6 +79,8 @@ input::placeholder { color: var(--text-color-2); }
 .copied { color: var(--text-color-2); }
 .file-additions { color: var(--additions-color); }
 .file-deletions { color: var(--deletions-color); }
+.text-small { font-size: 0.8rem; }
+.text-smallest { font-size: 0.6rem; }
 
 button, a, input {
     text-decoration: none;
@@ -361,7 +363,6 @@ main {
 }
 
 .full-commit-file-name {
-    font-size: 0.8rem;
     font-weight: 600;
     width: 70%;
     overflow-wrap: break-word;
@@ -369,7 +370,6 @@ main {
 
 .full-commit-file-changes {
     margin-left: auto;
-    font-size: 0.8rem;
     display: flex;
     gap: 8px;
     font-weight: bolder;
@@ -380,7 +380,7 @@ main {
     top: 50%;
     left: calc(100% + 18px);
     transform: translateY(-50%);
-    width: 460px;
+    width: 300px;
     min-height: 190px;
     background: var(--color-3);
     border: 2px solid var(--border-color-1);
@@ -396,13 +396,7 @@ main {
     text-align: center;
 }
 
-.commit {
-    position: relative;
-}
-
-.hover-commit-modal h2 {
-    font-size: 1.2rem;
-    font-weight: 700;
+.hover-commit-modal h3 {
     width: 100%;
     border-bottom: 2px solid var(--border-color-1);
     padding-bottom: 10px;
@@ -416,33 +410,23 @@ main {
     align-items: center;
 }
 
-.hover-commit-meta {
+.hover-commit-data {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    align-items: center;
     gap: 12px;
 }
 
-.hover-commit-meta .author-container {
+.hover-commit-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
     background: var(--color-4);
-    padding: 12px 14px;
-    border-radius: 14px;
-    text-decoration: none;
+    width: 90%;
+    padding: 10px;
+    min-height: 35px;
+    max-height: fit-content;
     color: var(--text-color-1);
-}
-
-.hover-commit-meta .author-container span {
-    color: var(--text-color-1);
-    font-size: 0.8rem;
-}
-
-.hover-meta-item {
-    font-size: 0.95rem;
-    color: var(--text-color-2);
-    display: block;
 }
 
 .overlay {

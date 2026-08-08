@@ -210,6 +210,7 @@ export default class Graph {
     #openHoverCommitModal = (e) => {
         const commitButton = e.target.closest('.commit');
         const commit = this.#data?.commitsDetails[+commitButton?.dataset.id];
+        const shortDate = commit.author.date.split(",")[0].trim().split(".").map((part, i, arr) => i === 2 ? part.slice(-2) : part).join(".");
 
         if (!commit || this.#isFullOpen || this.#isHoverOpen) return;
 
@@ -225,15 +226,24 @@ export default class Graph {
 
             const card = `
                 <div class="hover-commit-modal" id="hover-commit-modal" role="dialog">
-                    <h2>${commit.title}</h2>
+                    <h3>${commit.title}</h3>
                     <div class="hover-commit-body">
-                        <div class="hover-commit-meta">
-                            <span href="${commit.author.url}" class="author-container" target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">
-                                <span>Author: ${commit.author.name}</span>
-                                <img class="avatar-small" src="${commit.author.avatar}" alt="${commit.author.name} avatar">
-                            </span>
-                            <span class="hover-meta-item">Hash: #${commit.hash}</span>
-                            <span class="hover-meta-item">Date: ${commit.author.date}</span>
+                        <div class="hover-commit-data">
+                            <div class="hover-commit-item rounded-normal" style="display: flex; align-items: center; gap: 10px;" title="Email: ${commit.author.email}">
+                                <span>Author: </span>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span>${commit.author.name}</span>
+                                    <img class="avatar rounded-full" src="${commit.author.avatar}" alt="${commit.author.name} avatar">
+                                </div>
+                            </div>
+                            <div class="hover-commit-item rounded-normal">
+                                <span>Hash: </span>
+                                <span>#${commit.hash}</span>
+                            </div>
+                            <div class="hover-commit-item rounded-normal">
+                                <span>Date: </span>
+                                <span>${shortDate}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
