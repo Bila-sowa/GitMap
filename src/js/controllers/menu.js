@@ -1,5 +1,7 @@
 import storage from "../data/storage.js";
+import config from "../data/config.js";
 import LocalStorage from "./localStorage.js";
+
 
 class Input {
     #input
@@ -35,7 +37,7 @@ class Refresh {
         this.#bindEvents()
     }
 
-    #bindEvents() { this.#button.addEventListener("click", () => this.#graph.render(storage.link) )}
+    #bindEvents() { this.#button.addEventListener("click", () => this.#graph.render(storage.link))}
 }
 
 class Theme {
@@ -46,7 +48,7 @@ class Theme {
         this.#bindEvents();
     }
 
-    #bindEvents () { this.#button.addEventListener("click", () => this.#changeTheme()) }
+    #bindEvents () { this.#button.addEventListener("click", () => this.#changeTheme())}
 
     #setTheme (theme) {
         document.body.classList.remove("dark-theme", "light-theme");
@@ -61,6 +63,45 @@ class Theme {
 }
 
 class Settings {
+    #body
+    #button
+
+    constructor (button) {
+        this.#body = document.querySelector("body");
+        this.#button = button;
+        this.#bindEvents();
+    }
+
+    #bindEvents () { this.#button.addEventListener("click", () => this.#openSettings())}
+
+    #openSettings () {
+        const card = `
+            <div class="overlay">
+                <div class="settings-modal" id="settings-modal" role="dialog">
+                    <h2>Settings</h2>
+                    <h3>GitHub</h3>
+                    <div class="settings-item">
+                        <label for="token-input">GitHub Rest Api Token</label>
+                        <input type="password" id="token-input" placeholder="gpy_">
+                    </div>
+                    <h3>LocalStorage</h3>
+                    <div class="settings-item">
+                        <span for="save-link">Save current repo in page</span>
+                        <label for="save-link"></label>
+                        <input type="checkbox" id="save-link">
+                    </div>
+                    <div class="settings-item">
+                        <span>Save current token in page</span>
+                        <label for="save-token"></label>
+                        <input type="checkbox" id="save-token">
+                    </div>
+                    <span>Version: ${config.version}</span>
+                </div>
+            </div>
+        `;
+
+        this.#body.insertAdjacentHTML("beforeend", card);
+    }
 
 }
 

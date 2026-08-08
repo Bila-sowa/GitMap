@@ -105,7 +105,7 @@ export default class Graph {
                 <h2>${commit.title}</h2>
                 <p>${commit.description ? "Description: " + commit.description : ""} </p>
                 <div class="data-container">
-                    <a href="${commit.author.url}" class="author-container"  target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">Author: ${commit.author.name} <img class="avatar-big" src="${commit.author.avatar}" alt="${commit.author}'s Avatar"></a>
+                    <a href="${commit.author.url}" class="author-container" target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">Author: ${commit.author.name} <img class="avatar-big" src="${commit.author.avatar}" alt="${commit.author}'s Avatar"></a>
                     <span>Hash: #${commit.hash}</span>
                     <span>Date: ${commit.author.date}</span>
                 </div>
