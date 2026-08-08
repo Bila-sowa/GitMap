@@ -423,3 +423,41 @@ main {
     display: block;
 }
 
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 4;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.settings-modal {
+    border: 1px solid var(--border-color-1);
+    border-radius: 10px;
+    background: var(--color-3);
+    width: 60dvw;
+    height: 60dvh;
+    padding: 20px;
+}
+
+.settings-header {
+    font-size: 1rem;
+    padding-bottom: 10px;
+    font-weight: bolder;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--border-color-1);
+}
+
+.settings-header button {
+    width: 50px;
+    height: 50px;
+    border-radius: 999px;
+    box-sizing: border-box;
+    font-size: 1.5rem;
+}
+

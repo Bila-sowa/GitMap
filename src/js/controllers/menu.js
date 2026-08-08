@@ -78,7 +78,10 @@ class Settings {
         const card = `
             <div class="overlay">
                 <div class="settings-modal" id="settings-modal" role="dialog">
-                    <h2>Settings</h2>
+                    <div class="settings-header">
+                        <h1>Settings</h1>
+                        <button class="close-settings-button" id="close-button">&times;</button>
+                    </div>
                     <h3>GitHub</h3>
                     <div class="settings-item">
                         <label for="token-input">GitHub Rest Api Token</label>
