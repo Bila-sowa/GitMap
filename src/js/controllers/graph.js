@@ -13,6 +13,25 @@ export default class Graph {
     #lastFocusedCommit = null;
     #keydownHandler = null;
 
+    #statusColors = {
+        light: {
+            added: "#2DA44E",
+            modified: "#BF8700",
+            removed: "#CF222E",
+            renamed: "#0969DA",
+            copied: "#8250DF",
+            changed: "#656D76"
+        },
+        dark: {
+            added: "#3FB950",
+            modified: "#D29922",
+            removed: "#F85149",
+            renamed: "#58A6FF",
+            copied: "#A371F7",
+            changed: "#8B949E"
+        }
+    };
+
     constructor(graphElement) {
         this.#body = document.querySelector("body")
         this.#graph = graphElement;
@@ -27,8 +46,7 @@ export default class Graph {
 
         this.#data.commitsDetails.forEach((commit, index) => {
             const isLast = index === this.#data.commitsDetails.length - 1;
-            const words = commit.title.trim().split(/\s+/);
-            const formattedTitle = words.length > 5 ? words.slice(0, 3).join(" ") + "..." : commit.title;
+            const formattedTitle = this.#truncateTitle(commit.title);
 
             const commitCard = `
                 <button class="commit neon rounded-full" data-id="${index}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
@@ -56,20 +74,30 @@ export default class Graph {
         this.#data = await this.#client.getData();
     }
 
-    #openFullCommitModal = async (e) => {
-        const commitButton = e.target.closest('.commit');
-        const commit = this.#data?.commitsDetails[+commitButton?.dataset.id];
 
-        if (!commit) return;
+    #truncateTitle(title) {
+        const words = title.trim().split(/\s+/);
+        return words.length > 5 ? words.slice(0, 3).join(" ") + "..." : title;
+    }
 
+    #getTheme() {
+        return this.#body.classList.contains("dark-theme") ? "dark" : "light";
+    }
+
+    #clearHoverTimeout() {
         if (this.#hoverTimeoutId) {
             clearTimeout(this.#hoverTimeoutId);
             this.#hoverTimeoutId = null;
         }
+    }
 
+    #closeHoverModal() {
+        this.#clearHoverTimeout();
         document.querySelector("#hover-commit-modal")?.remove();
         this.#isHoverOpen = false;
+    }
 
+    #closeFullModal() {
         document.querySelector("#full-modal-window")?.remove();
         this.#lastFocusedCommit?.setAttribute("aria-expanded", "false");
 
@@ -77,32 +105,22 @@ export default class Graph {
             document.removeEventListener("keydown", this.#keydownHandler);
             this.#keydownHandler = null;
         }
+    }
+
+
+    #openFullCommitModal = async (e) => {
+        const commitButton = e.target.closest('.commit');
+        const commit = this.#data?.commitsDetails[+commitButton?.dataset.id];
+
+        if (!commit) return;
+
+        this.#closeHoverModal();
+        this.#closeFullModal();
 
         const files = await this.#client.getCommitFiles(commit.sha);
-        const theme = this.#body.classList.contains("dark-theme")
-            ? "dark"
-            : "light";
+        const theme = this.#getTheme();
+        const colors = this.#statusColors[theme];
 
-        const statusColors = {
-            light: {
-                added: "#2DA44E",
-                modified: "#BF8700",
-                removed: "#CF222E",
-                renamed: "#0969DA",
-                copied: "#8250DF",
-                changed: "#656D76"
-            },
-            dark: {
-                added: "#3FB950",
-                modified: "#D29922",
-                removed: "#F85149",
-                renamed: "#58A6FF",
-                copied: "#A371F7",
-                changed: "#8B949E"
-            }
-        };
-        
-        
         const card = `
             <div class="full-commit-modal" id="full-modal-window" role="dialog">
                 <div class="full-commit-header">
@@ -135,11 +153,11 @@ export default class Graph {
                                 <img style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
                                 <code class="full-commit-file-name text-small">${file.name}</code>
                                 <div class="full-commit-file-changes">
-                                    ${file.status === "R" ? `<span style="color: ${statusColors[theme][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>` : 
+                                    ${file.status === "R" ? `<span style="color: ${colors[file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>` : 
                                         `
                                         <code class="file-additions text-small">+${file.additions}</code>
                                         <code class="file-deletions text-small">-${file.deletions}</code>
-                                        <code class="text-small" style="color: ${statusColors[theme]?.[file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</code>
+                                        <code class="text-small" style="color: ${colors?.[file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</code>
                                         `
                                     }
                                 </div>
@@ -164,6 +182,8 @@ export default class Graph {
         const copyableItems = [...modal.querySelectorAll(".copyable")];
         const COOLDOWN = 1500;
 
+        // renderIcons(array)
+
         icons.forEach(icon => {
             icon.addEventListener("error", () => {
                 icon.onerror = null;
@@ -186,8 +206,8 @@ export default class Graph {
             }
         };
 
-        copyableItems.forEach( item => {item.addEventListener("click", () => copyValueToClipboard(item));} );
-        
+        copyableItems.forEach(item => { item.addEventListener("click", () => copyValueToClipboard(item)); });
+
         closeButton.focus();
 
         const closeModal = () => {
@@ -216,11 +236,7 @@ export default class Graph {
 
         const shortDate = commit.author.date.split(",")[0].trim().split(".").map((part, i, arr) => i === 2 ? part.slice(-2) : part).join(".");
 
-
-        if (this.#hoverTimeoutId) {
-            clearTimeout(this.#hoverTimeoutId);
-            this.#hoverTimeoutId = null;
-        }
+        this.#clearHoverTimeout();
 
         this.#hoverTimeoutId = setTimeout(() => {
             this.#hoverTimeoutId = null;
@@ -257,12 +273,6 @@ export default class Graph {
     }
 
     #closeHoverCommitModal = () => {
-        if (this.#hoverTimeoutId) {
-            clearTimeout(this.#hoverTimeoutId);
-            this.#hoverTimeoutId = null;
-        }
-
-        document.querySelector("#hover-commit-modal")?.remove();
-        this.#isHoverOpen = false;
+        this.#closeHoverModal();
     }
 }

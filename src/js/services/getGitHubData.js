@@ -1,4 +1,8 @@
+import Formatter from '../utils/Formatter.js';
+
 class GitHubClient {
+    #formatter = new Formatter();
+
     constructor(url) {
         const { branchLink, commitsLink } = GitHubClient.formatGitHubUrl(url);
         this.branchLink = branchLink;
@@ -59,10 +63,10 @@ class GitHubClient {
         
 
         commits.forEach(commit => {
-            const formattedTitle = commit.commit.message.split('\n')[0];
-            const formattedDescription = commit.commit.message.split('\n').slice(1).join('\n');
-            const formattedDate = new Date(`${commit.commit.author.date}`).toLocaleString();
-            const shortHash = commit.sha.slice(0, 7);
+            const formattedTitle = this.#formatter.getFormattedTitle(commit.commit.message);
+            const formattedDescription = this.#formatter.getFormattedDescription(commit.commit.message);
+            const formattedDate = this.#formatter.getFormattedDate(commit.commit.author.date);
+            const shortHash = this.#formatter.getFormattedHash(commit.sha);
 
             const details = {
                 author: {
