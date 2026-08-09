@@ -32,7 +32,8 @@ export default class Graph {
 
             const commitCard = `
                 <button class="commit neon rounded-full" data-id="${index}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
-                ${isLast ? '' : `
+                ${isLast 
+                    ? `<span class="limit-description text-smallest">The REST API supports only the last 30 commits from one branch.</span>` : `
                 <div class="connection neon">
                     <span></span>
                     <span></span>
@@ -210,9 +211,11 @@ export default class Graph {
     #openHoverCommitModal = (e) => {
         const commitButton = e.target.closest('.commit');
         const commit = this.#data?.commitsDetails[+commitButton?.dataset.id];
-        const shortDate = commit.author.date.split(",")[0].trim().split(".").map((part, i, arr) => i === 2 ? part.slice(-2) : part).join(".");
 
         if (!commit || this.#isFullOpen || this.#isHoverOpen) return;
+
+        const shortDate = commit.author.date.split(",")[0].trim().split(".").map((part, i, arr) => i === 2 ? part.slice(-2) : part).join(".");
+
 
         if (this.#hoverTimeoutId) {
             clearTimeout(this.#hoverTimeoutId);
