@@ -1,4 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap');
+@font-face {
+    font-family: 'Mona Sans VF';
+    src:
+        url('../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff2') format('woff2 supports variations'),
+        url('../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff2') format('woff2-variations'),
+        url('../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff') format('woff-variations');
+    font-weight: 200 900;
+    font-stretch: 75% 125%;
+    font-optical-sizing: auto;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Mona Sans Mono VF';
+    src:
+        url('../fonts/mona-sans/MonaSansMonoVF[wdth,wght].woff2') format('woff2 supports variations'),
+        url('../fonts/mona-sans/MonaSansMonoVF[wdth,wght].woff2') format('woff2-variations');
+    font-weight: 200 900;
+    font-stretch: 75% 125%;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans';
+    src: url('../fonts/noto-sans/NotoSans-Variable.ttf') format('truetype-variations');
+    font-weight: 100 900;
+    font-stretch: 62.5% 100%;
+    font-display: swap;
+}
 
 *, *::before, *::after {
     margin: 0;
@@ -11,6 +39,10 @@
 }
 
 :root {
+    --font-monospace: 'Mona Sans Mono VF', ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --font-sans-serif: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-sans-serif-display: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-system: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     --accent-color-1: #3DED6B;
     --shadow-color-1: #3bed6a4d;
     --error-color: #FF4040;
@@ -44,15 +76,20 @@
 
 .hidden { display: none !important; }
 
+h1, h2, h3 {
+    font-family: var(--font-sans-serif-display);
+    font-stretch: 110%;
+}
+
 h1 {
     font-size: 1.6rem;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 2.5%;
 }
 
 h2 {
     font-size: 1.4rem;
-    font-weight: normal;
+    font-weight: 600;
     letter-spacing: 2%;
 }
 
@@ -63,7 +100,14 @@ h3 {
 }
 
 span, p, a, button {
+    font-family: var(--font-system);
     font-size: 1rem;
+    font-weight: normal;
+    letter-spacing: 1%;
+}
+
+code {
+    font-family: var(--font-monospace);
     font-weight: normal;
     letter-spacing: 1%;
 }
@@ -100,10 +144,11 @@ ul, li { list-style: none; }
 
 html { scroll-behavior: smooth; font-size: 22px; }
 
-body {
+body {    
     background: var(--color-2);
     color: var(--text-color-1);
-    font-family: "Mona Sans", sans-serif;
+    font-family: var(--font-sans-serif);
+    font-weight: 400;
     min-height: calc(100dvh - 75px);
     letter-spacing: 3%;
 }

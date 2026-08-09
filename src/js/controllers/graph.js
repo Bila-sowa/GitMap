@@ -133,13 +133,13 @@ export default class Graph {
                         ${files.success ? files.files.map(file => `
                             <div class="full-commit-file rounded-normal">
                                 <img style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
-                                <span class="full-commit-file-name">${file.name}</span>
+                                <code class="full-commit-file-name text-small">${file.name}</code>
                                 <div class="full-commit-file-changes">
                                     ${file.status === "R" ? `<span style="color: ${statusColors[theme][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>` : 
                                         `
-                                        <span class="file-additions">+${file.additions}</span>
-                                        <span class="file-deletions">-${file.deletions}</span>
-                                        <span style="color: ${statusColors[theme]?.[file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</span>
+                                        <code class="file-additions text-small">+${file.additions}</code>
+                                        <code class="file-deletions text-small">-${file.deletions}</code>
+                                        <code class="text-small" style="color: ${statusColors[theme]?.[file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</code>
                                         `
                                     }
                                 </div>
@@ -233,19 +233,19 @@ export default class Graph {
                     <div class="hover-commit-body">
                         <div class="hover-commit-data">
                             <div class="hover-commit-item rounded-normal" style="display: flex; align-items: center; gap: 10px;" title="Email: ${commit.author.email}">
-                                <span>Author: </span>
+                                <span class="text-small">Author: </span>
                                 <div style="display: flex; align-items: center; gap: 10px;">
-                                    <span>${commit.author.name}</span>
+                                    <span class="text-small">${commit.author.name}</span>
                                     <img class="avatar rounded-full" src="${commit.author.avatar}" alt="${commit.author.name} avatar">
                                 </div>
                             </div>
                             <div class="hover-commit-item rounded-normal">
-                                <span>Hash: </span>
-                                <span>#${commit.hash}</span>
+                                <span class="text-small">Hash: </span>
+                                <span class="text-small">#${commit.hash}</span>
                             </div>
                             <div class="hover-commit-item rounded-normal">
-                                <span>Date: </span>
-                                <span>${shortDate}</span>
+                                <span class="text-small">Date: </span>
+                                <span class="text-small">${shortDate}</span>
                             </div>
                         </div>
                     </div>
