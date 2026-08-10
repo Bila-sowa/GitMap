@@ -27,7 +27,7 @@ export default class Graph {
 
             const commitCard = `
                 <button class="commit neon rounded-full" data-id="${index}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
-                ${isLast 
+                ${isLast
                     ? `<span class="limit-description text-smallest">The REST API supports only the last 30 commits from one branch.</span>` : `
                 <div class="connection neon">
                     <span></span>

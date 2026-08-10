@@ -1,5 +1,4 @@
 import * as DOM from "./controllers/dom.js";
-import { renderGraph } from './controllers/render.js';
 
 import { Input, Refresh, Theme, Settings } from "./controllers/menu.js";
 import Graph from "./controllers/graph.js";

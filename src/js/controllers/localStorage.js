@@ -4,11 +4,21 @@ export default class LocalStorage {
     #body = null;
     #storage = null;
 
-    constructor () { this.#body = document.body; }
+    constructor() { this.#body = document.body; }
 
-    save () { localStorage.setItem("GitMap", JSON.stringify(storage)); }
+    save() {
+        if (!storage.localStorage.saveLink) {
+            storage.link = "";
+        }
 
-    get () {
+        if (!storage.localStorage.saveToken) {
+            storage.token = "";
+        }
+
+        localStorage.setItem("GitMap", JSON.stringify(storage));
+    }
+
+    get() {
         try {
             const value = localStorage.getItem("GitMap");
             let parse = {};
@@ -22,5 +32,5 @@ export default class LocalStorage {
         }
     }
 
-    load () { data = storage }
+    load() { data = storage }
 }

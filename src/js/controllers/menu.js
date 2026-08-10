@@ -1,6 +1,7 @@
 import storage from "../data/storage.js";
 import config from "../data/config.js";
 import LocalStorage from "./localStorage.js";
+import GitHubClient from "../services/getGitHubData.js";
 
 class Input {
     #input
@@ -14,7 +15,7 @@ class Input {
         this.#bindEvents();
     }
 
-    #bindEvents () {
+    #bindEvents() {
         this.#input.addEventListener("blur", () => {
             // if (storage.settings.saveLink) {
             //     this.#localStorage = this.#input.value;
@@ -28,34 +29,34 @@ class Input {
 
 class Refresh {
     #button
-    #graph 
+    #graph
 
-    constructor (button, graph) {
+    constructor(button, graph) {
         this.#button = button;
         this.#graph = graph;
         this.#bindEvents()
     }
 
-    #bindEvents() { this.#button.addEventListener("click", () => this.#graph.render(storage.link))}
+    #bindEvents() { this.#button.addEventListener("click", () => this.#graph.render(storage.link)) }
 }
 
 class Theme {
     #button;
 
-    constructor (button) {
+    constructor(button) {
         this.#button = button;
         this.#bindEvents();
     }
 
-    #bindEvents () { this.#button.addEventListener("click", () => this.#changeTheme())}
+    #bindEvents() { this.#button.addEventListener("click", () => this.#changeTheme()) }
 
-    #setTheme (theme) {
+    #setTheme(theme) {
         document.body.classList.remove("dark-theme", "light-theme");
         document.body.classList.add(theme);
         storage.theme = theme;
     }
 
-    #changeTheme () {
+    #changeTheme() {
         const theme = storage.theme === "dark-theme" ? "light-theme" : "dark-theme";
         this.#setTheme(theme)
     }
@@ -64,51 +65,104 @@ class Theme {
 class Settings {
     #body
     #button
+    #client
+    #limit
 
-    constructor (button) {
+    constructor(button) {
         this.#body = document.querySelector("body");
         this.#button = button;
         this.#bindEvents();
+        this.#client = new GitHubClient(storage?.link);
     }
 
-    #bindEvents () { this.#button.addEventListener("click", () => this.#openSettings())}
+    async #getRestApiLimit() {
+        this.#limit = await this.#client.getRateLimit();
 
-    #openSettings () {
+        if (!this.#limit?.success) {
+            return { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 };
+        }
+
+        return {
+            limitPerNumber: this.#limit.limit,
+            usedPerNumber: this.#limit.remaining,
+            usedPerPercent: (this.#limit.remaining / this.#limit.limit) * 100,
+        };
+    }
+
+    #bindEvents() { this.#button.addEventListener("click", () => this.#openSettings()) }
+
+    async #openSettings() {
+        const limit = await this.#getRestApiLimit();
         const card = `
-            <div class="overlay">
+            <div class="overlay" id="overlay">
                 <div class="settings-modal" id="settings-modal" role="dialog">
                     <div class="settings-header">
                         <h1>Settings</h1>
-                        <button class="close-settings-button" id="close-button">&times;</button>
+                        <button class="close-button" id="close-button">&times;</button>
                     </div>
-                    <h3>GitHub</h3>
-                    <div class="settings-item">
-                        <label for="token-input">GitHub Rest Api Token</label>
-                        <input type="password" id="token-input" placeholder="gpy_">
-                    </div>
-                    <h3>LocalStorage</h3>
-                    <div class="settings-item">
-                        <span for="save-link">Save current repo in page</span>
-                        <label for="save-link"></label>
-                        <input type="checkbox" id="save-link">
-                    </div>
-                    <div class="settings-item">
-                        <span>Save current token in page</span>
-                        <label for="save-token"></label>
-                        <input type="checkbox" id="save-token">
-                    </div>
-                    <div class="settings-item">
-                        <span>Rest API Limit:</span>
-                        <div class="rest-api-limit-container">
-                            <span class="rest-api-limit-progress" id="rest-api-limit-progress"></span>
+                    <div class="settings-content">
+                        <div class="settings-section">
+                            <h3>GitHub</h3>
+                            <div class="settings-item rounded-normal border-sm">
+                                <label for="token-input">GitHub Rest Api Token</label>
+                                <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" placeholder="gpy_">
+                            </div>
                         </div>
+                        <div class="settings-section"> 
+                            <h3>LocalStorage</h3>
+                            <div class="settings-item rounded-normal border-sm">
+                                <span for="save-link">Save current repo in page</span>
+                                <input class="hidden toggle-input" type="checkbox" id="save-link">
+                                <label class="toggle-button rounded-full" for="save-link" aria-label="toggle save link option"></label>
+                            </div>
+                            <div class="settings-item rounded-normal border-sm">
+                                <span>Save current token in page</span>
+                                <input class="hidden toggle-input" type="checkbox" id="save-token">
+                                <label class="toggle-button rounded-full" for="save-token" aria-label="toggle save token option"></label>
+                            </div>
+                            <div class="settings-item rounded-normal border-sm">
+                                <span>Rest API Limit:</span>
+                                <div class="rest-api-limit-progress rounded-full border-normal" title="Used: ${limit.usedPerNumber} / ${limit.limitPerNumber}">
+                                    <span class="rest-api-limit-bar" style="width: ${limit.usedPerPercent}%"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="version-text text-small">Version: ${config.version}</span>
                     </div>
-                    <span>Version: ${config.version}</span>
                 </div>
             </div>
         `;
 
         this.#body.insertAdjacentHTML("beforeend", card);
+
+        const modal = document.querySelector("#overlay");
+        const closeButton = modal.querySelector(".close-button");
+        const saveLinkToggle = document.querySelector("#save-link");
+        const saveTokenToggle = document.querySelector("#save-token");
+
+        closeButton.addEventListener("click", () => {
+            modal.remove();
+        })
+
+        document.addEventListener("keydown", (e) => {
+            if (e.code === "Escape") {
+                modal.remove()
+            };
+        })
+
+        saveLinkToggle.checked = storage.localStorage.saveLink;
+        saveLinkToggle.addEventListener("change", () => {
+            storage.localStorage.saveLink = saveLinkToggle.checked;
+            console.log(storage.localStorage)
+        })
+
+        saveTokenToggle.checked = storage.localStorage.saveToken;
+        saveTokenToggle.addEventListener("change", () => {
+            storage.localStorage.saveToken = saveTokenToggle.checked;
+            console.log(storage.localStorage)
+        })
+
+
     }
 
 }
