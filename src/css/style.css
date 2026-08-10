@@ -109,21 +109,25 @@ h3 {
 span,
 p,
 a,
-button {
+button,
+li,
+ol,
+ul {
     font-family: var(--font-system);
     font-size: 1rem;
     font-weight: normal;
-    letter-spacing: 1%;
+    letter-spacing: -1%;
 }
 
 code {
     font-family: var(--font-monospace);
     font-weight: normal;
-    letter-spacing: 1%;
+    letter-spacing: -1%;
 }
 
 input {
     font-size: 0.8rem;
+    letter-spacing: -1.5%;
 }
 
 input::placeholder {
@@ -186,16 +190,12 @@ button,
 a {
     cursor: pointer;
     font-size: 1rem;
+    letter-spacing: -0.5%;
 }
 
 button:hover,
 a:hover:not(.author-container) {
     background: var(--hover-color-1);
-}
-
-ul,
-li {
-    list-style: none;
 }
 
 html {
@@ -457,6 +457,12 @@ main {
 .full-commit-modal p {
     color: var(--text-color-2);
 }
+
+.full-commit-description {
+    color: var(--text-color-2);
+    margin: 0px 20px;
+}
+
 
 .full-commit-item {
     background: var(--color-4);

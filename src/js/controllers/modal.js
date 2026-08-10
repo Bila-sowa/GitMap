@@ -85,6 +85,7 @@ export default class Modal {
         const files = await this.#getClient().getCommitFiles(commit.sha);
         const theme = this.#getTheme();
         const colors = this.#statusColors[theme];
+        const parsedDescription = marked.parse(commit.description)
 
         const card = `
             <div class="full-commit-modal" id="full-modal-window" role="dialog">
@@ -92,7 +93,10 @@ export default class Modal {
                     <h2>${commit.title}</h2>
                     <button class="close-button rounded-full" id="close-button" aria-label="Close">&times;</button>
                 </div>
-                <p>${commit.description ? "Description: " + commit.description : ""} </p>
+                <p>Description:</p>
+                <div class="full-commit-description">
+                    ${parsedDescription ? parsedDescription : ""} 
+                </div>
                 <div class="full-commit-data">
                     <a class="full-commit-item rounded-normal " href="${commit.author.url}" target="_blank" rel="noopener noreferrer" title="Email: ${commit.author.email}">
                         <span>Author: </span>

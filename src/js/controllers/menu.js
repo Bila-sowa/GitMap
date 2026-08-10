@@ -143,7 +143,7 @@ class Settings {
         });
 
         document.addEventListener("keydown", (e) => {
-            if (e.code === "Escape" || e.target !== modal) {
+            if (e.code === "Escape") {
                 modal.remove()
             };
         })

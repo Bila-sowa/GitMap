@@ -1,10 +1,8 @@
 import GitHubClient from "../src/js/services/getGitHubData.js"
-import GITHUB_TOKEN from "../src/js/services/gitHubToken.js";
 import TestFeedBack from "./testFeedBack.js";
 
 export default async function test_001_D() {
     const client = new GitHubClient("https://github.com/Bila-sowa/GitMap");
-    // await client.setToken(GITHUB_TOKEN);
     try {
         const [rawData, parsedData, rateLimitData, commitFileData] = await Promise.all([
             client.getRawData(),
