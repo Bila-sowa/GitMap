@@ -1,3 +1,5 @@
+import { createNotification } from "./utils.js";
+
 export default async function getRateLimit() {
     try {
         const tokenRes = await fetch('https://api.github.com/rate_limit');
@@ -24,6 +26,7 @@ export default async function getRateLimit() {
             success: true
         };
     } catch (err) {
+        createNotification("File data request error", "error")
         return { error: err.message, success: false };
     }
 };

@@ -1,4 +1,5 @@
 import storage from "../data/storage.js";
+import { createNotification } from "../utils/utils.js";
 
 export default class LocalStorage {
     save() {
@@ -27,6 +28,7 @@ export default class LocalStorage {
 
             return { data: parse, success: true };
         } catch (err) {
+            createNotification("Invalid local storage parse. Please check your data in the local storage or delete its data.", "error")
             return { error: err.name, success: false };
         }
     }

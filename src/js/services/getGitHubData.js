@@ -1,37 +1,64 @@
-import Formatter from '../utils/formatter.js';
+import Formatter from "../utils/formatter.js";
+import { createNotification } from "../utils/utils.js";
 
 class GitHubClient {
     #formatter = new Formatter();
 
     constructor(url) {
-        const { branchLink, commitsLink } = GitHubClient.formatGitHubUrl(url);
-        this.branchLink = branchLink;
-        this.commitsLink = commitsLink;
-        this.headers = { 'Accept': 'application/vnd.github+json' };
+        const result = GitHubClient.formatGitHubUrl(url);
+
+        if (!result.success) {
+            this.branchLink = null;
+            this.commitsLink = null;
+            this.headers = { "Accept": "application/vnd.github+json" };
+            return;
+        }
+
+        this.branchLink = result.data.branchLink;
+        this.commitsLink = result.data.commitsLink;
+        this.headers = { "Accept": "application/vnd.github+json" };
     }
 
     static formatGitHubUrl(url) {
-        const match = url.match(/github\.com\/([^/]+)\/([^/]+)/);
-        if (!match) throw new Error('Invalid GitHub URL');
+        if (!url || typeof url !== "string" || !url.trim()) {
+            createNotification("GitHub repository URL is missing", "error");
+            return { error: "Missing GitHub URL", success: false };
+        }
 
-        const [, owner, repo] = match;
-        const cleanRepo = repo.replace(/\.git$/, '').replace(/\/$/, '');
+        try {
+            const match = url.match(/github\.com\/([^/]+)\/([^/]+)/);
+            if (!match) throw new Error("Invalid GitHub URL");
 
-        return {
-            branchLink: `https://api.github.com/repos/${owner}/${cleanRepo}/branches`,
-            commitsLink: `https://api.github.com/repos/${owner}/${cleanRepo}/commits`,
-        };
+            const [, owner, repo] = match;
+            const cleanRepo = repo.replace(/\.git$/, "").replace(/\/$/, "");
+
+            return {
+                data: {
+                    branchLink: `https://api.github.com/repos/${owner}/${cleanRepo}/branches`,
+                    commitsLink: `https://api.github.com/repos/${owner}/${cleanRepo}/commits`,
+                },
+                success: true,
+            };
+        } catch (err) {
+            createNotification("Invalid GitHub URL", "error");
+            return { error: err.name, success: false };
+        }
+
     };
 
     async getRawData() {
         try {
+            if (!this.branchLink || !this.commitsLink) {
+                return { error: "Repository URL is missing or invalid", success: false };
+            }
+
             const branchesRes = await fetch(this.branchLink, { headers: this.headers });
             const commitsRes = await fetch(this.commitsLink, { headers: this.headers });
 
             if (!branchesRes.ok || !commitsRes.ok) {
                 if (branchesRes.status === 403 || commitsRes.status === 403) {
-                    // showMessage("")
-                    throw new Error(`Hourly request limit reached or invalid URL. Status: ${branchesRes.status} / ${commitsRes.status}`);
+                    window.location = "./limit.html"
+                    return;
                 } else {
                     throw new Error(`GitHub API error: ${branchesRes.status} / ${commitsRes.status}`);
                 };
@@ -43,24 +70,27 @@ class GitHubClient {
             return { branches, commits, success: true };
 
         } catch (err) {
-            // showError(err.message);
+            createNotification("Invalid GitHub URL or private repo", "error");
             return { error: err.message, success: false };
         }
     };
 
     async getData() {
         const data = await this.getRawData();
-        if (!data.success) return { error: data.error, success: false };
-
-        const { branches, commits } = data;
-
-        if (!Array.isArray(branches) || !Array.isArray(commits)) {
-            return { error: 'Unexpected GitHub API response format', success: false };
+        if (!data?.success) {
+            return { success: false, error: data?.error || "Failed to retrieve data" };
         }
 
-        let commitsDetails = [];
-        let branchesDetails = [];
+        const branches = Array.isArray(data.branches) ? data.branches : [];
+        const commits = Array.isArray(data.commits) ? data.commits : [];
 
+        if (!branches.length || !commits.length) {
+            createNotification("Unexpected GitHub API response format", "error");
+            return { success: false, error: "Unexpected GitHub API response format" };
+        }
+
+        const commitsDetails = [];
+        const branchesDetails = [];
 
         commits.forEach(commit => {
             const formattedTitle = this.#formatter.getFormattedTitle(commit.commit.message);
@@ -88,28 +118,31 @@ class GitHubClient {
 
         branches.forEach(branch => {
             const details = { name: branch.name };
-
             branchesDetails.push(details);
         })
 
         return {
-            commitsDetails: commitsDetails,
-            branchesDetails: branchesDetails,
+            commitsDetails,
+            branchesDetails,
             success: true,
         };
     };
 
     async getCommitFiles(sha) {
         try {
+            if (!this.commitsLink || !sha) {
+                return { error: "Commit SHA or repository URL is missing", success: false };
+            }
+
             const fileRes = await fetch(`${this.commitsLink}/${sha}`, { headers: this.headers });
 
-            if (!fileRes.ok) throw new Error(`GitHub API error: ${res.status}`);
+            if (!fileRes.ok) throw new Error(`GitHub API error: ${fileRes.status}`);
 
             const data = await fileRes.json();
             let formattedData = [];
 
             data.files.forEach(file => {
-                const extension = file.filename.slice(file.filename.lastIndexOf('.') + 1);
+                const extension = file.filename.slice(file.filename.lastIndexOf(".") + 1);
                 const status = file.status.slice(0, 1).toUpperCase();
 
                 const fileData = {
@@ -129,7 +162,7 @@ class GitHubClient {
                 success: true,
             };
         } catch (err) {
-            console.error(`Failed to fetch files for commit ${sha}: ${err.message}`);
+            createNotification(`Failed to fetch files for commit ${sha}: ${err.message}`, "error")
             return { error: err.message, success: false };
         }
     };
@@ -145,19 +178,24 @@ class GitHubClient {
 
         if (!validation.success) {
             delete this.headers.Authorization;
-            console.error(`Invalid token: ${validation.error}. Falling back to no-token mode.`);
+            createNotification(`Invalid token: ${validation.error}. Falling back to no-token mode.`, "error");
         }
     };
 
     async validateToken() {
         try {
-            const res = await fetch('https://api.github.com/user', { headers: this.headers });
+            const res = await fetch("https://api.github.com/user", { headers: this.headers });
 
-            if (res.status === 401) throw new Error('Token is invalid or expired');
-            if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+            if (!res.ok) {
+                return { success: false, error: `GitHub token validation failed: ${res.status}` };
+            }
 
-            const { login } = await res.json();
-            return { success: true, login };
+            const data = await res.json();
+            if (!data?.login) {
+                return { success: false, error: "GitHub token validation failed" };
+            }
+
+            return { success: true, login: data.login };
         } catch (err) {
             return { success: false, error: err.message };
         }
@@ -167,3 +205,4 @@ class GitHubClient {
 };
 
 export default GitHubClient;
+

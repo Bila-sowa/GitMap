@@ -7,13 +7,12 @@ const copyValueToClipboard = async (element) => {
         element.classList.add("copied");
         setTimeout(() => element.classList.remove("copied"), COOLDOWN);
     } catch (err) {
-        console.log(err);
+        createNotification("Copying error or copying is not allowed by your browser (especially if you launched the server on live server)", "error")
     }
 };
 
 function createNotification(message, type) {
     if (!message || !type) return;
-
 
     const COOLDOWN_MS = 5000;
     const icons = {

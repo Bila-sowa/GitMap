@@ -19,7 +19,9 @@ export default class Graph {
         if (!storage.link) return;
 
         await this.#getData(storage.link);
-        this.#graph.innerHTML = '';
+        if (!this.#data?.success) return;
+
+        this.#graph.innerHTML = "";
 
         this.#data.commitsDetails.forEach((commit, index) => {
             const isLast = index === this.#data.commitsDetails.length - 1;
@@ -50,3 +52,4 @@ export default class Graph {
         return words.length > 5 ? words.slice(0, 3).join(" ") + "..." : title;
     }
 }
+
