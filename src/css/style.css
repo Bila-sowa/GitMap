@@ -47,8 +47,9 @@
     --font-system: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     --accent-color-1: #3DED6B;
     --shadow-color-1: #3bed6a4d;
-    --error-color: #FF4040;
     --info-color: #40A9FF;
+    --warning-color: #f7b34c;
+    --error-color: #FF4040;
     --success-color: #2BFF60;
     --additions-color: #1f6feb;
     --deletions-color: #da3633;
@@ -281,6 +282,42 @@ header {
     justify-content: center;
     align-items: center;
 }
+
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 50;
+    padding: 10px 20px;
+    color: #fff;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: alert-pop 0.35s ease-out;
+}
+
+.info {
+    background-color: var(--info-color);
+    box-shadow: 0px 0px 16px var(--info-color);
+}
+
+.warning {
+    background-color: var(--warning-color);
+    box-shadow: 0px 0px 16px var(--warning-color);
+}
+
+.error {
+    background-color: var(--error-color);
+    box-shadow: 0px 0px 16px var(--error-color);
+}
+
+.success {
+    background-color: var(--success-color);
+    box-shadow: 0px 0px 16px var(--success-color);
+}
+
+
 
 main {
     height: calc(100dvh - 77px);
@@ -660,6 +697,23 @@ main {
 
 .version-text {
     color: var(--text-color-2);
+}
+
+@keyframes alert-pop {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 @keyframes elongation {

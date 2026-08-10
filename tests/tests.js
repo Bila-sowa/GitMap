@@ -1,9 +1,15 @@
-import test_001 from "./getGitHubData.test.js";
-import test_002 from "./getRateLimit.test.js";
+import test_001_Data from "./getGitHubData.test.js";
+import test_002_Data from "./getRateLimit.test.js";
+import test_001_Ui from "./utils.test.js";
 
-const tests = [
-    test_001,
-    test_002,
+
+const dataTests = [
+    test_001_Data,
+    test_002_Data,
+];
+
+const uiTests = [
+    test_001_Ui,
 ];
 
 function shuffle(array) {
@@ -15,21 +21,26 @@ function shuffle(array) {
     return result;
 }
 
-async function runTests() {
-    const results = await Promise.all(shuffle(tests).map(fn => fn()));
+async function runDataTests(tests = dataTests) {
+    const shuffled = shuffle(tests);
+    const results = await Promise.all(shuffled.map(fn => fn()));
 
     const failed = results
-        .map((result, i) => ({ name: tests[i].name, result }))
+        .map((result, i) => ({ name: shuffled[i].name, result }))
         .filter(({ result }) => !result.success);
-
 
     console.log(`Tests done: ${results.length - failed.length} passed, ${failed.length} failed.`);
     if (failed.length > 0) {
         console.error("Failed tests:", failed.map(({ name }) => name));
-    };
+    }
 
-    console.dir(results)
+    console.dir(results);
     return results;
 }
 
-runTests();
+async function runUiTests(tests = uiTests) {
+    await Promise.all(shuffle(tests).map(fn => fn()));
+    console.log(`Ui tests done`);
+}
+
+runDataTests().then(() => runUiTests());

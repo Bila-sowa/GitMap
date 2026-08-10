@@ -1,4 +1,4 @@
-import Formatter from '../utils/Formatter.js';
+import Formatter from '../utils/formatter.js';
 
 class GitHubClient {
     #formatter = new Formatter();

@@ -1,7 +1,7 @@
 import getRateLimit from "../src/js/utils/getRateLimit.js";
 import TestFeedBack from "./testFeedBack.js";
 
-export default async function test_002() {
+export default async function test_002_D() {
     const result = await getRateLimit();
 
     if (result.success) {
