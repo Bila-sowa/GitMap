@@ -12,25 +12,8 @@ class Input {
         this.#input = input;
         this.#graph = graph;
         this.#localStorage = new LocalStorage();
-        this.#loadSavedLink();
+        this.#input.value = storage.link || "";
         this.#bindEvents();
-    }
-
-    #loadSavedLink() {
-        if (!storage.localStorage.saveLink) {
-            return;
-        }
-
-        const saved = this.#localStorage.get();
-        const savedLink = saved.success && saved.data?.link ? saved.data.link : storage.link;
-
-        if (!savedLink) {
-            return;
-        }
-
-        storage.link = savedLink;
-        this.#input.value = savedLink;
-        this.#graph.render(savedLink);
     }
 
     #bindEvents() {
@@ -45,7 +28,7 @@ class Input {
                 this.#localStorage.save();
             }
 
-            this.#graph.render(inputValue);
+            this.#graph.render();
         });
     }
 }
@@ -57,10 +40,10 @@ class Refresh {
     constructor(button, graph) {
         this.#button = button;
         this.#graph = graph;
-        this.#bindEvents()
+        this.#bindEvents();
     }
 
-    #bindEvents() { this.#button.addEventListener("click", () => this.#graph.render(storage.link)) }
+    #bindEvents() { this.#button.addEventListener("click", () => this.#graph.render()) }
 }
 
 class Theme {
@@ -90,10 +73,12 @@ class Settings {
     #button
     #client
     #limit
+    #localStorage
 
     constructor(button) {
         this.#body = document.querySelector("body");
         this.#button = button;
+        this.#localStorage = new LocalStorage();
         this.#bindEvents();
         this.#client = new GitHubClient(storage?.link);
     }
@@ -182,13 +167,13 @@ class Settings {
         saveLinkToggle.checked = storage.localStorage.saveLink;
         saveLinkToggle.addEventListener("change", () => {
             storage.localStorage.saveLink = saveLinkToggle.checked;
-            console.log(storage.localStorage)
+            this.#localStorage.save();
         })
 
         saveTokenToggle.checked = storage.localStorage.saveToken;
         saveTokenToggle.addEventListener("change", () => {
             storage.localStorage.saveToken = saveTokenToggle.checked;
-            console.log(storage.localStorage)
+            this.#localStorage.save();
         })
 
 

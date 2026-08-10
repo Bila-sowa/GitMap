@@ -1,21 +1,21 @@
 import storage from "../data/storage.js";
 
 export default class LocalStorage {
-    #body = null;
-    #storage = null;
-
-    constructor() { this.#body = document.body; }
-
     save() {
+        const dataToSave = {
+            ...storage,
+            localStorage: { ...storage.localStorage },
+        };
+
         if (!storage.localStorage.saveLink) {
-            storage.link = "";
+            dataToSave.link = "";
         }
 
         if (!storage.localStorage.saveToken) {
-            storage.token = "";
+            dataToSave.token = "";
         }
 
-        localStorage.setItem("GitMap", JSON.stringify(storage));
+        localStorage.setItem("GitMap", JSON.stringify(dataToSave));
     }
 
     get() {
@@ -38,6 +38,15 @@ export default class LocalStorage {
         }
 
         Object.assign(storage, result.data);
+
+        if (!storage.localStorage.saveLink) {
+            storage.link = "";
+        }
+
+        if (!storage.localStorage.saveToken) {
+            storage.token = "";
+        }
+
         return { success: true, data: storage };
     }
 }

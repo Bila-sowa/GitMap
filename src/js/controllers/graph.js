@@ -15,11 +15,7 @@ export default class Graph {
         });
     }
 
-    async render(link) {
-        if (link) {
-            storage.link = link;
-        }
-
+    async render() {
         if (!storage.link) return;
 
         await this.#getData(storage.link);
