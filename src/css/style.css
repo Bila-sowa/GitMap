@@ -342,9 +342,10 @@ main {
 }
 
 .full-commit-header {
+    width: 100%;
     display: flex;
-    align-items: start;
-    justify-content: center;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .full-commit-header button { margin: 10px; }

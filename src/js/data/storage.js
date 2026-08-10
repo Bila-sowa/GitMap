@@ -1,6 +1,6 @@
 export default {
     client: null, 
-    link: "https://github.com/microsoft/vscode", // only for testing
+    link: "https://github.com/Bila-sowa/GitMap/tree/fixes/design", // only for testing
     theme: "dark-theme",
     token: null,
     localStorage: {
