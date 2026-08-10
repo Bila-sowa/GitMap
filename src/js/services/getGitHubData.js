@@ -29,7 +29,7 @@ class GitHubClient {
             const commitsRes = await fetch(this.commitsLink, { headers: this.headers });
 
             if (!branchesRes.ok || !commitsRes.ok) {
-                if (branchesRes.status === 403 || commitsRes.status === 403 ) {
+                if (branchesRes.status === 403 || commitsRes.status === 403) {
                     // showMessage("")
                     throw new Error(`Hourly request limit reached or invalid URL. Status: ${branchesRes.status} / ${commitsRes.status}`);
                 } else {
@@ -42,13 +42,13 @@ class GitHubClient {
 
             return { branches, commits, success: true };
 
-        } catch(err) {
+        } catch (err) {
             // showError(err.message);
-            return { error: err.message, success: false};
+            return { error: err.message, success: false };
         }
     };
 
-    async getData () {
+    async getData() {
         const data = await this.getRawData();
         if (!data.success) return { error: data.error, success: false };
 
@@ -57,10 +57,10 @@ class GitHubClient {
         if (!Array.isArray(branches) || !Array.isArray(commits)) {
             return { error: 'Unexpected GitHub API response format', success: false };
         }
-        
+
         let commitsDetails = [];
         let branchesDetails = [];
-        
+
 
         commits.forEach(commit => {
             const formattedTitle = this.#formatter.getFormattedTitle(commit.commit.message);
@@ -99,30 +99,6 @@ class GitHubClient {
         };
     };
 
-    async getRateLimit() {
-        try {
-            const tokenRes = await fetch('https://api.github.com/rate_limit', { headers: this.headers });
-
-            if (!tokenRes.ok) {
-                throw new Error(`GitHub API error: ${tokenRes.status}`);
-            }
-
-            const data = await tokenRes.json();
-            const { limit, remaining, reset, used } = data.rate;
-            
-            return {
-                limit,
-                remaining,
-                used,
-                success: true,
-            };
-        } catch (err) {
-            return { error: err.message, success: false };
-        }
-    };
-
-
-
     async getCommitFiles(sha) {
         try {
             const fileRes = await fetch(`${this.commitsLink}/${sha}`, { headers: this.headers });
@@ -149,7 +125,7 @@ class GitHubClient {
             });
 
             return {
-                files: formattedData, 
+                files: formattedData,
                 success: true,
             };
         } catch (err) {

@@ -2,6 +2,7 @@ import storage from "../data/storage.js";
 import config from "../data/config.js";
 import LocalStorage from "./localStorage.js";
 import GitHubClient from "../services/getGitHubData.js";
+import getRateLimit from "../utils/getRateLimit.js";
 
 class Input {
     #input
@@ -71,8 +72,6 @@ class Theme {
 class Settings {
     #body
     #button
-    #client
-    #limit
     #localStorage
 
     constructor(button) {
@@ -80,27 +79,12 @@ class Settings {
         this.#button = button;
         this.#localStorage = new LocalStorage();
         this.#bindEvents();
-        this.#client = new GitHubClient(storage?.link);
-    }
-
-    async #getRestApiLimit() {
-        this.#limit = await this.#client.getRateLimit();
-
-        if (!this.#limit?.success) {
-            return { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 };
-        }
-
-        return {
-            limitPerNumber: this.#limit.limit,
-            usedPerNumber: this.#limit.remaining,
-            usedPerPercent: (this.#limit.remaining / this.#limit.limit) * 100,
-        };
     }
 
     #bindEvents() { this.#button.addEventListener("click", () => this.#openSettings()) }
 
     async #openSettings() {
-        const limit = await this.#getRestApiLimit();
+        const limit = await getRateLimit();
         const card = `
             <div class="overlay" id="overlay">
                 <div class="settings-modal" id="settings-modal" role="dialog">
