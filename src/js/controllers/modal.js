@@ -118,18 +118,18 @@ export default class Modal {
                                 <img style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
                                 <code class="full-commit-file-name text-small">${file.name}</code>
                                 <div class="full-commit-file-changes">
-                                    ${file.status === "R" ? `<span style="color: ${colors[file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>` : 
-                                        `
+                                    ${file.status === "R" ? `<span class="text-small" style="color: ${colors[file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>` :
+                `
                                         <code class="file-additions text-small">+${file.additions}</code>
                                         <code class="file-deletions text-small">-${file.deletions}</code>
                                         <code class="text-small" style="color: ${colors?.[file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</code>
                                         `
-                                    }
+            }
                                 </div>
                             </div>
                             `).join("")
-                            : ""
-                        }
+                : ""
+            }
                     </div>
                     <a href="${commit.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="./images/github_logo.webp" alt></a>
                 </div>

@@ -1,3 +1,4 @@
+import config from "../src/js/data/config.js";
 import test_001_Data from "./getGitHubData.test.js";
 import test_002_Data from "./getRateLimit.test.js";
 import test_001_Ui from "./utils.test.js";
@@ -43,4 +44,6 @@ async function runUiTests(tests = uiTests) {
     console.log(`Ui tests done`);
 }
 
-runDataTests().then(() => runUiTests());
+if (config.dev) {
+    runDataTests().then(() => runUiTests());
+}
