@@ -13,10 +13,15 @@ export default async function getRateLimit() {
             return { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 };
         }
 
+        const formattedPercent = ((remaining / limit) * 100).toFixed(2);
+
         return {
-            limitPerNumber: data.rate?.limit,
-            usedPerNumber: data.rate?.remaining,
-            usedPerPercent: (data.rate?.remaining / data.rate?.limit) * 100,
+            data: {
+                limitPerNumber: data.rate?.limit,
+                usedPerNumber: data.rate?.remaining,
+                usedPerPercent: formattedPercent,
+            },
+            success: true
         };
     } catch (err) {
         return { error: err.message, success: false };

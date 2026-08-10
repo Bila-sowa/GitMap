@@ -84,7 +84,7 @@ class Settings {
     #bindEvents() { this.#button.addEventListener("click", () => this.#openSettings()) }
 
     async #openSettings() {
-        const limit = await getRateLimit();
+        const limit = await getRateLimit().success ? getRateLimit().data : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
         const card = `
             <div class="overlay" id="overlay">
                 <div class="settings-modal" id="settings-modal" role="dialog">

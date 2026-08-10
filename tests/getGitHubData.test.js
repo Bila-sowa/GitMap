@@ -18,8 +18,8 @@ export default async function test_001() {
         if (!data.getData.success) throw new Error(data.getData.error || 'getData() failed');
         if (!data.getRateLimit.success) throw new Error(data.getRateLimit.error || 'getRateLimit() failed');
 
-        return new TestFeedBack("getGitHubData.mjs", "GitHubClient", "class", true, data)
-    } catch (err) { return new TestFeedBack("getGitHubData.mjs", "GitHubClient", "class", false, err.message) }
+        return new TestFeedBack("getGitHubData.js", "GitHubClient", "class", true, data)
+    } catch (err) { return new TestFeedBack("getGitHubData.js", "GitHubClient", "class", false, err.message) }
 }
 
 
