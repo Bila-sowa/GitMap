@@ -2,7 +2,6 @@ import storage from "../data/storage.js";
 import config from "../data/config.js";
 import LocalStorage from "./localStorage.js";
 
-
 class Input {
     #input
     #graph
@@ -97,6 +96,12 @@ class Settings {
                         <span>Save current token in page</span>
                         <label for="save-token"></label>
                         <input type="checkbox" id="save-token">
+                    </div>
+                    <div class="settings-item">
+                        <span>Rest API Limit:</span>
+                        <div class="rest-api-limit-container">
+                            <span class="rest-api-limit-progress" id="rest-api-limit-progress"></span>
+                        </div>
                     </div>
                     <span>Version: ${config.version}</span>
                 </div>

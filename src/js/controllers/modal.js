@@ -198,19 +198,19 @@ export default class Modal {
                     <div class="hover-commit-body">
                         <div class="hover-commit-data">
                             <div class="hover-commit-item rounded-normal" style="display: flex; align-items: center; gap: 10px;" title="Email: ${commit.author.email}">
-                                <span class="text-small">Author: </span>
+                                <span>Author: </span>
                                 <div style="display: flex; align-items: center; gap: 10px;">
-                                    <span class="text-small">${commit.author.name}</span>
+                                    <span>${commit.author.name}</span>
                                     <img class="avatar rounded-full" src="${commit.author.avatar}" alt="${commit.author.name} avatar">
                                 </div>
                             </div>
                             <div class="hover-commit-item rounded-normal">
-                                <span class="text-small">Hash: </span>
-                                <span class="text-small">#${commit.hash}</span>
+                                <span>Hash: </span>
+                                <span>#${commit.hash}</span>
                             </div>
                             <div class="hover-commit-item rounded-normal">
-                                <span class="text-small">Date: </span>
-                                <span class="text-small">${shortDate}</span>
+                                <span>Date: </span>
+                                <span>${shortDate}</span>
                             </div>
                         </div>
                     </div>
