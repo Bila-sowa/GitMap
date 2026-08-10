@@ -28,7 +28,9 @@
     font-display: swap;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
 }
@@ -74,9 +76,13 @@
     --text-color-2: #4c535b;
 }
 
-.hidden { display: none !important; }
+.hidden {
+    display: none !important;
+}
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     font-family: var(--font-sans-serif-display);
     font-stretch: 110%;
 }
@@ -99,7 +105,10 @@ h3 {
     letter-spacing: 1.5%;
 }
 
-span, p, a, button {
+span,
+p,
+a,
+button {
     font-family: var(--font-system);
     font-size: 1rem;
     font-weight: normal;
@@ -112,22 +121,58 @@ code {
     letter-spacing: 1%;
 }
 
-input { font-size: 0.8rem; }
-input::placeholder { color: var(--text-color-2); }
+input {
+    font-size: 0.8rem;
+}
 
-.border-sm { border: 1px solid var(--border-color-1); }
-.border-normal { border: 2px solid var(--border-color-1); }
-.rounded-normal { border-radius: 10px;}
-.rounded-full { border-radius: 999px; }
-.neon { box-shadow: 0px 0px 10px var(--shadow-color-1); }
-.copied { color: var(--text-color-2); }
-.file-additions { color: var(--additions-color); }
-.file-deletions { color: var(--deletions-color); }
-.text-small { font-size: 0.8rem; }
-.text-smallest { font-size: 0.6rem; }
+input::placeholder {
+    color: var(--text-color-2);
+}
+
+.border-sm {
+    border: 1px solid var(--border-color-1);
+}
+
+.border-normal {
+    border: 2px solid var(--border-color-1);
+}
+
+.rounded-normal {
+    border-radius: 10px;
+}
+
+.rounded-full {
+    border-radius: 999px;
+}
+
+.neon {
+    box-shadow: 0px 0px 10px var(--shadow-color-1);
+}
+
+.copied {
+    color: var(--text-color-2);
+}
+
+.file-additions {
+    color: var(--additions-color);
+}
+
+.file-deletions {
+    color: var(--deletions-color);
+}
+
+.text-small {
+    font-size: 0.8rem;
+}
+
+.text-smallest {
+    font-size: 0.6rem;
+}
 
 
-button, a, input {
+button,
+a,
+input {
     text-decoration: none;
     border: none;
     outline: none;
@@ -136,15 +181,28 @@ button, a, input {
     transition: background 300ms ease;
 }
 
-button, a { cursor: pointer; font-size: 1rem; }
+button,
+a {
+    cursor: pointer;
+    font-size: 1rem;
+}
 
-button:hover, a:hover:not(.author-container) { background: var(--hover-color-1); }
+button:hover,
+a:hover:not(.author-container) {
+    background: var(--hover-color-1);
+}
 
-ul, li { list-style: none; }
+ul,
+li {
+    list-style: none;
+}
 
-html { scroll-behavior: smooth; font-size: 22px; }
+html {
+    scroll-behavior: smooth;
+    font-size: 22px;
+}
 
-body {    
+body {
     background: var(--color-2);
     color: var(--text-color-1);
     font-family: var(--font-sans-serif);
@@ -171,7 +229,9 @@ header {
     gap: 10px
 }
 
-.logo img { user-select: none; }
+.logo img {
+    user-select: none;
+}
 
 .logo-title label {
     font-weight: bold;
@@ -271,7 +331,8 @@ main {
 }
 
 .commit::before {
-    font-size: 1.2rem; /*H3 Sizes*/
+    font-size: 1.2rem;
+    /*H3 Sizes*/
     font-weight: normal;
     letter-spacing: 1%;
     word-break: break-word;
@@ -282,7 +343,10 @@ main {
     width: 240px;
 }
 
-.commit:hover, .commit:active { background: none; }
+.commit:hover,
+.commit:active {
+    background: none;
+}
 
 .connection {
     height: 120px;
@@ -320,7 +384,7 @@ main {
 
 .author-container {
     display: flex;
-    gap:10px;
+    gap: 10px;
 }
 
 .full-commit-modal {
@@ -333,6 +397,7 @@ main {
     box-sizing: border-box;
     padding: 20px;
     background: var(--color-3);
+    box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
@@ -348,8 +413,13 @@ main {
     justify-content: space-between;
 }
 
-.full-commit-header button { margin: 10px; }
-.full-commit-modal p { color: var(--text-color-2); }
+.full-commit-header button {
+    margin: 10px;
+}
+
+.full-commit-modal p {
+    color: var(--text-color-2);
+}
 
 .full-commit-item {
     background: var(--color-4);
@@ -379,13 +449,13 @@ main {
     justify-content: space-between;
 }
 
-.full-commit-changes h3 { 
+.full-commit-changes h3 {
     width: 100%;
     padding-bottom: 5px;
     border-bottom: var(--border-color-1) 2px solid;
 }
 
-.full-commit-changes a { 
+.full-commit-changes a {
     background: var(--color-4);
     width: 260px;
     height: 50px;
@@ -500,6 +570,7 @@ main {
     border: 1px solid var(--border-color-1);
     border-radius: 10px;
     background: var(--color-3);
+    box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.4);
     width: 60dvw;
     height: 60dvh;
     padding: 20px;
@@ -568,7 +639,7 @@ main {
     transition: transform 0.2s ease;
 }
 
-.toggle-input:checked + .toggle-button::before {
+.toggle-input:checked+.toggle-button::before {
     transform: translate(calc(60px - 25px - 2px - 2px), -50%);
 }
 
@@ -587,12 +658,16 @@ main {
     width: 0%;
 }
 
-.version-text { color: var(--text-color-2); }
+.version-text {
+    color: var(--text-color-2);
+}
 
 @keyframes elongation {
     from {
         transform: translateY(50%);
-    } to {
+    }
+
+    to {
         transform: translateY(0%);
     }
 }

@@ -12,18 +12,41 @@ class Input {
         this.#input = input;
         this.#graph = graph;
         this.#localStorage = new LocalStorage();
+        this.#loadSavedLink();
         this.#bindEvents();
+    }
+
+    #loadSavedLink() {
+        if (!storage.localStorage.saveLink) {
+            return;
+        }
+
+        const saved = this.#localStorage.get();
+        const savedLink = saved.success && saved.data?.link ? saved.data.link : storage.link;
+
+        if (!savedLink) {
+            return;
+        }
+
+        storage.link = savedLink;
+        this.#input.value = savedLink;
+        this.#graph.render(savedLink);
     }
 
     #bindEvents() {
         this.#input.addEventListener("blur", () => {
-            // if (storage.settings.saveLink) {
-            //     this.#localStorage = this.#input.value;
-            // }
+            const inputValue = this.#input.value.trim();
+            if (!inputValue) {
+                return;
+            }
 
-            storage.link = this.#input.value;
-            this.#graph.render()
-        })
+            storage.link = inputValue;
+            if (storage.localStorage.saveLink) {
+                this.#localStorage.save();
+            }
+
+            this.#graph.render(inputValue);
+        });
     }
 }
 
@@ -144,8 +167,14 @@ class Settings {
             modal.remove();
         })
 
+        document.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+
         document.addEventListener("keydown", (e) => {
-            if (e.code === "Escape") {
+            if (e.code === "Escape" || e.target !== modal) {
                 modal.remove()
             };
         })

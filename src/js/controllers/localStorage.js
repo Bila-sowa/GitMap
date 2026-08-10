@@ -25,12 +25,19 @@ export default class LocalStorage {
 
             if (value) parse = JSON.parse(value);
 
-            return { data: parse, success: true }
+            return { data: parse, success: true };
         } catch (err) {
-            // showError
-            return { error: err.name, success: false }
+            return { error: err.name, success: false };
         }
     }
 
-    load() { data = storage }
+    load() {
+        const result = this.get();
+        if (!result.success || !result.data || !Object.keys(result.data).length) {
+            return { success: false, data: null };
+        }
+
+        Object.assign(storage, result.data);
+        return { success: true, data: storage };
+    }
 }
