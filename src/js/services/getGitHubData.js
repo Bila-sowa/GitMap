@@ -57,8 +57,8 @@ class GitHubClient {
 
             if (!branchesRes.ok || !commitsRes.ok) {
                 if (branchesRes.status === 403 || commitsRes.status === 403) {
-                    window.location = "./limit.html"
-                    return;
+                    // window.location = "./limit.html"
+                    // return;
                 } else {
                     throw new Error(`GitHub API error: ${branchesRes.status} / ${commitsRes.status}`);
                 };

@@ -19,11 +19,28 @@ export default class Graph {
         if (!storage.link) return;
 
         await this.#getData(storage.link);
+
         if (!this.#data?.success) return;
+
+        this.#generateGraph(this.#data.commitsDetails)
+    }
+
+    async #getData(link) {
+        this.#client = new GitHubClient(link);
+        this.#data = await this.#client.getData();
+    }
+
+    #truncateTitle(title) {
+        const words = title.trim().split(/\s+/);
+        return words.length > 5 ? words.slice(0, 3).join(" ") + "..." : title;
+    }
+
+    #generateGraph(array) {
+        if (!array) return;
 
         this.#graph.innerHTML = "";
 
-        this.#data.commitsDetails.forEach((commit, index) => {
+        array.forEach((commit, index) => {
             const isLast = index === this.#data.commitsDetails.length - 1;
             const formattedTitle = this.#truncateTitle(commit.title);
 
@@ -40,16 +57,6 @@ export default class Graph {
 
             this.#graph.insertAdjacentHTML("beforeend", commitCard);
         });
-    }
-
-    async #getData(link) {
-        this.#client = new GitHubClient(link);
-        this.#data = await this.#client.getData();
-    }
-
-    #truncateTitle(title) {
-        const words = title.trim().split(/\s+/);
-        return words.length > 5 ? words.slice(0, 3).join(" ") + "..." : title;
     }
 }
 
