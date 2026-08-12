@@ -4,7 +4,7 @@ import Modal from "./modal.js";
 
 export default class Graph {
     #graph = null;
-    #client = null;
+    #client = new GitHubClient();
     #data = null;
 
     constructor(graphElement) {
@@ -26,8 +26,7 @@ export default class Graph {
     }
 
     async #getData(link) {
-        this.#client = new GitHubClient(link);
-        this.#data = await this.#client.getData();
+        this.#data = await this.#client.getData(link);
     }
 
     #truncateTitle(title) {
