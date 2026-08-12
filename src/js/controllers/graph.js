@@ -39,6 +39,7 @@ export default class Graph {
         if (!array) return;
 
         this.#graph.innerHTML = "";
+        this.#graph.dataset.repoUrl = storage.link;
 
         array.forEach((commit, index) => {
             const isLast = index === this.#data.commitsDetails.length - 1;

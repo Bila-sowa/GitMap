@@ -1,20 +1,14 @@
 {
-    "name": "gitmap",
-    "version": "0.3.2",
-    "description": "",
-    "homepage": "https://github.com/Bila-sowa/GitMap#readme",
-    "bugs": {
-        "url": "https://github.com/Bila-sowa/GitMap/issues"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Bila-sowa/GitMap.git"
-    },
-    "license": "MIT",
-    "author": "Bila_sowa",
-    "type": "module",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    }
+  "name": "gitmap",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.2.0"
+  }
 }

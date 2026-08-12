@@ -1,19 +1,26 @@
 export default class Formatter {
 
-    getFormattedTitle(title) {
-        return title.split('\n').slice(0, 1).join('\n');
+    getFormattedTitle(commitName) {
+        return commitName.split('\n').slice(0, 1).join('\n');
     }
 
-    getFormattedDescription(description) {
-        return description.split('\n').slice(1).join('\n');
+    getFormattedDescription(commitName) {
+        return commitName.split('\n').slice(1).join('\n');
     }
 
-    getFormattedDate(date) {
+    getDateInLocaleString(date) {
         return new Date(date).toLocaleString();
     }
 
-    getFormattedHash(hash) {
+    getShortHash(hash) {
         return hash.slice(0, 7);
     }
 
+    getFormattedExtension(file) {
+        return file?.filename.slice(file.filename.lastIndexOf(".") + 1);
+    }
+
+    getShortStatus(file) {
+        return file.status.slice(0, 1).toUpperCase();
+    }
 }
