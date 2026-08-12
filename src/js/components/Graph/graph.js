@@ -1,6 +1,6 @@
-import storage from "../data/storage.js";
-import GitHubClient from "../services/getGitHubData.js";
-import Modal from "./modal.js";
+import storage from "@/js/data/storage.js";
+import GitHubClient from "@/js/services/getGitHubData.js";
+import { createCommitModals } from "../Modals/index.js";
 
 export default class Graph {
     #graph = null;
@@ -9,10 +9,22 @@ export default class Graph {
 
     constructor(graphElement) {
         this.#graph = graphElement;
-        new Modal(this.#graph, {
+        createCommitModals(this.#graph, {
             getData: () => this.#data,
             getClient: () => this.#client,
         });
+    }
+
+    get element() {
+        return this.#graph;
+    }
+
+    get data() {
+        return this.#data;
+    }
+
+    get client() {
+        return this.#client;
     }
 
     async render() {
@@ -22,7 +34,7 @@ export default class Graph {
 
         if (!this.#data?.success) return;
 
-        this.#generateGraph(this.#data.commitsDetails)
+        this.#generateGraph(this.#data.commitsDetails);
     }
 
     async #getData(link) {
@@ -45,9 +57,10 @@ export default class Graph {
             const formattedTitle = this.#truncateTitle(commit.title);
 
             const commitCard = `
-                <button class="commit neon rounded-full" data-id="${index}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
+                <button class="commit neon rounded-full" data-id="${index}" data-sha="${commit.sha}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
                 ${isLast
-                    ? `<span class="limit-description text-smallest">The REST API supports only the last 30 commits from one branch.</span>` : `
+                    ? `<span class="limit-description text-smallest">The REST API supports only the last 30 commits from one branch.</span>`
+                    : `
                 <div class="connection neon">
                     <span></span>
                     <span></span>
@@ -59,4 +72,5 @@ export default class Graph {
         });
     }
 }
+
 
