@@ -1,3 +1,4 @@
+import '../styles.scss';
 import * as DOM from "./controllers/dom.js";
 import storage from "./data/storage.js";
 

@@ -88,7 +88,7 @@ export default class Modal {
         const parsedDescription = marked.parse(commit.description)
 
         const card = `
-            <div class="full-commit-modal" id="full-modal-window" role="dialog">
+            <div class="full-commit" id="full-commit-modal" role="dialog">
                 <div class="full-commit-header">
                     <h2>${commit.title}</h2>
                     <button class="close-button rounded-full" id="close-button" aria-label="Close">&times;</button>
@@ -135,7 +135,7 @@ export default class Modal {
                 : ""
             }
                     </div>
-                    <a href="${commit.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="./images/github_logo.webp" alt></a>
+                    <a href="${commit.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="/src/assets/github_logo.webp" alt></a>
                 </div>
             </div>
         `;
@@ -145,7 +145,7 @@ export default class Modal {
         this.#isFullOpen = true;
         this.#lastFocusedCommit = commitButton;
 
-        const modal = document.querySelector("#full-modal-window");
+        const modal = document.querySelector("#full-commit-window");
         const closeButton = document.querySelector("#close-button");
         const icons = [...document.querySelectorAll(".file-icon")];
         const copyableItems = [...modal.querySelectorAll(".copyable")];

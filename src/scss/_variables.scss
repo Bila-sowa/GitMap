@@ -1,0 +1,67 @@
+@font-face {
+    font-family: 'Mona Sans VF';
+    src:
+        url('../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff2') format('woff2 supports variations'),
+        url('../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff2') format('woff2-variations'),
+        url('../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff') format('woff-variations');
+    font-weight: 200 900;
+    font-stretch: 75% 125%;
+    font-optical-sizing: auto;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Mona Sans Mono VF';
+    src:
+        url('../fonts/mona-sans/MonaSansMonoVF[wdth,wght].woff2') format('woff2 supports variations'),
+        url('../fonts/mona-sans/MonaSansMonoVF[wdth,wght].woff2') format('woff2-variations');
+    font-weight: 200 900;
+    font-stretch: 75% 125%;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans';
+    src: url('../fonts/noto-sans/NotoSans-Variable.ttf') format('truetype-variations');
+    font-weight: 100 900;
+    font-stretch: 62.5% 100%;
+    font-display: swap;
+}
+
+
+:root {
+    --font-monospace: 'Mona Sans Mono VF', ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --font-sans-serif: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-sans-serif-display: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-system: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --accent-color-1: #3DED6B;
+    --shadow-color-1: #3bed6a4d;
+    --info-color: #40A9FF;
+    --warning-color: #f7b34c;
+    --error-color: #FF4040;
+    --success-color: #2BFF60;
+    --additions-color: #1f6feb;
+    --deletions-color: #da3633;
+}
+
+.dark-theme {
+    --color-1: #010409;
+    --color-2: #0D1117;
+    --color-3: #14181F;
+    --color-4: #212830;
+    --border-color-1: #3D4D40;
+    --hover-color-1: #373E4A;
+    --text-color-1: #FFFFFF;
+    --text-color-2: #727478;
+}
+
+.light-theme {
+    --color-1: #ffffff;
+    --color-2: #f6f8fa;
+    --color-3: #dfdfe0;
+    --color-4: #cdcdcd;
+    --hover-color-1: #bebebe;
+    --border-color-1: #e0efe4;
+    --text-color-1: #1f2328;
+    --text-color-2: #4c535b;
+}

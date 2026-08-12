@@ -20,7 +20,6 @@
     <meta property="og:site_name" content="GitMap">
     <meta property="og:locale" content="en_US">
     <title>GitMap</title>
-    <link rel="stylesheet" href="./src/css/style.css">
     <link rel="icon" href="/logo.webp">
     <script src="./src/js/index.js" type="module" defer></script>
     <script src="./tests/tests.js" type="module" defer></script>
@@ -30,16 +29,16 @@
 <body class="dark-theme">
     <header>
         <div class="logo">
-            <img width="60" src="/logo.webp" alt>
+            <img class="logo-image" width="60" src="/logo.webp" alt>
             <div class="logo-title">
                 <h1>Git<label>Map</label></h1>
             </div>
         </div>
-        <nav class="header-nav">
-            <div class="link-input-container">
+        <nav class="nav">
+            <div class="nav-link-input-container">
                 <input class="rounded-normal" type="text" placeholder="Enter a link to the repository" id="linkInput">
                 <a class="rounded-full" href="https://github.com" target="_blank">
-                    <img width="32" src="./images/github_logo.webp" alt>
+                    <img width="32" src="/src/assets/github_logo.webp" alt>
                 </a>
             </div>
 
@@ -70,7 +69,7 @@
                 </svg>
             </button>
 
-            <div class="nav-menu hidden" aria-label="Open menu">
+            <div class="nav-mobile-menu hidden" aria-label="Open menu">
                 <span></span>
                 <span></span>
                 <span></span>
