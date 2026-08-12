@@ -1,6 +1,6 @@
-import storage from "@/js/data/storage.js";
-import GitHubClient from "@/js/services/getGitHubData.js";
-import { createCommitModals } from "../Modals/index.js";
+import storage from "./data/storage.js";
+import GitHubClient from "./services/getGitHubData.js";
+import { createCommitModals } from "./components/Modals/index.js";
 
 export default class Graph {
     #graph = null;
