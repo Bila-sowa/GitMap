@@ -26,14 +26,6 @@
     color: var(--text-color-2);
 }
 
-.file-additions {
-    color: var(--additions-color);
-}
-
-.file-deletions {
-    color: var(--deletions-color);
-}
-
 .text-small {
     font-size: 0.8rem;
 }
@@ -76,15 +68,5 @@
     100% {
         opacity: 1;
         transform: scale(1);
-    }
-}
-
-@keyframes elongation {
-    from {
-        transform: translateY(50%);
-    }
-
-    to {
-        transform: translateY(0%);
     }
 }

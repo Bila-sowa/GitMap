@@ -37,7 +37,36 @@ function createNotification(message, type) {
     }, COOLDOWN_MS);
 }
 
+function escapeHTML(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function positionModalNearElement(modal, trigger, offset = 16) {
+    if (!modal || !trigger) return;
+
+    const triggerRect = trigger.getBoundingClientRect();
+
+    modal.style.position = "fixed";
+    modal.style.top = `${triggerRect.top}px`;
+    modal.style.left = `${triggerRect.right + offset}px`;
+}
+
+const truncateTitle = (title, wordCount = 5) => {
+    if (!title) return;
+
+    const words = title.trim().split(/\s+/);
+    return words.length > wordCount ? words.slice(0, 3).join(" ") + "..." : title;
+};
+
 export {
     copyValueToClipboard,
     createNotification,
+    escapeHTML,
+    positionModalNearElement,
+    truncateTitle,
 }

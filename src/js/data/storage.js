@@ -1,7 +1,7 @@
 export default {
     link: "",
     theme: "dark-theme",
-    token: null,
+    token: "",
     localStorage: {
         saveLink: false,
         saveToken: false,

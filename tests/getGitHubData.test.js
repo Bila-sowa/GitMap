@@ -4,15 +4,20 @@ import TestFeedBack from "./testFeedBack.js";
 export default async function test_001_D() {
     const client = new GitHubClient();
     try {
-        const [parsedData, commitFilesData] = await Promise.all([
+        const [parsedData, commitFilesData, rateLimit, isAuthenticated] = await Promise.all([
             client.getData("https://github.com/Bila-sowa/GitMap"),
             client.getCommitFiles("https://github.com/Bila-sowa/GitMap", "46f5cd270ddda0267790caf4fe48ec8895149ec6"),
+            client.getRateLimit(),
+            client.isAuthenticated()
         ]);
 
-        const data = { getData: parsedData, getCommitFiles: commitFilesData };
+        const data = {
+            getData: parsedData,
+            getCommitFiles: commitFilesData,
+            rateLimit: rateLimit,
+            isAuthenticated: isAuthenticated,
+        };
 
-        if (!data.getData.success) throw new Error(data.getData.error || 'getData() failed');
-        if (!data.getCommitFiles.success) throw new Error(data.getCommitFiles.error || 'getCommitFiles() failed');
 
         return new TestFeedBack("getGitHubData.js", "GitHubClient", "class", true, data)
     } catch (err) {

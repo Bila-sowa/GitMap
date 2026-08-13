@@ -120,7 +120,7 @@ export default class GitHubClient {
         const files = Array.isArray(data.files) ? data.files : [];
         const formattedData = [];
 
-        data.files.forEach(file => {
+        files.forEach(file => {
             const extension = this.#formatter.getFormattedExtension(file);
             const status = this.#formatter.getShortStatus(file);
 
@@ -166,18 +166,13 @@ export default class GitHubClient {
 
     async #validateToken() {
         try {
-            const res = await fetch("https://api.github.com/user", { headers: this.#headers });
+            const res = await fetch("https://api.github.com/rate_limit", { headers: this.#headers });
 
             if (!res.ok) {
                 return { success: false };
             }
 
-            const data = await res.json();
-            if (!data?.login) {
-                return { success: false };
-            }
-
-            return { success: true, login: data.login };
+            return { success: true };
         } catch (err) {
             return { success: false };
         }
@@ -198,6 +193,46 @@ export default class GitHubClient {
             return validation;
         }
 
-        return { success: true, login: validation.login };
+        return { success: true };
     };
+
+    async getRateLimit() {
+        try {
+            const res = await fetch("https://api.github.com/rate_limit", { headers: this.#headers });
+
+            if (!res.ok) {
+                throw new Error(`GitHub API error: ${res.status}`);
+            }
+
+            const data = await res.json();
+            if (!data?.rate) {
+                return {
+                    success: false,
+                    data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 }
+                };
+            }
+
+            const { limit, remaining, used } = data.rate;
+            const usedCount = used !== undefined ? used : (limit - remaining);
+            const formattedPercent = limit > 0 ? ((usedCount / limit) * 100).toFixed(2) : 0;
+
+            return {
+                success: true,
+                data: {
+                    limitPerNumber: limit,
+                    usedPerNumber: usedCount,
+                    usedPerPercent: formattedPercent,
+                }
+            };
+        } catch (err) {
+            createNotification("Rate limit request error", "error");
+            return { error: err.message, success: false };
+        }
+    };
+
+    async isAuthenticated() {
+        const response = await fetch("https://api.github.com/rate_limit", { headers: this.#headers });
+
+        return response.ok;
+    }
 };

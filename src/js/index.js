@@ -3,7 +3,7 @@ import * as DOM from "./controllers/dom.js";
 import storage from "./data/storage.js";
 
 import { Input, Refresh, Theme, Settings } from "./controllers/menu.js";
-import Graph from "./graph.js";
+import Graph from "./controllers/graph.js";
 import Canvas from './controllers/canvas.js';
 import LocalStorage from "./controllers/localStorage.js";
 
@@ -20,3 +20,4 @@ const settings = new Settings(DOM.settingsButton);
 if (storage.link) {
     graph.render();
 }
+

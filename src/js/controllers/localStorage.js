@@ -6,15 +6,9 @@ export default class LocalStorage {
         const dataToSave = {
             ...storage,
             localStorage: { ...storage.localStorage },
+            link: storage.localStorage.saveLink ? storage.link : "",
+            token: storage.localStorage.saveToken ? storage.token : "",
         };
-
-        if (!storage.localStorage.saveLink) {
-            dataToSave.link = "";
-        }
-
-        if (!storage.localStorage.saveToken) {
-            dataToSave.token = "";
-        }
 
         localStorage.setItem("GitMap", JSON.stringify(dataToSave));
     }
@@ -28,7 +22,7 @@ export default class LocalStorage {
 
             return { data: parse, success: true };
         } catch (err) {
-            createNotification("Invalid local storage parse. Please check your data in the local storage or delete its data.", "error")
+            createNotification("Invalid local storage parse. Please check your data in the local storage or delete its data.", "error");
             return { error: err.name, success: false };
         }
     }
@@ -39,14 +33,22 @@ export default class LocalStorage {
             return { success: false, data: null };
         }
 
-        Object.assign(storage, result.data);
+        const data = result.data;
 
-        if (!storage.localStorage.saveLink) {
-            storage.link = "";
+        if (data.theme) {
+            storage.theme = data.theme;
         }
 
-        if (!storage.localStorage.saveToken) {
-            storage.token = "";
+        if (data.localStorage) {
+            Object.assign(storage.localStorage, data.localStorage);
+        }
+
+        if (storage.localStorage.saveLink && data.link) {
+            storage.link = data.link;
+        }
+
+        if (storage.localStorage.saveToken && data.token) {
+            storage.token = data.token;
         }
 
         return { success: true, data: storage };
