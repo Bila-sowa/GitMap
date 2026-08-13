@@ -1,3 +1,4 @@
+import '../styles.scss';
 import * as DOM from "./controllers/dom.js";
 import storage from "./data/storage.js";
 
@@ -19,3 +20,4 @@ const settings = new Settings(DOM.settingsButton);
 if (storage.link) {
     graph.render();
 }
+

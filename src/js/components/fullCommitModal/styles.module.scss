@@ -1,0 +1,142 @@
+.modal {
+    position: fixed;
+    z-index: 10;
+    top: 77px;
+    right: 0;
+    height: calc(100dvh - 77px);
+    width: 30dvw;
+    box-sizing: border-box;
+    padding: 20px;
+    background: var(--color-3);
+    box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    overflow-wrap: break-word;
+    gap: 20px;
+    animation: elongation .1s ease;
+
+    &-header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        button {
+            margin: 10px;
+        }
+
+        h2 {
+            overflow-wrap: break-word;
+        }
+    }
+
+    p {
+        color: var(--text-color-2);
+    }
+
+    &-description {
+        color: var(--text-color-2);
+        margin: 0px 20px;
+    }
+
+    &-item {
+        background: var(--color-4);
+        border-radius: 10px;
+        padding: 0px 20px;
+        min-height: 50px;
+        max-height: fit-content;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &-data {
+        margin-top: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    &-changes {
+        margin-top: auto;
+        height: 400px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+
+        h3 {
+            width: 100%;
+            padding-bottom: 5px;
+            border-bottom: var(--border-color-1) 2px solid;
+        }
+
+        a {
+            background: var(--color-4);
+            width: 260px;
+            height: 50px;
+            font-size: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+    }
+
+    &-files {
+        width: 100%;
+        height: 200px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        margin: 15px 0px;
+        gap: 10px;
+    }
+
+    &-file {
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 2px solid var(--text-color-2);
+        border-radius: 10px;
+    }
+
+    &-file-path {
+        font-weight: 600;
+        width: 70%;
+        overflow-wrap: break-word;
+    }
+
+
+    &-file-changes {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+        font-weight: bolder;
+
+        &-additions {
+            color: var(--additions-color)
+        }
+
+        &-deletions {
+            color: var(--deletions-color)
+        }
+    }
+
+}
+
+@keyframes elongation {
+    from {
+        transform: translateY(50%);
+    }
+
+    to {
+        transform: translateY(0%);
+    }
+}

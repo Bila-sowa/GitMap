@@ -2,7 +2,7 @@ import storage from "../data/storage.js";
 import config from "../data/config.js";
 import LocalStorage from "./localStorage.js";
 import GitHubClient from "../services/getGitHubData.js";
-import getRateLimit from "../utils/getRateLimit.js";
+
 
 class Input {
     #input
@@ -73,6 +73,7 @@ class Settings {
     #body
     #button
     #localStorage
+    #client = new GitHubClient();
 
     constructor(button) {
         this.#body = document.querySelector("body");
@@ -84,7 +85,10 @@ class Settings {
     #bindEvents() { this.#button.addEventListener("click", () => this.#openSettings()) }
 
     async #openSettings() {
-        const limit = await getRateLimit().success ? getRateLimit().data : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
+        storage.token ? await this.#client.setToken(storage.token) : "";
+
+        const rateLimitRes = await this.#client.getRateLimit();
+        const limit = rateLimitRes?.success ? rateLimitRes.data : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
         const card = `
             <div class="overlay" id="overlay">
                 <div class="settings-modal" id="settings-modal" role="dialog">
@@ -97,7 +101,7 @@ class Settings {
                             <h3>GitHub</h3>
                             <div class="settings-item rounded-normal border-sm">
                                 <label for="token-input">GitHub Rest Api Token</label>
-                                <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" placeholder="gpy_">
+                                <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${storage.token || ""}" placeholder="gpy_">
                             </div>
                         </div>
                         <div class="settings-section"> 
@@ -129,8 +133,16 @@ class Settings {
 
         const modal = document.querySelector("#overlay");
         const closeButton = modal.querySelector(".close-button");
+        const tokenInput = modal.querySelector("#token-input");
         const saveLinkToggle = document.querySelector("#save-link");
         const saveTokenToggle = document.querySelector("#save-token");
+
+        tokenInput.addEventListener("blur", () => {
+            storage.token = tokenInput.value.trim();
+            if (storage.localStorage.saveToken) {
+                this.#localStorage.save();
+            }
+        });
 
         closeButton.addEventListener("click", () => {
             modal.remove();

@@ -1,0 +1,60 @@
+.modal {
+    position: fixed;
+    top: 50%;
+    left: calc(100% + 18px);
+    transform: translateY(-50%);
+    min-width: 350px;
+    width: fit-content;
+    min-height: 190px;
+    background: var(--color-3);
+    border: 2px solid var(--border-color-1);
+    border-radius: 10px;
+    padding: 18px;
+    color: var(--text-color-1);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    text-align: center;
+    animation: hover-modal-appear 0.15s steps(4, end);
+
+    h3 {
+        max-width: 300px;
+    }
+
+    &-hr {
+        width: 100%;
+        height: 2px;
+        background: var(--border-color-1);
+    }
+
+    &-content {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        width: 100%;
+        align-items: center;
+    }
+
+    &-data {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--color-4);
+        min-width: 300px;
+        width: fit-content;
+        padding: 10px;
+        min-height: 35px;
+        max-height: fit-content;
+        color: var(--text-color-1);
+    }
+}

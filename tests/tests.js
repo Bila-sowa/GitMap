@@ -1,12 +1,12 @@
 import config from "../src/js/data/config.js";
 import test_001_Data from "./getGitHubData.test.js";
-import test_002_Data from "./getRateLimit.test.js";
-import test_001_Ui from "./utils.test.js";
+import test_003_Data from "./escapeHTML.test.js";
+import test_001_Ui from "./createNotification.test.js";
 
 
 const dataTests = [
     test_001_Data,
-    test_002_Data,
+    test_003_Data,
 ];
 
 const uiTests = [

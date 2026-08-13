@@ -1,0 +1,121 @@
+import { copyValueToClipboard } from "@/js/utils/utils.js";
+import styles from "./styles.module.scss";
+
+const getTheme = () => {
+    return document.body.classList.contains("dark-theme") ? "dark" : "light";
+}
+
+const closeFullCommitModals = () => {
+    [...document.querySelectorAll(".full-commit-modal")].forEach(modal => modal.remove());
+};
+
+const statusColors = {
+    light: {
+        added: "#2DA44E",
+        modified: "#BF8700",
+        removed: "#CF222E",
+        renamed: "#0969DA",
+        copied: "#8250DF",
+        changed: "#656D76"
+    },
+    dark: {
+        added: "#3FB950",
+        modified: "#D29922",
+        removed: "#F85149",
+        renamed: "#58A6FF",
+        copied: "#A371F7",
+        changed: "#8B949E"
+    }
+};
+
+const generateFullCommitModalHTML = (commitData, filesData) => {
+    if (!commitData || !filesData) return;
+
+    closeFullCommitModals();
+
+    const parsedDescription = typeof marked !== "undefined" ? marked.parse(commitData.description || "") : commit.description;
+    const theme = getTheme();
+
+    return `
+        <div class="full-commit-modal ${styles.modal}" id="full-commit-modal" role="dialog">
+        <div class="${styles['modal-header']}">
+            <h2>${commitData.title}</h2>
+            <button class="close-button rounded-full" id="close-full-commit-button" aria-label="Close">&times;</button>
+        </div>
+        <p>Description:</p>
+        <div class="${styles['modal-description']}">
+            ${parsedDescription ? parsedDescription : ""} 
+        </div>
+        <div class="${styles['modal-data']}">
+            <a class="${styles['modal-item']} rounded-normal" href="${commitData.author.url}" target="_blank" rel="noopener noreferrer" title="Email: ${commitData.author.email}">
+                <span>Author: </span>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${commitData.author.name} 
+                    <img class="avatar rounded-full" src="${commitData.author.avatar}" alt="${commitData.author.name}'s Avatar">
+                </div>
+            </a>
+            <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${commitData.hash}" aria-label="Copy commit hash to clipboard">
+                <span>Hash: </span>
+                <span>#${commitData.hash}</span>
+            </button>
+            <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${commitData.author.date}" aria-label="Copy commit date to clipboard">
+                <span>Date: </span>
+                <span>${commitData.author.date}</span>
+            </button>
+        </div>
+        <div class="${styles['modal-changes']}">
+            <h3>Changes</h3>
+            <div class="${styles['modal-files']}">
+                ${filesData?.success && Array.isArray(filesData.files) ? filesData.files.map(file => `
+                    <div class="${styles['modal-file']} rounded-normal">
+                        <img class="${styles['modal-file-icon']}" style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
+                        <code class="${styles["modal-file-path"]} text-small">${file.name}</code>
+                        <div class="${styles['modal-file-changes']}">
+                            ${file.status === "R" ? `<span class="text-small" style="color: ${statusColors[`${theme}`][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>` : `
+                                <code class="${styles['modal-file-changes-additions']} text-small">+${file.additions}</code>
+                                <code class="${styles['modal-file-changes-deletions']} text-small">-${file.deletions}</code>
+                                <code class="text-small" style="color: ${statusColors?.[`${theme}`][file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</code>
+                            `}
+                        </div>
+                    </div>
+                `).join("") : `<p class="text-small">No files details available.</p>`}
+            </div>
+            <a href="${commitData.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="/src/assets/github_logo.webp" alt></a>
+        </div>
+    </div>
+    `;
+}
+
+function bindFullComitEvents() {
+    const modal = document.querySelector("#full-commit-modal");
+    if (!modal) return;
+
+    const closeButton = modal.querySelector("#close-full-commit-button");
+    const icons = [...modal.querySelectorAll(".file-icon")];
+    const copyableItems = [...modal.querySelectorAll(".copyable")];
+    const theme = getTheme();
+
+    icons.forEach(icon => {
+        icon.addEventListener("error", () => {
+            icon.onerror = null;
+            icon.src = `https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/file.svg`;
+        });
+    });
+
+    copyableItems.forEach(item => {
+        item.addEventListener("click", () => copyValueToClipboard(item));
+    });
+
+    closeButton?.focus();
+
+    const keydownHandler = (e) => {
+        if (e.key === "Escape") {
+            closeFullCommitModals();
+        }
+    };
+
+    closeButton?.addEventListener("click", closeFullCommitModals);
+    document.addEventListener("keydown", keydownHandler);
+}
+
+export { generateFullCommitModalHTML, bindFullComitEvents }
