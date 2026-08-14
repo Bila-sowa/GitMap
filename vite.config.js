@@ -8,5 +8,5 @@ export default defineConfig({
         }
     },
 
-    base: "/Area/"
+    base: "/GitMap/"
 });
