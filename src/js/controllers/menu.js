@@ -1,8 +1,7 @@
 import storage from "../data/storage.js";
-import config from "../data/config.js";
 import LocalStorage from "./localStorage.js";
 import GitHubClient from "../services/getGitHubData.js";
-
+import { getVersion } from "../utils/utils.js";
 
 class Input {
     #input
@@ -89,6 +88,7 @@ class Settings {
 
         const rateLimitRes = await this.#client.getRateLimit();
         const limit = rateLimitRes?.success ? rateLimitRes.data : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
+        const version = await getVersion();
         const card = `
             <div class="overlay" id="overlay">
                 <div class="settings-modal" id="settings-modal" role="dialog">
@@ -123,7 +123,7 @@ class Settings {
                                 </div>
                             </div>
                         </div>
-                        <span class="version-text text-small">Version: ${config.version}</span>
+                        <span class="version-text text-small">Version: ${version ? version : "unknown version"}</span>
                     </div>
                 </div>
             </div>

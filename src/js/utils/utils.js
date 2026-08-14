@@ -63,10 +63,26 @@ const truncateTitle = (title, wordCount = 5) => {
     return words.length > wordCount ? words.slice(0, 3).join(" ") + "..." : title;
 };
 
+const getVersion = async (url = "@/../package.json") => {
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`Failed to load package.json: ${response.status}`);
+        }
+
+        const packageData = await response.json();
+        return packageData.version;
+    } catch (error) {
+        console.error('Error fetching version:', error);
+    }
+}
+
 export {
     copyValueToClipboard,
     createNotification,
     escapeHTML,
     positionModalNearElement,
     truncateTitle,
+    getVersion,
 }

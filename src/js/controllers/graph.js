@@ -3,6 +3,7 @@ import GitHubClient from "../services/getGitHubData.js";
 import { generateFullCommitModalHTML, bindFullComitEvents } from "../components/fullCommitModal/index.js";
 import { generateHoverCommitModalHTML, closeHoverCommitModals } from "../components/hoverCommitModal/index.js";
 import { positionModalNearElement, truncateTitle } from "../utils/utils.js";
+import { generateLoader, removeLoader } from "../components/Loader/index.js";
 
 export default class Graph {
     #body = document.querySelector("body");
@@ -18,8 +19,9 @@ export default class Graph {
     async render() {
         if (!storage.link) return;
 
+        generateLoader();
         await this.#getGeneralData(storage.link);
-
+        removeLoader();
         if (!this.#data?.success) return;
 
         this.#generateGraph(this.#data.commitsDetails);
@@ -83,7 +85,12 @@ export default class Graph {
 
             const { id, sha } = commitButton.dataset;
 
+            generateLoader();
+
             this.#appendHTML(generateFullCommitModalHTML(this.#data?.commitsDetails[id], await this.#getFilesData(sha)));
+
+            removeLoader();
+
             bindFullComitEvents();
         });
 
@@ -96,7 +103,6 @@ export default class Graph {
             this.#appendHTML(generateHoverCommitModalHTML(this.#data?.commitsDetails[id]));
 
             const modal = this.#body.querySelector("#hover-commit-modal");
-            console.log(modal, commitButton)
 
 
             if (modal) {

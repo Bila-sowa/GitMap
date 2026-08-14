@@ -20,4 +20,3 @@ const settings = new Settings(DOM.settingsButton);
 if (storage.link) {
     graph.render();
 }
-

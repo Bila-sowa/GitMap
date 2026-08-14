@@ -3,7 +3,7 @@ import styles from "./styles.module.scss"
 function generateLoader() {
     const loaders = [...document.querySelectorAll(".loader")];
 
-    removeLoaders();
+    if (loaders.length) removeLoader();
 
     const loaderHTML = `
         <div class="overlay loader">
@@ -20,8 +20,8 @@ function generateLoader() {
     document.body.insertAdjacentHTML("beforeend", loaderHTML);
 }
 
-function removeLoaders() {
+function removeLoader() {
     [...document.querySelectorAll(".loader")].forEach(loader => loader.remove());
 }
 
-export { generateLoader, removeLoaders };
+export { generateLoader, removeLoader };

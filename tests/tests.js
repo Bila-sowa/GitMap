@@ -1,8 +1,6 @@
-import config from "../src/js/data/config.js";
 import test_001_Data from "./getGitHubData.test.js";
 import test_003_Data from "./escapeHTML.test.js";
 import test_001_Ui from "./createNotification.test.js";
-
 
 const dataTests = [
     test_001_Data,
@@ -12,6 +10,23 @@ const dataTests = [
 const uiTests = [
     test_001_Ui,
 ];
+
+async function loadTestConfig() {
+    try {
+        const response = await fetch(new URL("./config.json", import.meta.url));
+        if (!response.ok) {
+            throw new Error(`Failed to load config: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.warn("Using default test config because config.json could not be loaded.", error);
+        return {
+            uiTests: false,
+            dataTests: true,
+        };
+    }
+}
 
 function shuffle(array) {
     const result = array.slice();
@@ -44,6 +59,16 @@ async function runUiTests(tests = uiTests) {
     console.log(`Ui tests done`);
 }
 
-if (config.dev) {
-    runDataTests().then(() => runUiTests());
+async function runTests() {
+    const config = await loadTestConfig();
+
+    if (config.dataTests) {
+        await runDataTests();
+    }
+
+    if (config.uiTests) {
+        await runUiTests();
+    }
 }
+
+runTests();
