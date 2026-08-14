@@ -7,9 +7,11 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "compile": "sass src/styles.scss src/styles.css"
+        "compile": "sass src/styles.scss src/styles.css",
+        "deploy": "gh-pages -d dist"
     },
     "devDependencies": {
+        "gh-pages": "^6.3.0",
         "sass": "^1.102.0",
         "vite": "^8.2.0"
     }
