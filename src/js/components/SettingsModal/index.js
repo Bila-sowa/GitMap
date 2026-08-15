@@ -11,7 +11,7 @@ const generateSettingsModalHTML = (limit, version) => {
 
     return `
         <div class="overlay">
-            <div class="settings-modal" id="settings-modal" role="dialog">
+            <div class="settings-modal" id="settings-content" role="dialog">
                 <div class="settings-header">
                     <h1>Settings</h1>
                     <button class="close-button" id="close-settings-button">&times;</button>
@@ -50,52 +50,63 @@ const generateSettingsModalHTML = (limit, version) => {
     `;
 }
 
-const bindSettingsModal = () => {
+function bindSettingsModalEvents() {
     const modal = document.querySelector(".overlay");
     const modalContent = document.querySelector("#settings-content")
 
     if (!modal || !modalContent) return;
 
-    const closeButton = modal.querySelector("#close-setting-button");
+    const closeButton = modal.querySelector("#close-settings-button");
     const tokenInput = modal.querySelector("#token-input");
     const saveLinkToggle = document.querySelector("#save-link");
     const saveTokenToggle = document.querySelector("#save-token");
     const localStorage = new LocalStorage();
 
-    tokenInput.addEventListener("blur", () => {
+    function saveToken() {
         storage.token = tokenInput.value.trim();
         if (storage.localStorage.saveToken) {
             localStorage.save();
-        };
-    });
+        }
+    }
 
-    closeButton.addEventListener("click", () => {
+    function closeModal() {
         modal.remove();
-    })
+        document.removeEventListener("click", handleOutsideClick);
+        document.removeEventListener("keydown", handleEscapeKey);
+    }
 
-    document.addEventListener("click", (e) => {
+    function handleOutsideClick(e) {
         if (e.target === modal) {
-            modal.remove();
-        };
-    });
+            closeModal();
+        }
+    }
 
-    document.addEventListener("keydown", (e) => {
+    function handleEscapeKey(e) {
         if (e.code === "Escape") {
-            modal.remove()
-        };
-    });
+            closeModal();
+        }
+    }
 
-    saveLinkToggle.checked = storage.localStorage.saveLink;
-    saveLinkToggle.addEventListener("change", () => {
+    function toggleSaveLink() {
         storage.localStorage.saveLink = saveLinkToggle.checked;
         localStorage.save();
-    });
+    }
 
-    saveTokenToggle.checked = storage.localStorage.saveToken;
-    saveTokenToggle.addEventListener("change", () => {
+    function toggleSaveToken() {
         storage.localStorage.saveToken = saveTokenToggle.checked;
         localStorage.save();
-    });
+    }
+
+    tokenInput.addEventListener("blur", saveToken);
+    closeButton.addEventListener("click", closeModal);
+    document.addEventListener("click", handleOutsideClick);
+    document.addEventListener("keydown", handleEscapeKey);
+
+    saveLinkToggle.checked = storage.localStorage.saveLink;
+    saveLinkToggle.addEventListener("change", toggleSaveLink);
+
+    saveTokenToggle.checked = storage.localStorage.saveToken;
+    saveTokenToggle.addEventListener("change", toggleSaveToken);
 }
 
-export { generateSettingsModalHTML, bindSettingsModal }
+export { generateSettingsModalHTML, bindSettingsModalEvents }
