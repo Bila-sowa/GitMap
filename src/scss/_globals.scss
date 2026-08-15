@@ -87,7 +87,7 @@ a {
     letter-spacing: -0.5%;
 }
 
-button:hover,
+button:hover:not(.close-alert-button),
 a:hover:not(.author-container) {
     background: var(--hover-color-1);
 }

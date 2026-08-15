@@ -1,15 +1,20 @@
 const copyValueToClipboard = async (element) => {
+    const COOLDOWN_MS = 3500;
     const value = element.dataset.copyValue;
     if (!value) return;
 
     try {
         await navigator.clipboard.writeText(value);
         element.classList.add("copied");
-        setTimeout(() => element.classList.remove("copied"), COOLDOWN);
+        setTimeout(() => element.classList.remove("copied"), COOLDOWN_MS);
     } catch (err) {
         createNotification("Copying error or copying is not allowed by your browser (especially if you launched the server on live server)", "error")
     }
 };
+
+function getRandomID(prefix) {
+    return `${prefix ? prefix + "-" : ""}${Math.random().toString(16).slice(2)}`
+}
 
 function createNotification(message, type) {
     if (!message || !type) return;
@@ -20,20 +25,33 @@ function createNotification(message, type) {
         warning: `<svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15H12.01M12 12V9M4.98207 19H19.0179C20.5615 19 21.5233 17.3256 20.7455 15.9923L13.7276 3.96153C12.9558 2.63852 11.0442 2.63852 10.2724 3.96153L3.25452 15.9923C2.47675 17.3256 3.43849 19 4.98207 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
         error: `<svg aria-hidden="true" width="40" height="40" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32.085,56.058c6.165,-0.059 12.268,-2.619 16.657,-6.966c5.213,-5.164 7.897,-12.803 6.961,-20.096c-1.605,-12.499 -11.855,-20.98 -23.772,-20.98c-9.053,0 -17.853,5.677 -21.713,13.909c-2.955,6.302 -2.96,13.911 0,20.225c3.832,8.174 12.488,13.821 21.559,13.908c0.103,0.001 0.205,0.001 0.308,0Zm-0.282,-4.003c-9.208,-0.089 -17.799,-7.227 -19.508,-16.378c-1.204,-6.452 1.07,-13.433 5.805,-18.015c5.53,-5.35 14.22,-7.143 21.445,-4.11c6.466,2.714 11.304,9.014 12.196,15.955c0.764,5.949 -1.366,12.184 -5.551,16.48c-3.672,3.767 -8.82,6.016 -14.131,6.068c-0.085,0 -0.171,0 -0.256,0Zm-12.382,-10.29l9.734,-9.734l-9.744,-9.744l2.804,-2.803l9.744,9.744l10.078,-10.078l2.808,2.807l-10.078,10.079l10.098,10.098l-2.803,2.804l-10.099,-10.099l-9.734,9.734l-2.808,-2.808Z" fill="currentColor"/></svg>`,
         success: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2"/><path d="M8 12L11 15L16 9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    }
+    };
 
+    const notificationId = getRandomID("notification");
     const notification = `
-        <div class="notification-container ${type} rounded-normal" role="alert">
+        <div class="notification-container ${type} rounded-normal" data-notification-id="${notificationId}" role="alert">
             ${icons[type] || icons.info}
             <span>${message}</span>
+            <button class="close-button close-alert-button rounded-full" type="button" aria-label="Close notification">&times;</button>
         </div>
     `;
 
     document.body.insertAdjacentHTML("beforeend", notification);
 
+    const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+    const closeButton = notificationElement?.querySelector(".close-alert-button");
+
+    const closeNotification = () => {
+        notificationElement?.remove();
+        closeButton?.removeEventListener("click", closeNotification);
+    };
+
+    closeButton?.addEventListener("click", closeNotification);
+
     setTimeout(() => {
-        const notifElement = document.querySelector(".notification-container");
-        if (notifElement) notifElement.remove();
+        if (notificationElement?.isConnected) {
+            closeNotification();
+        }
     }, COOLDOWN_MS);
 }
 
@@ -88,6 +106,7 @@ function appendHTML(HTML) {
 
 export {
     copyValueToClipboard,
+    getRandomID,
     createNotification,
     escapeHTML,
     positionModalNearElement,

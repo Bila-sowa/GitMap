@@ -30,10 +30,10 @@
 
 
 :root {
-    --font-monospace: 'Mona Sans Mono VF', ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-    --font-sans-serif: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    --font-sans-serif-display: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    --font-system: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-monospace: 'Mona Sans Mono VF', ui-monospace, sfmono-regular, "SF Mono", menlo, consolas, "Liberation Mono", monospace;
+    --font-sans-serif: "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-sans-serif-display: "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-system: "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     --accent-color-1: #3DED6B;
     --shadow-color-1: #3bed6a4d;
     --info-color: #40A9FF;
@@ -51,12 +51,12 @@
     --color-4: #212830;
     --border-color-1: #3D4D40;
     --hover-color-1: #373E4A;
-    --text-color-1: #FFFFFF;
+    --text-color-1: #FFF;
     --text-color-2: #727478;
 }
 
 .light-theme {
-    --color-1: #ffffff;
+    --color-1: #fff;
     --color-2: #f6f8fa;
     --color-3: #dfdfe0;
     --color-4: #cdcdcd;

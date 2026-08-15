@@ -20,7 +20,7 @@ export default class GitHubClient {
                 commitsLink: `https://api.github.com/repos/${owner}/${cleanRepo}/commits`,
             };
         } catch (err) {
-            return { success: false };
+            return { success: false, error: err };
         }
     };
 
@@ -51,7 +51,7 @@ export default class GitHubClient {
             };
 
         } catch (err) {
-            return { success: false };
+            return { success: false, error: err };
         }
     };
 
@@ -159,7 +159,7 @@ export default class GitHubClient {
 
             return parsed;
         } catch (err) {
-            return { success: false };
+            return { success: false, error: err };
         }
     };
 
@@ -174,7 +174,7 @@ export default class GitHubClient {
 
             return { success: true };
         } catch (err) {
-            return { success: false };
+            return { success: false, error: err };
         }
     };
 

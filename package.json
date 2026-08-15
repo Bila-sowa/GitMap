@@ -1,6 +1,6 @@
 {
     "name": "gitmap",
-    "version": "0.4.22",
+    "version": "0.4.3",
     "private": true,
     "type": "module",
     "scripts": {
@@ -13,7 +13,7 @@
         "ESLint-fix": "npx eslint src/ --fix",
         "StyleLint-check": "stylelint \"**/*.scss\"",
         "StyleLint-fix": "stylelint \"**/*.scss\" --fix",
-        "format": "prettier /src --write",
+        "format": "prettier src/ --write",
         "global-check": "npm run ESLint-check && npm run StyleLint-check",
         "global-fix": "npm run ESLint-fix && npm run StyleLint-fix"
     },

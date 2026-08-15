@@ -33,7 +33,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
 
     closeFullCommitModals();
 
-    const parsedDescription = typeof marked !== "undefined" ? marked.parse(commitData.description || "") : commit.description;
+    const parsedDescription = typeof marked !== "undefined" ? marked.parse(commitData.description || "") : commitData.description;
     const theme = getTheme();
 
     return `

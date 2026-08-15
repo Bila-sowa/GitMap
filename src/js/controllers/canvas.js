@@ -115,11 +115,6 @@ export default class Canvas {
         } else if (e.touches.length === 2) {
             const dist = this.#getPinchDistance(e.touches);
             const scaleRatio = dist / this._lastPinchDist;
-            const newScale = this.#clamp(
-                this._pinchStartScale * (dist / this.#getPinchDistance({ 0: { clientX: this._pinchMidX, clientY: this._pinchMidY }, 1: { clientX: this._pinchMidX + this._lastPinchDist, clientY: this._pinchMidY } })),
-                this.minScale,
-                this.maxScale
-            );
 
             const rect = this.viewport.getBoundingClientRect();
             const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
@@ -152,14 +147,14 @@ export default class Canvas {
 
     centerOn(worldX, worldY) {
         const rect = this.viewport.getBoundingClientRect();
-        this.offsetX = rect.width  / 2 - worldX * this.scale;
+        this.offsetX = rect.width / 2 - worldX * this.scale;
         this.offsetY = rect.height / 2 - worldY * this.scale;
         this.#applyTransform();
     }
-    
+
     zoom(factor) {
         const rect = this.viewport.getBoundingClientRect();
-        const midX = rect.width  / 2;
+        const midX = rect.width / 2;
         const midY = rect.height / 2;
         const newScale = this.#clamp(this.scale * factor, this.minScale, this.maxScale);
         const scaleRatio = newScale / this.scale;
