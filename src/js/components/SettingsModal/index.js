@@ -1,6 +1,6 @@
 import storage from "@/js/data/storage";
 import LocalStorage from "@/js/controllers/localStorage";
-
+import styles from "./styles.module.scss"
 
 const generateSettingsModalHTML = (limit, version) => {
     const {
@@ -11,39 +11,39 @@ const generateSettingsModalHTML = (limit, version) => {
 
     return `
         <div class="overlay">
-            <div class="settings-modal" id="settings-content" role="dialog">
-                <div class="settings-header">
+            <div class="${styles.settings}" id="settings-content" role="dialog">
+                <div class="${styles["settings-header"]}">
                     <h1>Settings</h1>
-                    <button class="close-button" id="close-settings-button">&times;</button>
+                    <button class="close-button rounded-full" id="close-settings-button">&times;</button>
                 </div>
-                <div class="settings-content">
-                    <div class="settings-section">
+                <div class="${styles["settings-content"]}">
+                    <div class="${styles["settings-section"]}">
                         <h3>GitHub</h3>
-                        <div class="settings-item rounded-normal border-sm">
+                        <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <label for="token-input">GitHub Rest Api Token</label>
                             <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${storage.token || ""}" placeholder="gpy_">
                         </div>
                     </div>
-                    <div class="settings-section"> 
+                    <div class="${styles["settings-section"]}"> 
                         <h3>LocalStorage</h3>
-                        <div class="settings-item rounded-normal border-sm">
+                        <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span for="save-link">Save current repo in page</span>
-                            <input class="hidden toggle-input" type="checkbox" id="save-link">
-                            <label class="toggle-button rounded-full" for="save-link" aria-label="toggle save link option"></label>
+                            <input class="hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-link">
+                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-link" aria-label="toggle save link option"></label>
                         </div>
-                        <div class="settings-item rounded-normal border-sm">
+                        <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>Save current token in page</span>
-                            <input class="hidden toggle-input" type="checkbox" id="save-token">
-                            <label class="toggle-button rounded-full" for="save-token" aria-label="toggle save token option"></label>
+                            <input class="hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-token">
+                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-token" aria-label="toggle save token option"></label>
                         </div>
-                        <div class="settings-item rounded-normal border-sm">
+                        <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>Rest API Limit:</span>
-                            <div class="rest-api-limit-progress rounded-full border-normal" title="Used: ${usedPerNumber} / ${limitPerNumber}">
-                                <span class="rest-api-limit-bar" style="width: ${usedPerPercent ? usedPerNumber : "0"}%"></span>
+                            <div class="${styles["settings-rest-api-limit-progress"]} rounded-full border-normal" title="Used: ${usedPerNumber} / ${limitPerNumber}">
+                                <span class="${styles["settings-rest-api-limit-bar"]}" style="width: ${usedPerPercent ? usedPerNumber : "0"}%"></span>
                             </div>
                         </div>
                     </div>
-                    <span class="version-text text-small">Version: ${version ? version : "unknown version"}</span>
+                    <span class="${styles["settings-version-text"]} text-small">Version: ${version ? version : "unknown version"}</span>
                 </div>
             </div>
         </div>
