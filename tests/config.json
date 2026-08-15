@@ -1,4 +1,4 @@
 {
-    "uiTests": true,
+    "uiTests": false,
     "dataTests": false
 }

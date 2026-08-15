@@ -2,6 +2,7 @@ import storage from "../data/storage.js";
 import LocalStorage from "./localStorage.js";
 import GitHubClient from "../services/getGitHubData.js";
 import { getVersion } from "../utils/utils.js";
+import { generateLoader, removeLoader } from "../components/Loader/index.js";
 
 class Input {
     #input
@@ -84,11 +85,13 @@ class Settings {
     #bindEvents() { this.#button.addEventListener("click", () => this.#openSettings()) }
 
     async #openSettings() {
+        generateLoader();
         storage.token ? await this.#client.setToken(storage.token) : "";
-
         const rateLimitRes = await this.#client.getRateLimit();
         const limit = rateLimitRes?.success ? rateLimitRes.data : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
         const version = await getVersion();
+
+        removeLoader();
         const card = `
             <div class="overlay" id="overlay">
                 <div class="settings-modal" id="settings-modal" role="dialog">

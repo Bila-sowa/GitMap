@@ -78,6 +78,14 @@ const getVersion = async (url = "@/../package.json") => {
     }
 }
 
+function appendHTML(HTML) {
+    const body = document.body;
+
+    if (!HTML | !body) return;
+
+    body.insertAdjacentHTML("beforeend", HTML);
+}
+
 export {
     copyValueToClipboard,
     createNotification,
@@ -85,4 +93,5 @@ export {
     positionModalNearElement,
     truncateTitle,
     getVersion,
+    appendHTML,
 }
