@@ -1,12 +1,12 @@
 import { escapeHTML } from "@/js/utils/utils";
-import * as tools from "./tools/testTools.js";
+import * as tools from "../tools/testTools.js";
 
-export default function test_003_Data(appendToHTML = false) {
+export default function test_0c2os_Data(appendToHTML = false) {
     const config = new tools.TestConfig(
         {
             file: "utils.js",
             name: "escapeHTML",
-            test: "test_003_Data",
+            test: "test_0c2os_Data",
             type: "function",
         },
 

@@ -27,7 +27,7 @@ export default async function test_hvnws_Data() {
     let data = {};
 
     try {
-        data = await client.getData(config.other.TEST_REPO_URL);
+        data = await client.getData(config.testData.TEST_REPO_URL);
 
         const result = tools.validateTestData(data, config.expected);
 

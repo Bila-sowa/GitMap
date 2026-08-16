@@ -121,8 +121,8 @@ export default class GitHubClient {
         const formattedData = [];
 
         files.forEach(file => {
-            const extension = this.#formatter.getFormattedExtension(file);
-            const status = this.#formatter.getShortStatus(file);
+            const extension = this.#formatter.getFormattedExtension(file.filename);
+            const status = this.#formatter.getShortStatus(file.status);
 
             const fileData = {
                 name: file.filename,

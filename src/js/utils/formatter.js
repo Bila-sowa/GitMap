@@ -16,11 +16,11 @@ export default class Formatter {
         return hash.slice(0, 7);
     }
 
-    getFormattedExtension(file) {
-        return file?.filename.slice(file.filename.lastIndexOf(".") + 1);
+    getFormattedExtension(fileName) {
+        return fileName.slice(fileName.lastIndexOf(".") + 1);
     }
 
-    getShortStatus(file) {
-        return file.status.slice(0, 1).toUpperCase();
+    getShortStatus(fileStatus) {
+        return fileStatus.slice(0, 1).toUpperCase();
     }
 }

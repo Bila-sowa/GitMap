@@ -94,10 +94,10 @@ class TestFeedBack {
 };
 
 class TestConfig {
-    constructor(details, expected, other) {
+    constructor(details, expected, testData) {
         this.details = details;
         this.expected = expected;
-        this.other = other
+        this.testData = testData
     };
 }
 

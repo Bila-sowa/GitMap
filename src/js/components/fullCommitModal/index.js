@@ -1,5 +1,6 @@
 import { copyValueToClipboard } from "@/js/utils/utils.js";
 import styles from "./styles.module.scss";
+import gitHubLogoSrc from "@/assets/github-logo.webp"
 
 const getTheme = () => {
     return document.body.classList.contains("dark-theme") ? "dark" : "light";
@@ -80,7 +81,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
                     </div>
                 `).join("") : `<p class="text-small">No files details available.</p>`}
             </div>
-            <a href="${commitData.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="/src/assets/github_logo.webp" alt></a>
+            <a href="${commitData.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="${gitHubLogoSrc}" alt></a>
         </div>
     </div>
     `;

@@ -25,7 +25,7 @@ export default async function test_nd2u3_Data() {
     let data = {};
 
     try {
-        data = await client.getCommitFiles(config.other.TEST_REPO_URL, config.other.TEST_COMMIT_SHA);
+        data = await client.getCommitFiles(config.testData.TEST_REPO_URL, config.testData.TEST_COMMIT_SHA);
 
         const result = tools.validateTestData(data, config.expected);
 

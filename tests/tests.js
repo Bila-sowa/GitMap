@@ -1,7 +1,5 @@
-import test_003_Data from "./escapeHTML.test";
-import test_001_Ui from "./createNotification.test";
 import * as gitHubClientTests from "./gitHubClient/index";
-
+import * as utilsTests from "./utils/index";
 
 
 const dataTests = [
@@ -9,11 +7,12 @@ const dataTests = [
     gitHubClientTests.test_hvnws_Data,
     gitHubClientTests.test_nd2u3_Data,
     gitHubClientTests.test_2rb1v_Data,
-    test_003_Data,
+    utilsTests.test_0c2os_Data,
+    utilsTests.test_gj781_Data,
 ];
 
 const uiTests = [
-    test_001_Ui,
+    utilsTests.test_44ibx_Ui,
 ];
 
 async function loadTestConfig() {
