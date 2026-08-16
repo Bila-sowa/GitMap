@@ -1,10 +1,16 @@
 const findAndThrowError = (object) => {
-    if (!object) return;
+    if (!object || typeof object !== "object") return;
+
+    if (object.success === false) {
+        throw new Error(object.error ? object.error.message || object.error : "Request failed");
+    }
 
     for (const [key, value] of Object.entries(object)) {
-        if (value && typeof value === "object" && value.success === false) {
-            throw new Error(`${key}: ${value.error}`);
-        };
+        if (value && typeof value === "object") {
+            if (value.success === false) {
+                throw new Error(`${key}: ${value.error ? value.error.message || value.error : "Request failed"}`);
+            }
+        }
     };
 };
 
@@ -87,13 +93,22 @@ class TestFeedBack {
     };
 };
 
-const validateTestData = (object, expected) => {
-    if (object) findAndThrowError(object);
-    if (object && expected) {
-        const result = equalKeysAndValidValues(object, expected);
-        return result;
+class TestConfig {
+    constructor(details, expected, other) {
+        this.details = details;
+        this.expected = expected;
+        this.other = other
     };
-    return true;
+}
+
+const validateTestData = (object, expected) => {
+    if (!object) return true;
+
+    findAndThrowError(object);
+
+    if (!expected) return true;
+
+    return equalKeysAndValidValues(object, expected);
 };
 
 export {
@@ -101,5 +116,6 @@ export {
     ANY_VALID,
     equalKeysAndValidValues,
     TestFeedBack,
+    TestConfig,
     validateTestData,
 };

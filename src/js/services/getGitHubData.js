@@ -230,7 +230,7 @@ export default class GitHubClient {
         }
     };
 
-    async isAuthenticated() {
+    async getAuthenticatedStatus() {
         const response = await fetch("https://api.github.com/rate_limit", { headers: this.#headers });
 
         return response.ok;

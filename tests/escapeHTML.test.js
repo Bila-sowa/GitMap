@@ -1,13 +1,22 @@
 import { escapeHTML } from "@/js/utils/utils";
-import { equalKeysAndValidValues, TestFeedBack } from "./testTools.js";
+import * as tools from "./tools/testTools.js";
 
 export default function test_003_Data(appendToHTML = false) {
-    const details = {
-        file: "utils.js",
-        name: "escapeHTML",
-        test: "test_003_Data",
-        type: "function",
-    };
+    const config = new tools.TestConfig(
+        {
+            file: "utils.js",
+            name: "escapeHTML",
+            test: "test_003_Data",
+            type: "function",
+        },
+
+        {
+            "pattern1": "&lt;input style=&quot;display: none;&quot; type=&quot;text&quot; value=&quot;&quot; onfocus=&quot;alert(&#39;XSS&#39;)&quot; autofocus&gt;",
+            "pattern2": "&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;",
+            "pattern3": "&lt;textarea style=&quot;display: none;&quot;&gt;&lt;img src=x onerror=alert(&#39;XSS&#39;)&gt;&lt;/textarea&gt;"
+        },
+
+    );
     let testData = {};
     try {
         testData = {
@@ -22,23 +31,17 @@ export default function test_003_Data(appendToHTML = false) {
             };
         };
 
-        const expected = {
-            "pattern1": "&lt;input style=&quot;display: none;&quot; type=&quot;text&quot; value=&quot;&quot; onfocus=&quot;alert(&#39;XSS&#39;)&quot; autofocus&gt;",
-            "pattern2": "&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;",
-            "pattern3": "&lt;textarea style=&quot;display: none;&quot;&gt;&lt;img src=x onerror=alert(&#39;XSS&#39;)&gt;&lt;/textarea&gt;"
-        };
+        const result = tools.equalKeysAndValidValues(testData, config.expected);
 
-        const result = equalKeysAndValidValues(testData, expected);
-
-        return new TestFeedBack({
-            ...details,
+        return new tools.TestFeedBack({
+            ...config.details,
             success: result,
             data: testData,
         });
     } catch (err) {
         console.error(err);
-        return new TestFeedBack({
-            ...details,
+        return new tools.TestFeedBack({
+            ...config.details,
             success: false,
             data: testData,
         })

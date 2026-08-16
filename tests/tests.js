@@ -1,9 +1,14 @@
-import test_001_Data from "./getGitHubData.test.js";
-import test_003_Data from "./escapeHTML.test.js";
-import test_001_Ui from "./createNotification.test.js";
+import test_003_Data from "./escapeHTML.test";
+import test_001_Ui from "./createNotification.test";
+import * as gitHubClientTests from "./gitHubClient/index";
+
+
 
 const dataTests = [
-    test_001_Data,
+    gitHubClientTests.test_3j3f8_Data,
+    gitHubClientTests.test_hvnws_Data,
+    gitHubClientTests.test_nd2u3_Data,
+    gitHubClientTests.test_2rb1v_Data,
     test_003_Data,
 ];
 
