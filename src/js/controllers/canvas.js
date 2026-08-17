@@ -1,4 +1,4 @@
-export default class Canvas {
+export default class CanvasController {
     constructor(viewport, canvas) {
         this.viewport = viewport;
         this.canvas = canvas;

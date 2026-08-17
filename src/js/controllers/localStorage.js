@@ -1,7 +1,7 @@
 import storage from "../data/storage.js";
 import { createNotification } from "../utils/utils.js";
 
-export default class LocalStorage {
+export default class LocalStorageController {
     save() {
         const dataToSave = {
             ...storage,

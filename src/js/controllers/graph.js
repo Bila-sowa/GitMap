@@ -1,11 +1,11 @@
 import storage from "../data/storage.js";
 import GitHubClient from "../services/getGitHubData.js";
-import { generateFullCommitModalHTML, bindFullComitEvents } from "../components/fullCommitModal/index.js";
-import { generateHoverCommitModalHTML, closeHoverCommitModals } from "../components/hoverCommitModal/index.js";
+import { generateFullCommitModalHTML, bindFullComitEvents } from "../components/FullCommitModal/index.js";
+import { generateHoverCommitModalHTML, closeHoverCommitModals } from "../components/HoverCommitModal/index.js";
 import { appendHTML, positionModalNearElement, truncateTitle } from "../utils/utils.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 
-export default class Graph {
+export default class GraphController {
     #body = document.querySelector("body");
     #graph = null;
     #client = new GitHubClient();

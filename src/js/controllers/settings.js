@@ -4,7 +4,7 @@ import { appendHTML, getVersion } from "../utils/utils.js";
 import { bindSettingsModalEvents, generateSettingsModalHTML } from "../components/SettingsModal/index.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 
-export default class SettingsController {
+class SettingsController {
     #button
     #client = new GitHubClient();
 
@@ -30,3 +30,5 @@ export default class SettingsController {
         bindSettingsModalEvents();
     };
 };
+
+export default SettingsController;
