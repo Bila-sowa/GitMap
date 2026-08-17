@@ -1,6 +1,18 @@
 import Formatter from "@/js/utils/formatter";
 import * as tools from "../tools/testTools";
 
+/**
+ * #### Description:
+ * 
+ * The test checks the formatter's methods with different types of data.
+ * 
+ * #### Params:
+ * - file: formatter.js
+ * - test: test_gj781_Data
+ * - name: Formatter
+ * - type: class
+ * 
+ */
 export default function test_gj781_Data() {
     const config = new tools.TestConfig(
         { // details
@@ -41,7 +53,7 @@ export default function test_gj781_Data() {
 
     const result = tools.validateTestData(formattedData, config.expected);
 
-    return new tools.TestFeedBack({
+    return new tools.TestFeedback({
         ...config.details,
         success: result,
         data: formattedData,

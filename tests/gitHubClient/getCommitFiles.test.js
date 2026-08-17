@@ -1,6 +1,19 @@
 import GitHubClient from "@/js/services/getGitHubData";
 import * as tools from "../tools/testTools";
 
+/**
+ * #### Description:
+ * 
+ * The test verifies the formatted data for commits and branches.
+ * 
+ * #### Params:
+ * - file: getGitHubData.js
+ * - test: test_nd2u3_Data
+ * - name: getCommitFiles
+ * - type: method
+ * 
+ * @returns TestFeedback
+ */
 export default async function test_nd2u3_Data() {
     const config = new tools.TestConfig(
         {
@@ -29,14 +42,14 @@ export default async function test_nd2u3_Data() {
 
         const result = tools.validateTestData(data, config.expected);
 
-        return new tools.TestFeedBack({
+        return new tools.TestFeedback({
             ...config.details,
             success: result,
             data: data,
         });
     } catch (e) {
         console.error(e);
-        return new tools.TestFeedBack({
+        return new tools.TestFeedback({
             ...config.details,
             success: false,
             data: data,

@@ -1,6 +1,19 @@
 import GitHubClient from "@/js/services/getGitHubData";
 import * as tools from "../tools/testTools";
 
+/**
+ * #### Description:
+ * 
+ * The test verifies the formatted data for commits and branches.
+ * 
+ * #### Params:
+ * - file: getGitHubData.js
+ * - test: test_hvnws_Data
+ * - name: getData
+ * - type: method
+ * 
+ * @returns TestFeedback
+ */
 export default async function test_hvnws_Data() {
     const config = new tools.TestConfig(
         {
@@ -31,14 +44,14 @@ export default async function test_hvnws_Data() {
 
         const result = tools.validateTestData(data, config.expected);
 
-        return new tools.TestFeedBack({
+        return new tools.TestFeedback({
             ...config.details,
             success: result,
             data: data,
         });
     } catch (err) {
         console.error(err);
-        return new tools.TestFeedBack({
+        return new tools.TestFeedback({
             ...config.details,
             success: false,
             data: data,

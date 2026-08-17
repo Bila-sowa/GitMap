@@ -1,6 +1,18 @@
 import { escapeHTML } from "@/js/utils/utils";
 import * as tools from "../tools/testTools.js";
 
+/**
+ * #### Description:
+ * 
+ * The test checks protection against various XSL attack patterns.
+ * 
+ * #### Params:
+ * - file: utils.js
+ * - test: test_0c2os_Data
+ * - name: escapeHTML
+ * - type: function
+ * 
+ */
 export default function test_0c2os_Data(appendToHTML = false) {
     const config = new tools.TestConfig(
         {
@@ -33,14 +45,14 @@ export default function test_0c2os_Data(appendToHTML = false) {
 
         const result = tools.equalKeysAndValidValues(testData, config.expected);
 
-        return new tools.TestFeedBack({
+        return new tools.TestFeedback({
             ...config.details,
             success: result,
             data: testData,
         });
     } catch (err) {
         console.error(err);
-        return new tools.TestFeedBack({
+        return new tools.TestFeedback({
             ...config.details,
             success: false,
             data: testData,

@@ -82,7 +82,7 @@ const equalKeysAndValidValues = (actual, expected, seen = new WeakMap()) => {
     });
 };
 
-class TestFeedBack {
+class TestFeedback {
     constructor({ file, name, test, type, success, data }) {
         this.file = file;
         this.name = name;
@@ -115,7 +115,7 @@ export {
     findAndThrowError,
     ANY_VALID,
     equalKeysAndValidValues,
-    TestFeedBack,
+    TestFeedback,
     TestConfig,
     validateTestData,
 };
