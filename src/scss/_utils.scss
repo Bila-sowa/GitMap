@@ -35,23 +35,35 @@
 }
 
 .info {
-    background-color: var(--info-color);
-    box-shadow: 0 0 16px var(--info-color);
+    outline: 2px solid var(--info-color);
+
+    svg {
+        color: var(--info-color)
+    }
 }
 
 .warning {
-    background-color: var(--warning-color);
-    box-shadow: 0 0 16px var(--warning-color);
+    outline: 2px solid var(--warning-color);
+
+    svg {
+        color: var(--warning-color)
+    }
 }
 
 .error {
-    background-color: var(--error-color);
-    box-shadow: 0 0 16px var(--error-color);
+    outline: 2px solid var(--error-color);
+
+    svg {
+        color: var(--error-color)
+    }
 }
 
 .success {
-    background-color: var(--success-color);
-    box-shadow: 0 0 16px var(--success-color);
+    outline: 2px solid var(--success-color);
+
+    svg {
+        color: var(--success-color)
+    }
 }
 
 @keyframes alert-pop {

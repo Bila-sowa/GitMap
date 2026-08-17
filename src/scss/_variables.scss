@@ -34,15 +34,16 @@
     --font-sans-serif: "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     --font-sans-serif-display: "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     --font-system: "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    --accent-color-1: #3DED6B;
-    --shadow-color-1: #3bed6a4d;
-    --info-color: #40A9FF;
-    --warning-color: #f7b34c;
-    --error-color: #FF4040;
-    --success-color: #2BFF60;
-    --additions-color: #1f6feb;
-    --deletions-color: #da3633;
+    --accent-color-1: #3FB950;
+    --shadow-color-1: #40ba5080;
+    --info-color: #58A6FF;
+    --warning-color: #D29922;
+    --error-color: #F85149;
+    --success-color: #3FB950;
+    --additions-color: #3B82F6;
+    --deletions-color: #CC5049;
 }
+
 
 .dark-theme {
     --color-1: #010409;
@@ -60,8 +61,8 @@
     --color-2: #f6f8fa;
     --color-3: #dfdfe0;
     --color-4: #cdcdcd;
-    --hover-color-1: #bebebe;
     --border-color-1: #e0efe4;
+    --hover-color-1: #bebebe;
     --text-color-1: #1f2328;
     --text-color-2: #4c535b;
 }

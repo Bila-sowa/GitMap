@@ -108,18 +108,19 @@ body {
 
 .notification-container {
     position: fixed;
+    background: var(--color-4);
     top: 20px;
     right: 20px;
     z-index: 50;
     padding: 10px 20px;
     max-width: 300px;
     height: fit-content;
-    color: #fff;
     font-weight: bold;
     display: flex;
     align-items: center;
     gap: 10px;
     animation: alert-pop 0.35s ease-out;
+    box-shadow: 0px 0px 8px rgba(0 0 0 / 75%);
 
     svg {
         flex-shrink: 0;
