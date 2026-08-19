@@ -32,15 +32,31 @@ const statusColors = {
 const generateFullCommitModalHTML = (commitData, filesData) => {
     if (!commitData || !filesData) return;
 
+    const {
+        title,
+        description = "",
+        author: {
+            url: authorUrl,
+            email: authorEmail,
+            name: authorName,
+            avatar: authorAvatar,
+            date: authorDate
+        },
+        hash,
+        url: commitUrl
+    } = commitData;
+
+    const { success, files } = filesData;
+
     closeFullCommitModals();
 
-    const parsedDescription = typeof marked !== "undefined" ? marked.parse(commitData.description || "") : commitData.description;
+    const parsedDescription = typeof marked !== "undefined" ? marked.parse(description) : description;
     const theme = getTheme();
 
     return `
         <div class="full-commit-modal ${styles.modal}" id="full-commit-modal" role="dialog">
         <div class="${styles['modal-header']}">
-            <h2>${commitData.title}</h2>
+            <h2>${title}</h2>
             <button class="close-button rounded-full" id="close-full-commit-button" aria-label="Close">&times;</button>
         </div>
         <p>Description:</p>
@@ -48,26 +64,26 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
             ${parsedDescription ? parsedDescription : ""} 
         </div>
         <div class="${styles['modal-data']}">
-            <a class="${styles['modal-item']} rounded-normal" href="${commitData.author.url}" target="_blank" rel="noopener noreferrer" title="Email: ${commitData.author.email}">
+            <a class="${styles['modal-item']} rounded-normal" href="${authorUrl}" target="_blank" rel="noopener noreferrer" title="Email: ${authorEmail}">
                 <span>Author: </span>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    ${commitData.author.name} 
-                    <img class="avatar rounded-full" src="${commitData.author.avatar}" alt="${commitData.author.name}'s Avatar">
+                    ${authorName} 
+                    <img class="avatar rounded-full" src="${authorAvatar}" alt="${authorName}'s Avatar">
                 </div>
             </a>
-            <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${commitData.hash}" aria-label="Copy commit hash to clipboard">
+            <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${hash}" aria-label="Copy commit hash to clipboard">
                 <span>Hash: </span>
-                <span>#${commitData.hash}</span>
+                <span>#${hash}</span>
             </button>
-            <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${commitData.author.date}" aria-label="Copy commit date to clipboard">
+            <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${authorDate}" aria-label="Copy commit date to clipboard">
                 <span>Date: </span>
-                <span>${commitData.author.date}</span>
+                <span>${authorDate}</span>
             </button>
         </div>
         <div class="${styles['modal-changes']}">
             <h3>Changes</h3>
             <div class="${styles['modal-files']}">
-                ${filesData?.success && Array.isArray(filesData.files) ? filesData.files.map(file => `
+                ${success && Array.isArray(files) ? files.map(file => `
                     <div class="${styles['modal-file']} rounded-normal">
                         <img class="${styles['modal-file-icon']}" style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
                         <code class="${styles["modal-file-path"]} text-small">${file.name}</code>
@@ -81,7 +97,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
                     </div>
                 `).join("") : `<p class="text-small">No files details available.</p>`}
             </div>
-            <a href="${commitData.url}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="${gitHubLogoSrc}" alt></a>
+            <a href="${commitUrl}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="${gitHubLogoSrc}" alt></a>
         </div>
     </div>
     `;
