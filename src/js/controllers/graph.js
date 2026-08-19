@@ -11,6 +11,7 @@ export default class GraphController {
     #client = new GitHubClient();
     #link = null;
     #data = null;
+    #eventsController = null;
 
     constructor(graphElement) {
         this.#graph = graphElement;
@@ -76,6 +77,10 @@ export default class GraphController {
     };
 
     #bindEvents() {
+        if (this.#eventsController) this.#eventsController.abort();
+        this.#eventsController = new AbortController();
+        const { signal } = this.#eventsController;
+
         this.#graph.addEventListener("click", async (e) => {
             const commitButton = e.target.closest("[data-id]");
             if (!commitButton) return;
@@ -89,7 +94,7 @@ export default class GraphController {
             removeLoader();
 
             bindFullComitEvents();
-        });
+        }, { signal });
 
         this.#graph.addEventListener("mouseover", (e) => {
             const commitButton = e.target.closest("[data-id]");
@@ -105,9 +110,9 @@ export default class GraphController {
             if (modal) {
                 positionModalNearElement(modal, commitButton);
             }
-        });
+        }, { signal });
 
-        this.#graph.addEventListener("mouseout", () => closeHoverCommitModals());
+        this.#graph.addEventListener("mouseout", () => closeHoverCommitModals(), { signal });
     }
 }
 

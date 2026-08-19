@@ -56,6 +56,9 @@ function bindSettingsModalEvents() {
 
     if (!modal || !modalContent) return;
 
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const closeButton = modal.querySelector("#close-settings-button");
     const tokenInput = modal.querySelector("#token-input");
     const saveLinkToggle = document.querySelector("#save-link");
@@ -70,9 +73,8 @@ function bindSettingsModalEvents() {
     }
 
     function closeModal() {
+        controller.abort();
         modal.remove();
-        document.removeEventListener("click", handleOutsideClick);
-        document.removeEventListener("keydown", handleEscapeKey);
     }
 
     function handleOutsideClick(e) {
@@ -97,16 +99,16 @@ function bindSettingsModalEvents() {
         localStorage.save();
     }
 
-    tokenInput.addEventListener("blur", saveToken);
-    closeButton.addEventListener("click", closeModal);
-    document.addEventListener("click", handleOutsideClick);
-    document.addEventListener("keydown", handleEscapeKey);
+    tokenInput.addEventListener("blur", saveToken, { signal });
+    closeButton.addEventListener("click", closeModal, { signal });
+    document.addEventListener("click", handleOutsideClick, { signal });
+    document.addEventListener("keydown", handleEscapeKey, { signal });
 
     saveLinkToggle.checked = storage.localStorage.saveLink;
-    saveLinkToggle.addEventListener("change", toggleSaveLink);
+    saveLinkToggle.addEventListener("change", toggleSaveLink, { signal });
 
     saveTokenToggle.checked = storage.localStorage.saveToken;
-    saveTokenToggle.addEventListener("change", toggleSaveToken);
+    saveTokenToggle.addEventListener("change", toggleSaveToken, { signal });
 }
 
 export { generateSettingsModalHTML, bindSettingsModalEvents }

@@ -91,6 +91,9 @@ function bindFullComitEvents() {
     const modal = document.querySelector("#full-commit-modal");
     if (!modal) return;
 
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const closeButton = modal.querySelector("#close-full-commit-button");
     const icons = [...modal.querySelectorAll(".file-icon")];
     const copyableItems = [...modal.querySelectorAll(".copyable")];
@@ -100,23 +103,26 @@ function bindFullComitEvents() {
         icon.addEventListener("error", () => {
             icon.onerror = null;
             icon.src = `https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/file.svg`;
-        });
+        }, { signal });
     });
 
     copyableItems.forEach(item => {
-        item.addEventListener("click", () => copyValueToClipboard(item));
+        item.addEventListener("click", () => copyValueToClipboard(item), { signal });
     });
 
     closeButton?.focus();
 
-    const keydownHandler = (e) => {
-        if (e.key === "Escape") {
-            closeFullCommitModals();
-        }
+    const cleanup = () => {
+        controller.abort();
+        closeFullCommitModals();
     };
 
-    closeButton?.addEventListener("click", closeFullCommitModals);
-    document.addEventListener("keydown", keydownHandler);
+    closeButton?.addEventListener("click", cleanup, { signal });
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            cleanup();
+        }
+    }, { signal });
 }
 
 export { generateFullCommitModalHTML, bindFullComitEvents }

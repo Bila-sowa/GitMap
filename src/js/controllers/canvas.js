@@ -1,4 +1,6 @@
 export default class CanvasController {
+    #abortController = null;
+
     constructor(viewport, canvas) {
         this.viewport = viewport;
         this.canvas = canvas;
@@ -27,15 +29,19 @@ export default class CanvasController {
     }
 
     #bindEvents() {
-        this.viewport.addEventListener('mousedown', (e) => this.#onMouseDown(e));
-        window.addEventListener('mousemove', (e) => this.#onMouseMove(e));
-        window.addEventListener('mouseup', () => this.#onMouseUp());
+        if (this.#abortController) this.#abortController.abort();
+        this.#abortController = new AbortController();
+        const { signal } = this.#abortController;
 
-        this.viewport.addEventListener('wheel', (e) => this.#onWheel(e), { passive: false });
+        this.viewport.addEventListener('mousedown', (e) => this.#onMouseDown(e), { signal });
+        window.addEventListener('mousemove', (e) => this.#onMouseMove(e), { signal });
+        window.addEventListener('mouseup', () => this.#onMouseUp(), { signal });
 
-        this.viewport.addEventListener('touchstart', (e) => this.#onTouchStart(e), { passive: false });
-        this.viewport.addEventListener('touchmove', (e) => this.#onTouchMove(e), { passive: false });
-        this.viewport.addEventListener('touchend', () => this.#onTouchEnd());
+        this.viewport.addEventListener('wheel', (e) => this.#onWheel(e), { passive: false, signal });
+
+        this.viewport.addEventListener('touchstart', (e) => this.#onTouchStart(e), { passive: false, signal });
+        this.viewport.addEventListener('touchmove', (e) => this.#onTouchMove(e), { passive: false, signal });
+        this.viewport.addEventListener('touchend', () => this.#onTouchEnd(), { signal });
     }
 
     #onMouseDown(e) {
@@ -163,5 +169,12 @@ export default class CanvasController {
         this.offsetY = midY - scaleRatio * (midY - this.offsetY);
         this.scale = newScale;
         this.#applyTransform();
+    }
+
+    destroy() {
+        if (this.#abortController) {
+            this.#abortController.abort();
+            this.#abortController = null;
+        }
     }
 };
