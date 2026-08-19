@@ -89,9 +89,13 @@ export default class GraphController {
 
             generateLoader();
 
-            appendHTML(generateFullCommitModalHTML(this.#data?.commitsDetails[id], await this.#getFilesData(sha)));
+            const modal = generateFullCommitModalHTML(this.#data?.commitsDetails[id], await this.#getFilesData(sha));
 
             removeLoader();
+
+            if (!modal) return;
+
+            appendHTML(modal);
 
             bindFullComitEvents();
         }, { signal });
@@ -102,13 +106,16 @@ export default class GraphController {
 
             const { id } = commitButton.dataset;
 
-            appendHTML(generateHoverCommitModalHTML(this.#data?.commitsDetails[id]));
+            const modal = generateHoverCommitModalHTML(this.#data?.commitsDetails[id]);
 
-            const modal = this.#body.querySelector("#hover-commit-modal");
+            if (!modal) return;
 
+            appendHTML(modal);
+
+            const modalDOM = this.#body.querySelector("#hover-commit-modal");
 
             if (modal) {
-                positionModalNearElement(modal, commitButton);
+                positionModalNearElement(modalDOM, commitButton);
             }
         }, { signal });
 

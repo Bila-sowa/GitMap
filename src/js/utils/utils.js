@@ -68,12 +68,19 @@ function positionModalNearElement(modal, trigger, offset = 16) {
     if (!modal || !trigger) return;
 
     const triggerRect = trigger.getBoundingClientRect();
+    const modalRect = modal.getBoundingClientRect();
 
     modal.style.position = "fixed";
-    modal.style.top = `${triggerRect.top}px`;
+
+    const maxTop = window.innerHeight - modalRect.height - offset;
+    const clampedTop = Math.min(
+        Math.max(triggerRect.top, offset),
+        Math.max(maxTop, offset)
+    );
+
+    modal.style.top = `${clampedTop}px`;
     modal.style.left = `${triggerRect.right + offset}px`;
 }
-
 const truncateTitle = (title, wordCount = 5) => {
     if (!title) return;
 
