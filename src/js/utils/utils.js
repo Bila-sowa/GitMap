@@ -98,7 +98,7 @@ const getDefaultConfig = () => {
         "versionDetails": {
             "version": "not found",
             "versionType": "not found",
-            "isStable": false
+            "versionIsStable": false
         },
         "graph": {
             "renderLimit": 30

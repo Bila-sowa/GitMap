@@ -23,11 +23,15 @@ class SettingsController {
         const rateLimitRes = await this.#client.getRateLimit();
         const limit = rateLimitRes?.success ? rateLimitRes.data : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
         const config = await getConfigData();
-        const version = config.versionDetails.version;
+        const versionDetails = config.versionDetails;
 
         removeLoader();
 
-        appendHTML(generateSettingsModalHTML(limit, version));
+        const modal = generateSettingsModalHTML(limit, versionDetails);
+
+        if (!modal) return;
+
+        appendHTML(modal);
         bindSettingsModalEvents();
     };
 };

@@ -2,12 +2,18 @@ import storage from "@/js/data/storage";
 import LocalStorage from "@/js/controllers/localStorage";
 import styles from "./styles.module.scss"
 
-const generateSettingsModalHTML = (limit, version) => {
+const generateSettingsModalHTML = (limit, versionDetails) => {
     const {
         usedPerNumber,
         limitPerNumber,
         usedPerPercent,
     } = limit;
+
+    const {
+        version,
+        versionType,
+        versionIsStable
+    } = versionDetails;
 
     return `
         <div class="overlay">
@@ -43,7 +49,12 @@ const generateSettingsModalHTML = (limit, version) => {
                             </div>
                         </div>
                     </div>
-                    <span class="${styles["settings-version-text"]} text-small">Version: ${version ? version : "unknown version"}</span>
+                    <span class="${styles["settings-version-text"]} text-small">
+                        Version: 
+                        ${versionType ? versionType : ""} 
+                        ${version} 
+                        ${versionIsStable ? "" : "(not stable)"}
+                    </span> 
                 </div>
             </div>
         </div>
