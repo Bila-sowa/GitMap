@@ -66,6 +66,16 @@
     }
 }
 
+.active-color {
+    background: #40ba501a;
+    color: var(--success-color);
+}
+
+.non-active-color {
+    background: #d39b221a;
+    color: var(--warning-color);
+}
+
 @keyframes alert-pop {
     0% {
         opacity: 0%;

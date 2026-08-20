@@ -193,7 +193,7 @@ export default class GitHubClient {
         return { success: true };
     }
 
-    async getRateLimit() {
+    async getRateLimitData() {
         try {
             const res = await fetch("https://api.github.com/rate_limit", { headers: this.#headers });
 
@@ -202,6 +202,7 @@ export default class GitHubClient {
             }
 
             const data = await res.json();
+
             if (!data?.rate) {
                 return {
                     success: false,
@@ -225,11 +226,5 @@ export default class GitHubClient {
             notifications.notify("Rate limit request error", "error");
             return { error: err.message, success: false };
         }
-    }
-
-    async getAuthenticatedStatus() {
-        const response = await fetch("https://api.github.com/rate_limit", { headers: this.#headers });
-
-        return response.ok;
     }
 }

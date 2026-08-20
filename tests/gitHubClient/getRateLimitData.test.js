@@ -9,7 +9,7 @@ import * as tools from "../tools/testTools";
  * #### Params:
  * - file: getGitHubData.js
  * - test: test_3j3f8_Data
- * - name: getRateLimit
+ * - name: getRateLimitData
  * - type: method
  * 
  * @returns TestFeedback
@@ -19,7 +19,7 @@ export default async function test_3j3f8_Data() {
         {
             file: "getGitHubData.js",
             test: "test_3j3f8_Data",
-            name: "getRateLimit",
+            name: "getRateLimitData",
             type: "method",
         },
 
@@ -38,7 +38,7 @@ export default async function test_3j3f8_Data() {
     let data = {};
 
     try {
-        data = await client.getRateLimit();
+        data = await client.getRateLimitData();
 
         const result = tools.validateTestData(data, config.expected);
 

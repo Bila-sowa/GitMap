@@ -6,7 +6,6 @@ const dataTests = [
     gitHubClientTests.test_3j3f8_Data,
     gitHubClientTests.test_hvnws_Data,
     gitHubClientTests.test_nd2u3_Data,
-    gitHubClientTests.test_2rb1v_Data,
     utilsTests.test_0c2os_Data,
     utilsTests.test_gj781_Data,
 ];

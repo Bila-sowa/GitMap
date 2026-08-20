@@ -22,10 +22,8 @@ class SettingsController {
 
         generateLoader();
 
-        const rateLimitRes = await this.#client.getRateLimit();
-        const limit = rateLimitRes?.success
-            ? rateLimitRes.data
-            : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
+        const rateLimitRes = await this.#client.getRateLimitData();
+        const limit = rateLimitRes.data;
         const config = await getConfigData();
         const versionDetails = config.versionDetails;
 

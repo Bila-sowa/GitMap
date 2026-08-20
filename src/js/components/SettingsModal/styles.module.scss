@@ -40,6 +40,12 @@
         align-items: center;
     }
 
+    &-token-status {
+        padding: 0 30px;
+        text-align: center;
+        width: fit-content;
+    }
+
     &-toggle-button {
         position: relative;
         background: var(--color-3);

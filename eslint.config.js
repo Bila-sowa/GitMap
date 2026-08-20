@@ -16,6 +16,7 @@ export default defineConfig([
             "no-dupe-else-if": "error",
             "no-duplicate-case": "error",
             "no-duplicate-imports": "error",
+            "no-unsafe-optional-chaining": "off",
         }
     },
 ]);

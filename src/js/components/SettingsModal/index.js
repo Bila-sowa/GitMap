@@ -4,6 +4,15 @@ import styles from "./styles.module.scss";
 
 const generateSettingsModalHTML = (limit, versionDetails) => {
     const { usedPerNumber, limitPerNumber, usedPerPercent } = limit;
+    const tokenActiveMessage = "The token is active, now your limit is 5000 requests per hour.";
+    const tokenNonActiveMessage = "The token is not active, your limit is 60 requests per hour.";
+
+    let authenticated = false;
+
+    if (limitPerNumber >= 5000) {
+        // Basic token limit with authorization.
+        authenticated = true;
+    }
 
     const { version, versionType, versionIsStable } = versionDetails;
 
@@ -18,8 +27,18 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
                     <div class="${styles["settings-section"]}">
                         <h3>GitHub</h3>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
-                            <label for="token-input">GitHub Rest Api Token</label>
+                            <label for="token-input">GitHub rest api token</label>
                             <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${storage.token || ""}" placeholder="gpy_">
+                        </div>
+                        <div class="${styles["settings-item"]} rounded-normal border-sm">
+                            <span>GitHub Rest api token status:</span>
+                            <span class="
+                                ${authenticated ? "active-color" : "non-active-color"} 
+                                ${styles["settings-token-status"]} rounded-full"
+                                title="${authenticated ? tokenActiveMessage : tokenNonActiveMessage}"
+                            >
+                                ${authenticated ? "Active" : "Non-active"}
+                            </span>
                         </div>
                     </div>
                     <div class="${styles["settings-section"]}"> 
@@ -36,8 +55,14 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>Rest API Limit:</span>
-                            <div class="${styles["settings-rest-api-limit-progress"]} rounded-full border-normal" title="Used: ${usedPerNumber} / ${limitPerNumber}">
-                                <span class="${styles["settings-rest-api-limit-bar"]}" style="width: ${usedPerPercent ? usedPerNumber : "0"}%"></span>
+                            <div 
+                                class="${styles["settings-rest-api-limit-progress"]} 
+                                rounded-full border-normal" 
+                                title="Used: ${usedPerNumber} / ${limitPerNumber}"
+                            >
+                                <span 
+                                    class="${styles["settings-rest-api-limit-bar"]}" 
+                                    style="width: ${usedPerPercent}%"></span>
                             </div>
                         </div>
                     </div>
