@@ -14,7 +14,7 @@
     overflow-y: scroll;
     overflow-wrap: break-word;
     gap: 20px;
-    animation: elongation .1s ease;
+    animation: elongation 0.1s ease;
 
     &-header {
         width: 100%;
@@ -112,7 +112,6 @@
         overflow-wrap: break-word;
     }
 
-
     &-file-changes {
         margin-left: auto;
         display: flex;
@@ -120,14 +119,13 @@
         font-weight: bolder;
 
         &-additions {
-            color: var(--additions-color)
+            color: var(--additions-color);
         }
 
         &-deletions {
-            color: var(--deletions-color)
+            color: var(--deletions-color);
         }
     }
-
 }
 
 @keyframes elongation {

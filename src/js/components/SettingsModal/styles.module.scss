@@ -62,7 +62,7 @@
         transition: transform 0.2s ease;
     }
 
-    &-toggle-input:checked+&-toggle-button::before {
+    &-toggle-input:checked + &-toggle-button::before {
         transform: translate(calc(60px - 25px - 2px - 2px), -50%);
     }
 

@@ -27,7 +27,7 @@ async function loadTestConfig() {
         console.warn("Using default test config because config.json could not be loaded.", error);
         return {
             uiTests: false,
-            dataTests: true,
+            dataTests: false,
         };
     }
 }

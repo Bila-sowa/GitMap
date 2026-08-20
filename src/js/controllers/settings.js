@@ -5,7 +5,7 @@ import { bindSettingsModalEvents, generateSettingsModalHTML } from "../component
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 
 class SettingsController {
-    #button
+    #button;
     #client = new GitHubClient();
 
     constructor(button) {
@@ -13,7 +13,9 @@ class SettingsController {
         this.#bindEvents();
     }
 
-    #bindEvents() { this.#button.addEventListener("click", () => this.#openSettings()) }
+    #bindEvents() {
+        this.#button.addEventListener("click", () => this.#openSettings());
+    }
 
     async #openSettings() {
         storage.token ? await this.#client.setToken(storage.token) : "";
@@ -21,7 +23,9 @@ class SettingsController {
         generateLoader();
 
         const rateLimitRes = await this.#client.getRateLimit();
-        const limit = rateLimitRes?.success ? rateLimitRes.data : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
+        const limit = rateLimitRes?.success
+            ? rateLimitRes.data
+            : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
         const config = await getConfigData();
         const versionDetails = config.versionDetails;
 
@@ -33,7 +37,7 @@ class SettingsController {
 
         appendHTML(modal);
         bindSettingsModalEvents();
-    };
-};
+    }
+}
 
 export default SettingsController;

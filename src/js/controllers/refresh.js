@@ -1,6 +1,6 @@
 class RefreshButtonController {
-    #button
-    #graph
+    #button;
+    #graph;
 
     constructor(button, graph) {
         this.#button = button;
@@ -8,8 +8,9 @@ class RefreshButtonController {
         this.#bindEvents();
     }
 
-    #bindEvents() { this.#button.addEventListener("click", () => this.#graph.render()) }
+    #bindEvents() {
+        this.#button.addEventListener("click", () => this.#graph.render());
+    }
 }
 
 export default RefreshButtonController;
-

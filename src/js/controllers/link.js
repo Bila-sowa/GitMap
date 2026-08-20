@@ -2,9 +2,9 @@ import LocalStorageController from "./localStorage";
 import storage from "../data/storage";
 
 class LinkController {
-    #input
-    #graph
-    #localStorage
+    #input;
+    #graph;
+    #localStorage;
 
     constructor(input, graph) {
         this.#input = input;
@@ -29,6 +29,6 @@ class LinkController {
             this.#graph.render();
         });
     }
-};
+}
 
 export default LinkController;

@@ -1,7 +1,6 @@
 import LocalStorageController from "./localStorage";
 import storage from "../data/storage";
 
-
 class ThemeController {
     #button;
     #localStorage = new LocalStorageController();
@@ -12,7 +11,9 @@ class ThemeController {
         this.#bindEvents();
     }
 
-    #bindEvents() { this.#button.addEventListener("click", () => this.#changeTheme()) }
+    #bindEvents() {
+        this.#button.addEventListener("click", () => this.#changeTheme());
+    }
 
     #setTheme(theme) {
         const validTheme = theme === "light-theme" || theme === "dark-theme" ? theme : "dark-theme";
@@ -28,6 +29,6 @@ class ThemeController {
         const theme = storage.theme === "dark-theme" ? "light-theme" : "dark-theme";
         this.#setTheme(theme);
     }
-};
+}
 
 export default ThemeController;

@@ -1,9 +1,9 @@
 @font-face {
-    font-family: 'Mona Sans VF';
+    font-family: "Mona Sans VF";
     src:
-        url('../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff2') format('woff2 supports variations'),
-        url('../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff2') format('woff2-variations'),
-        url('../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff') format('woff-variations');
+        url("../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff2") format("woff2 supports variations"),
+        url("../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff2") format("woff2-variations"),
+        url("../fonts/mona-sans/MonaSansVF[wdth,wght,opsz,ital].woff") format("woff-variations");
     font-weight: 200 900;
     font-stretch: 75% 125%;
     font-optical-sizing: auto;
@@ -11,48 +11,53 @@
 }
 
 @font-face {
-    font-family: 'Mona Sans Mono VF';
+    font-family: "Mona Sans Mono VF";
     src:
-        url('../fonts/mona-sans/MonaSansMonoVF[wdth,wght].woff2') format('woff2 supports variations'),
-        url('../fonts/mona-sans/MonaSansMonoVF[wdth,wght].woff2') format('woff2-variations');
+        url("../fonts/mona-sans/MonaSansMonoVF[wdth,wght].woff2") format("woff2 supports variations"),
+        url("../fonts/mona-sans/MonaSansMonoVF[wdth,wght].woff2") format("woff2-variations");
     font-weight: 200 900;
     font-stretch: 75% 125%;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'Noto Sans';
-    src: url('../fonts/noto-sans/NotoSans-Variable.ttf') format('truetype-variations');
+    font-family: "Noto Sans";
+    src: url("../fonts/noto-sans/NotoSans-Variable.ttf") format("truetype-variations");
     font-weight: 100 900;
     font-stretch: 62.5% 100%;
     font-display: swap;
 }
 
-
 :root {
-    --font-monospace: 'Mona Sans Mono VF', ui-monospace, sfmono-regular, "SF Mono", menlo, consolas, "Liberation Mono", monospace;
-    --font-sans-serif: "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    --font-sans-serif-display: "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    --font-system: "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    --accent-color-1: #4F7C77;
-    --shadow-color-1: #4F7C77;
-    --info-color: #58A6FF;
-    --warning-color: #D29922;
-    --error-color: #F85149;
-    --success-color: #3FB950;
-    --additions-color: #3B82F6;
-    --deletions-color: #CC5049;
+    --font-monospace:
+        "Mona Sans Mono VF", ui-monospace, sfmono-regular, "SF Mono", menlo, consolas, "Liberation Mono", monospace;
+    --font-sans-serif:
+        "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji";
+    --font-sans-serif-display:
+        "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji";
+    --font-system:
+        "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji";
+    --accent-color-1: #4f7c77;
+    --shadow-color-1: #4f7c77;
+    --info-color: #58a6ff;
+    --warning-color: #d29922;
+    --error-color: #f85149;
+    --success-color: #3fb950;
+    --additions-color: #3b82f6;
+    --deletions-color: #cc5049;
 }
-
 
 .dark-theme {
     --color-1: #010409;
-    --color-2: #0D1117;
-    --color-3: #14181F;
+    --color-2: #0d1117;
+    --color-3: #14181f;
     --color-4: #212830;
-    --border-color-1: #3D4D40;
-    --hover-color-1: #373E4A;
-    --text-color-1: #E6EDF3;
+    --border-color-1: #3d4d40;
+    --hover-color-1: #373e4a;
+    --text-color-1: #e6edf3;
     --text-color-2: #727478;
 }
 

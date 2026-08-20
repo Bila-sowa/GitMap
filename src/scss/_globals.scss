@@ -120,7 +120,7 @@ body {
     align-items: center;
     gap: 10px;
     animation: alert-pop 0.35s ease-out;
-    box-shadow: 0px 0px 8px rgba(0 0 0 / 75%);
+    box-shadow: 0 0 8px rgb(0 0 0 / 75%);
 
     svg {
         flex-shrink: 0;

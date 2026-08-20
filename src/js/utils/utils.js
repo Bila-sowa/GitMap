@@ -11,12 +11,15 @@ const copyValueToClipboard = async (element) => {
         notifications.notify("Successfully copied", "success");
         setTimeout(() => element.classList.remove("copied"), COOLDOWN_MS);
     } catch (err) {
-        notifications.notify("Copying error or copying is not allowed by your browser (especially if you launched the server on live server)", "error")
+        notifications.notify(
+            "Copying error or copying is not allowed by your browser (especially if you launched the server on live server)",
+            "error",
+        );
     }
 };
 
 function getRandomID(prefix) {
-    return `${prefix ? prefix + "-" : ""}${Math.random().toString(16).slice(2)}`
+    return `${prefix ? prefix + "-" : ""}${Math.random().toString(16).slice(2)}`;
 }
 
 function escapeHTML(str) {
@@ -26,7 +29,7 @@ function escapeHTML(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
-};
+}
 
 function positionModalNearElement(modal, trigger, offset = 16) {
     if (!modal || !trigger) return;
@@ -37,14 +40,11 @@ function positionModalNearElement(modal, trigger, offset = 16) {
     modal.style.position = "fixed";
 
     const maxTop = window.innerHeight - modalRect.height - offset;
-    const clampedTop = Math.min(
-        Math.max(triggerRect.top, offset),
-        Math.max(maxTop, offset)
-    );
+    const clampedTop = Math.min(Math.max(triggerRect.top, offset), Math.max(maxTop, offset));
 
     modal.style.top = `${clampedTop}px`;
     modal.style.left = `${triggerRect.right + offset}px`;
-};
+}
 
 const truncateTitle = (title, wordCount = 5) => {
     if (!title) return;
@@ -55,22 +55,22 @@ const truncateTitle = (title, wordCount = 5) => {
 
 const getDefaultConfig = () => {
     return {
-        "name": "GitMap",
-        "debug": false,
-        "versionDetails": {
-            "version": "not found",
-            "versionType": "not found",
-            "versionIsStable": false
+        name: "GitMap",
+        debug: false,
+        versionDetails: {
+            version: "not found",
+            versionType: "not found",
+            versionIsStable: false,
         },
-        "graph": {
-            "renderLimit": 30
+        graph: {
+            renderLimit: 30,
         },
-        "notifications": {
-            "showNotifications": true,
-            "COOLDOWN_MS": 5000
-        }
+        notifications: {
+            showNotifications: true,
+            COOLDOWN_MS: 5000,
+        },
     };
-}
+};
 
 const getConfigData = async (url = "src/js/data/config.json") => {
     try {
@@ -84,13 +84,13 @@ const getConfigData = async (url = "src/js/data/config.json") => {
 
         if (!Object.entries(configData).length) {
             throw new Error("Config is empty");
-        };
+        }
 
         return configData;
     } catch (error) {
-        console.error('Returning default config, error fetching config:', error);
+        console.error("Returning default config, error fetching config:", error);
         return getDefaultConfig();
-    };
+    }
 };
 
 function appendHTML(HTML) {
@@ -109,4 +109,4 @@ export {
     truncateTitle,
     getConfigData,
     appendHTML,
-}
+};

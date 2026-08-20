@@ -17,7 +17,7 @@ export default class GraphController {
 
     constructor(graphElement) {
         this.#graph = graphElement;
-    };
+    }
 
     async render() {
         if (!storage.link) return;
@@ -30,18 +30,18 @@ export default class GraphController {
         if (!this.#data?.success) return;
 
         this.#generateGraph(this.#data.commitsDetails);
-        this.#bindEvents()
-    };
+        this.#bindEvents();
+    }
 
     async #getGeneralData(link) {
         if (!link) return;
 
-        await this.#client.setToken(storage?.token)
+        await this.#client.setToken(storage?.token);
 
         this.#link = link;
         this.#data = await this.#client.getData(link);
         this.#configData = await getConfigData();
-    };
+    }
 
     #getFilesData = async (sha) => {
         if (!this.#link || !sha) return;
@@ -51,7 +51,7 @@ export default class GraphController {
         const filesData = await this.#client.getCommitFiles(this.#link, sha);
 
         return filesData;
-    }
+    };
 
     #generateGraph(array) {
         if (!array) return;
@@ -69,67 +69,78 @@ export default class GraphController {
 
             const commitCard = `
                 <button class="commit neon rounded-full" data-id="${index}" data-sha="${commit.sha}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
-                ${isLast
-                    ? `<span class="limit-description text-smallest">The REST API supports only the last 30 commits from one branch.</span>`
-                    : `
+                ${
+                    isLast
+                        ? `<span class="limit-description text-smallest">The REST API supports only the last 30 commits from one branch.</span>`
+                        : `
                 <div class="connection neon">
                     <span></span>
                     <span></span>
                 </div>
-                `}
+                `
+                }
             `;
 
             this.#graph.insertAdjacentHTML("beforeend", commitCard);
         });
 
-        notifications.notify("The graph has been successfully generated", "success")
-    };
+        notifications.notify("The graph has been successfully generated", "success");
+    }
 
     #bindEvents() {
         if (this.#eventsController) this.#eventsController.abort();
         this.#eventsController = new AbortController();
         const { signal } = this.#eventsController;
 
-        this.#graph.addEventListener("click", async (e) => {
-            const commitButton = e.target.closest("[data-id]");
-            if (!commitButton) return;
+        this.#graph.addEventListener(
+            "click",
+            async (e) => {
+                const commitButton = e.target.closest("[data-id]");
+                if (!commitButton) return;
 
-            const { id, sha } = commitButton.dataset;
+                const { id, sha } = commitButton.dataset;
 
-            generateLoader();
+                generateLoader();
 
-            const modal = generateFullCommitModalHTML(this.#data?.commitsDetails[id], await this.#getFilesData(sha));
+                const modal = generateFullCommitModalHTML(
+                    this.#data?.commitsDetails[id],
+                    await this.#getFilesData(sha),
+                );
 
-            removeLoader();
+                removeLoader();
 
-            if (!modal) return;
+                if (!modal) return;
 
-            appendHTML(modal);
+                appendHTML(modal);
 
-            bindFullComitEvents();
-        }, { signal });
+                bindFullComitEvents();
+            },
+            { signal },
+        );
 
-        this.#graph.addEventListener("mouseover", (e) => {
-            const commitButton = e.target.closest("[data-id]");
-            if (!commitButton) return;
+        this.#graph.addEventListener(
+            "mouseover",
+            (e) => {
+                const commitButton = e.target.closest("[data-id]");
+                if (!commitButton) return;
 
-            const { id } = commitButton.dataset;
+                const { id } = commitButton.dataset;
 
-            const modal = generateHoverCommitModalHTML(this.#data?.commitsDetails[id]);
+                const modal = generateHoverCommitModalHTML(this.#data?.commitsDetails[id]);
 
-            if (!modal) return;
+                if (!modal) return;
 
-            appendHTML(modal);
+                appendHTML(modal);
 
-            const modalDOM = this.#body.querySelector("#hover-commit-modal");
+                const modalDOM = this.#body.querySelector("#hover-commit-modal");
 
-            if (modal) {
-                positionModalNearElement(modalDOM, commitButton);
-            }
-        }, { signal });
+                if (modal) {
+                    positionModalNearElement(modalDOM, commitButton);
+                }
+            },
+            { signal },
+        );
 
         this.#graph.addEventListener("mouseout", () => closeHoverCommitModals(), { signal });
     }
 }
-
-

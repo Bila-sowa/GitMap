@@ -1,11 +1,10 @@
 export default class Formatter {
-
     getFormattedTitle(commitName) {
-        return commitName.split('\n').slice(0, 1).join('\n');
+        return commitName.split("\n").slice(0, 1).join("\n");
     }
 
     getFormattedDescription(commitName) {
-        return commitName.split('\n').slice(1).join('\n');
+        return commitName.split("\n").slice(1).join("\n");
     }
 
     getDateInLocaleString(date) {

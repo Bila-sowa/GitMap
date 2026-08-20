@@ -1,10 +1,9 @@
 import Formatter from "../utils/formatter.js";
 import notifications from "../utils/notificationManager.js";
 
-
 export default class GitHubClient {
     #formatter = new Formatter();
-    #headers = { "Accept": "application/vnd.github+json" };
+    #headers = { Accept: "application/vnd.github+json" };
 
     #formatGitHubUrl = (url) => {
         try {
@@ -49,11 +48,10 @@ export default class GitHubClient {
                 branches,
                 commits,
             };
-
         } catch (err) {
             return { success: false, error: err };
         }
-    };
+    }
 
     #parseData = (data) => {
         const branches = Array.isArray(data.branches) ? data.branches : [];
@@ -66,7 +64,7 @@ export default class GitHubClient {
         const commitsDetails = [];
         const branchesDetails = [];
 
-        commits.forEach(commit => {
+        commits.forEach((commit) => {
             const formattedTitle = this.#formatter.getFormattedTitle(commit.commit.message);
             const formattedDescription = this.#formatter.getFormattedDescription(commit.commit.message);
             const formattedDate = this.#formatter.getDateInLocaleString(commit.commit.author.date);
@@ -84,13 +82,13 @@ export default class GitHubClient {
                 description: formattedDescription ? formattedDescription : "",
                 hash: shortHash,
                 url: commit.html_url,
-                sha: commit.sha
+                sha: commit.sha,
             };
 
             commitsDetails.push(details);
         });
 
-        branches.forEach(branch => {
+        branches.forEach((branch) => {
             const details = { name: branch.name };
             branchesDetails.push(details);
         });
@@ -114,13 +112,13 @@ export default class GitHubClient {
         }
 
         return parsed;
-    };
+    }
 
     #parseCommitFiles = (data) => {
         const files = Array.isArray(data.files) ? data.files : [];
         const formattedData = [];
 
-        files.forEach(file => {
+        files.forEach((file) => {
             const extension = this.#formatter.getFormattedExtension(file.filename);
             const status = this.#formatter.getShortStatus(file.status);
 
@@ -161,8 +159,7 @@ export default class GitHubClient {
         } catch (err) {
             return { success: false, error: err };
         }
-    };
-
+    }
 
     async #validateToken() {
         try {
@@ -176,7 +173,7 @@ export default class GitHubClient {
         } catch (err) {
             return { success: false, error: err };
         }
-    };
+    }
 
     async setToken(token) {
         if (!token) {
@@ -194,7 +191,7 @@ export default class GitHubClient {
         }
 
         return { success: true };
-    };
+    }
 
     async getRateLimit() {
         try {
@@ -208,12 +205,12 @@ export default class GitHubClient {
             if (!data?.rate) {
                 return {
                     success: false,
-                    data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 }
+                    data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 },
                 };
             }
 
             const { limit, remaining, used } = data.rate;
-            const usedCount = used !== undefined ? used : (limit - remaining);
+            const usedCount = used !== undefined ? used : limit - remaining;
             const formattedPercent = limit > 0 ? ((usedCount / limit) * 100).toFixed(2) : 0;
 
             return {
@@ -222,17 +219,17 @@ export default class GitHubClient {
                     limitPerNumber: limit,
                     usedPerNumber: usedCount,
                     usedPerPercent: formattedPercent,
-                }
+                },
             };
         } catch (err) {
             notifications.notify("Rate limit request error", "error");
             return { error: err.message, success: false };
         }
-    };
+    }
 
     async getAuthenticatedStatus() {
         const response = await fetch("https://api.github.com/rate_limit", { headers: this.#headers });
 
         return response.ok;
     }
-};
+}

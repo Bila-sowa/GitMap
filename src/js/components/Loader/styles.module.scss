@@ -31,11 +31,11 @@
     0%,
     100% {
         transform: scaleY(0.4);
-        opacity: 0.5;
+        opacity: 50%;
     }
 
     50% {
         transform: scaleY(1);
-        opacity: 1;
+        opacity: 100%;
     }
 }

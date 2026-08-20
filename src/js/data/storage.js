@@ -5,5 +5,5 @@ export default {
     localStorage: {
         saveLink: false,
         saveToken: false,
-    }
-}
+    },
+};

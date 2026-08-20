@@ -20,8 +20,7 @@ export default class CanvasController {
     }
 
     #applyTransform() {
-        this.canvas.style.transform =
-            `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+        this.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
     }
 
     #clamp(value, min, max) {
@@ -33,15 +32,15 @@ export default class CanvasController {
         this.#abortController = new AbortController();
         const { signal } = this.#abortController;
 
-        this.viewport.addEventListener('mousedown', (e) => this.#onMouseDown(e), { signal });
-        window.addEventListener('mousemove', (e) => this.#onMouseMove(e), { signal });
-        window.addEventListener('mouseup', () => this.#onMouseUp(), { signal });
+        this.viewport.addEventListener("mousedown", (e) => this.#onMouseDown(e), { signal });
+        window.addEventListener("mousemove", (e) => this.#onMouseMove(e), { signal });
+        window.addEventListener("mouseup", () => this.#onMouseUp(), { signal });
 
-        this.viewport.addEventListener('wheel', (e) => this.#onWheel(e), { passive: false, signal });
+        this.viewport.addEventListener("wheel", (e) => this.#onWheel(e), { passive: false, signal });
 
-        this.viewport.addEventListener('touchstart', (e) => this.#onTouchStart(e), { passive: false, signal });
-        this.viewport.addEventListener('touchmove', (e) => this.#onTouchMove(e), { passive: false, signal });
-        this.viewport.addEventListener('touchend', () => this.#onTouchEnd(), { signal });
+        this.viewport.addEventListener("touchstart", (e) => this.#onTouchStart(e), { passive: false, signal });
+        this.viewport.addEventListener("touchmove", (e) => this.#onTouchMove(e), { passive: false, signal });
+        this.viewport.addEventListener("touchend", () => this.#onTouchEnd(), { signal });
     }
 
     #onMouseDown(e) {
@@ -53,7 +52,7 @@ export default class CanvasController {
         this.startY = e.clientY;
         this.lastOffsetX = this.offsetX;
         this.lastOffsetY = this.offsetY;
-        this.viewport.classList.add('is-panning');
+        this.viewport.classList.add("is-panning");
     }
 
     #onMouseMove(e) {
@@ -67,7 +66,7 @@ export default class CanvasController {
     #onMouseUp() {
         if (!this.isPanning) return;
         this.isPanning = false;
-        this.viewport.classList.remove('is-panning');
+        this.viewport.classList.remove("is-panning");
     }
 
     #onWheel(e) {
@@ -127,8 +126,14 @@ export default class CanvasController {
             const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
 
             this.scale = this.#clamp(this._pinchStartScale * scaleRatio, this.minScale, this.maxScale);
-            this.offsetX = midX - (this._pinchMidX - rect.left - this._pinchStartOffsetX) * (this.scale / this._pinchStartScale) - (midX - (this._pinchMidX - rect.left));
-            this.offsetY = midY - (this._pinchMidY - rect.top - this._pinchStartOffsetY) * (this.scale / this._pinchStartScale) - (midY - (this._pinchMidY - rect.top));
+            this.offsetX =
+                midX -
+                (this._pinchMidX - rect.left - this._pinchStartOffsetX) * (this.scale / this._pinchStartScale) -
+                (midX - (this._pinchMidX - rect.left));
+            this.offsetY =
+                midY -
+                (this._pinchMidY - rect.top - this._pinchStartOffsetY) * (this.scale / this._pinchStartScale) -
+                (midY - (this._pinchMidY - rect.top));
 
             this.#applyTransform();
         }
@@ -177,4 +182,4 @@ export default class CanvasController {
             this.#abortController = null;
         }
     }
-};
+}

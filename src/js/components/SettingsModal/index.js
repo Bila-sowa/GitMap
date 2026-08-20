@@ -1,19 +1,11 @@
 import storage from "@/js/data/storage";
 import LocalStorage from "@/js/controllers/localStorage";
-import styles from "./styles.module.scss"
+import styles from "./styles.module.scss";
 
 const generateSettingsModalHTML = (limit, versionDetails) => {
-    const {
-        usedPerNumber,
-        limitPerNumber,
-        usedPerPercent,
-    } = limit;
+    const { usedPerNumber, limitPerNumber, usedPerPercent } = limit;
 
-    const {
-        version,
-        versionType,
-        versionIsStable
-    } = versionDetails;
+    const { version, versionType, versionIsStable } = versionDetails;
 
     return `
         <div class="overlay">
@@ -59,11 +51,11 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
             </div>
         </div>
     `;
-}
+};
 
 function bindSettingsModalEvents() {
     const modal = document.querySelector(".overlay");
-    const modalContent = document.querySelector("#settings-content")
+    const modalContent = document.querySelector("#settings-content");
 
     if (!modal || !modalContent) return;
 
@@ -122,4 +114,4 @@ function bindSettingsModalEvents() {
     saveTokenToggle.addEventListener("change", toggleSaveToken, { signal });
 }
 
-export { generateSettingsModalHTML, bindSettingsModalEvents }
+export { generateSettingsModalHTML, bindSettingsModalEvents };
