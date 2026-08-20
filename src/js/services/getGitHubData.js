@@ -1,5 +1,5 @@
 import Formatter from "../utils/formatter.js";
-import { createNotification } from "../utils/utils.js";
+import notifications from "../utils/notificationManager.js";
 
 
 export default class GitHubClient {
@@ -102,14 +102,14 @@ export default class GitHubClient {
         const data = await this.#getRawData(url);
 
         if (!data.success) {
-            createNotification("Failed to fetch repository data", "error");
+            notifications.notify("Failed to fetch repository data", "error");
             return data;
         }
 
         const parsed = this.#parseData(data);
 
         if (!parsed.success) {
-            createNotification("Unexpected response format from GitHub", "error");
+            notifications.notify("Unexpected response format from GitHub", "error");
             return parsed;
         }
 
@@ -189,7 +189,7 @@ export default class GitHubClient {
 
         if (!validation.success) {
             delete this.#headers.Authorization;
-            createNotification("Invalid GitHub token", "error");
+            notifications.notify("Invalid GitHub token", "error");
             return validation;
         }
 
@@ -225,7 +225,7 @@ export default class GitHubClient {
                 }
             };
         } catch (err) {
-            createNotification("Rate limit request error", "error");
+            notifications.notify("Rate limit request error", "error");
             return { error: err.message, success: false };
         }
     };
