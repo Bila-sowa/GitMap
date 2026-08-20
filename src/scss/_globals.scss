@@ -11,6 +11,24 @@
     outline-offset: 2px;
 }
 
+*::-webkit-scrollbar {
+    width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-button {
+    display: none;
+}
+
 h1,
 h2,
 h3 {

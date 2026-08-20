@@ -67,13 +67,11 @@
 }
 
 .active-color {
-    background: #40ba501a;
-    color: var(--success-color);
+    outline: 2px solid #40ba5080;
 }
 
 .non-active-color {
-    background: #d39b221a;
-    color: var(--warning-color);
+    outline: 2px solid #f8524980;
 }
 
 @keyframes alert-pop {
