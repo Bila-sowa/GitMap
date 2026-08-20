@@ -1,6 +1,6 @@
 import storage from "../data/storage.js";
 import GitHubClient from "../services/getGitHubData.js";
-import { appendHTML, getVersion } from "../utils/utils.js";
+import { appendHTML, getConfigData } from "../utils/utils.js";
 import { bindSettingsModalEvents, generateSettingsModalHTML } from "../components/SettingsModal/index.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 
@@ -22,7 +22,8 @@ class SettingsController {
 
         const rateLimitRes = await this.#client.getRateLimit();
         const limit = rateLimitRes?.success ? rateLimitRes.data : { usedPerNumber: 0, limitPerNumber: 0, usedPerPercent: 0 };
-        const version = await getVersion();
+        const config = await getConfigData();
+        const version = config.versionDetails.version;
 
         removeLoader();
 

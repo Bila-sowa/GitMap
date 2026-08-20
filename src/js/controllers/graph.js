@@ -2,7 +2,7 @@ import storage from "../data/storage.js";
 import GitHubClient from "../services/getGitHubData.js";
 import { generateFullCommitModalHTML, bindFullComitEvents } from "../components/FullCommitModal/index.js";
 import { generateHoverCommitModalHTML, closeHoverCommitModals } from "../components/HoverCommitModal/index.js";
-import { appendHTML, positionModalNearElement, truncateTitle } from "../utils/utils.js";
+import { appendHTML, positionModalNearElement, truncateTitle, getConfigData } from "../utils/utils.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 
 export default class GraphController {
@@ -11,6 +11,7 @@ export default class GraphController {
     #client = new GitHubClient();
     #link = null;
     #data = null;
+    #configData = null;
     #eventsController = null;
 
     constructor(graphElement) {
@@ -38,6 +39,7 @@ export default class GraphController {
 
         this.#link = link;
         this.#data = await this.#client.getData(link);
+        this.#configData = await getConfigData();
     };
 
     #getFilesData = async (sha) => {
@@ -57,8 +59,12 @@ export default class GraphController {
         this.#graph.dataset.repoUrl = storage.link;
 
         array.forEach((commit, index) => {
-            const isLast = index === this.#data.commitsDetails.length - 1;
             const formattedTitle = truncateTitle(commit.title, 5);
+            const renderLimit = +this.#configData.graph.renderLimit;
+
+            if (index >= renderLimit) return;
+
+            const isLast = index === Math.min(array.length, renderLimit) - 1;
 
             const commitCard = `
                 <button class="commit neon rounded-full" data-id="${index}" data-sha="${commit.sha}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
