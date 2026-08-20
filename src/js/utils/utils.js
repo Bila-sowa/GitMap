@@ -33,7 +33,7 @@ async function createNotification(message, type) {
     const notification = `
         <div class="notification-container ${type} rounded-normal" data-notification-id="${notificationId}" role="alert">
             ${icons[type] || icons.info}
-            <span>${message}</span>
+            <span class="text-small">${message}</span>
             <button class="close-button close-alert-button rounded-full" type="button" aria-label="Close notification">&times;</button>
         </div>
     `;

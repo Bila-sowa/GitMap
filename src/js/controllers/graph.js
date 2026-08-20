@@ -2,7 +2,7 @@ import storage from "../data/storage.js";
 import GitHubClient from "../services/getGitHubData.js";
 import { generateFullCommitModalHTML, bindFullComitEvents } from "../components/FullCommitModal/index.js";
 import { generateHoverCommitModalHTML, closeHoverCommitModals } from "../components/HoverCommitModal/index.js";
-import { appendHTML, positionModalNearElement, truncateTitle, getConfigData } from "../utils/utils.js";
+import { appendHTML, positionModalNearElement, truncateTitle, getConfigData, createNotification } from "../utils/utils.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 
 export default class GraphController {
@@ -80,6 +80,8 @@ export default class GraphController {
 
             this.#graph.insertAdjacentHTML("beforeend", commitCard);
         });
+
+        createNotification("The graph has been successfully generated", "success")
     };
 
     #bindEvents() {
