@@ -31,9 +31,9 @@ const generateHoverCommitModalHTML = (commitData) => {
             <div class="${styles["modal-hr"]}"></div>
             <div class="${styles["modal-content"]}">
                 <div class="${styles["modal-data"]}">
-                    <div class="${styles["modal-item"]} rounded-normal" style="display: flex; align-items: center; gap: 10px;" title="Email: ${authorEmail}">
+                    <div class="${styles["modal-item"]} rounded-normal" class="flex-align-center" title="Email: ${authorEmail}">
                         <span>Author: </span>
-                        <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="flex-align-center">
                             <span>${authorName}</span>
                             <img class="avatar rounded-full" src="${authorAvatar}" alt="${authorName} avatar">
                         </div>

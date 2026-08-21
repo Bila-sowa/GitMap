@@ -74,6 +74,26 @@
     outline: 2px solid #f8524980;
 }
 
+.bg-none-important {
+    background: none !important;
+
+    &:hover,
+    &:active,
+    &:focus {
+        background: none !important;
+    }
+}
+
+.flex-align-center {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.cursor-help {
+    cursor: help;
+}
+
 @keyframes alert-pop {
     0% {
         opacity: 0%;

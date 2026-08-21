@@ -60,7 +60,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
         <div class="${styles["modal-data"]}">
             <a class="${styles["modal-item"]} rounded-normal" href="${authorUrl}" target="_blank" rel="noopener noreferrer" title="Email: ${authorEmail}">
                 <span>Author: </span>
-                <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="flex-align-center">
                     ${authorName} 
                     <img class="avatar rounded-full" src="${authorAvatar}" alt="${authorName}'s Avatar">
                 </div>
@@ -77,31 +77,29 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
         <div class="${styles["modal-changes"]}">
             <h3>Changes</h3>
             <div class="${styles["modal-files"]}">
-                ${
-                    success && Array.isArray(files)
-                        ? files
-                              .map(
-                                  (file) => `
+                ${success && Array.isArray(files)
+            ? files
+                .map(
+                    (file) => `
                     <div class="${styles["modal-file"]} rounded-normal">
-                        <img class="${styles["modal-file-icon"]}" style="color: white;" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
+                        <img class="${styles["modal-file-icon"]}" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
                         <code class="${styles["modal-file-path"]} text-small">${file.name}</code>
                         <div class="${styles["modal-file-changes"]}">
-                            ${
-                                file.status === "R"
-                                    ? `<span class="text-small" style="color: ${statusColors[`${theme}`][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>`
-                                    : `
+                            ${file.status === "R"
+                            ? `<span class="text-small" style="color: ${statusColors[`${theme}`][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>`
+                            : `
                                 <code class="${styles["modal-file-changes-additions"]} text-small">+${file.additions}</code>
                                 <code class="${styles["modal-file-changes-deletions"]} text-small">-${file.deletions}</code>
                                 <code class="text-small" style="color: ${statusColors?.[`${theme}`][file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</code>
                             `
-                            }
+                        }
                         </div>
                     </div>
                 `,
-                              )
-                              .join("")
-                        : `<p class="text-small">No files details available.</p>`
-                }
+                )
+                .join("")
+            : `<p class="text-small">No files details available.</p>`
+        }
             </div>
             <a href="${commitUrl}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="${gitHubLogoSrc}" alt></a>
         </div>

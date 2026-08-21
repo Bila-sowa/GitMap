@@ -4,15 +4,15 @@ import styles from "./styles.module.scss";
 
 const generateSettingsModalHTML = (limit, versionDetails) => {
     const { usedPerNumber, limitPerNumber, usedPerPercent } = limit;
+
     const tokenActiveMessage = "The token is active, now your limit is 5000 requests per hour.";
     const tokenNonActiveMessage = "The token is not active, your limit is 60 requests per hour.";
+    const notStableMessage = "This version provides no guarantees regarding your security and the program's operability.";
 
     let authenticated = false;
 
-    if (limitPerNumber >= 5000) {
-        // Basic token limit with authorization.
-        authenticated = true;
-    }
+    // Basic token limit with authorization.
+    if (limitPerNumber >= 5000) authenticated = true;
 
     const { version, versionType, versionIsStable } = versionDetails;
 
@@ -66,12 +66,12 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
                             </div>
                         </div>
                     </div>
-                    <span class="${styles["settings-version-text"]} text-small">
-                        Version: 
-                        ${versionType ? versionType : ""} 
-                        ${version} 
-                        ${versionIsStable ? "" : "(not stable)"}
-                    </span> 
+                    <div class="${styles["settings-version-text-container"]}">
+                        <span class="text-small">Version: </span>
+                        <span class="text-small">${versionType}</span>
+                        <a class="text-small bg-none-important" href="#" target="_blank" class="bg-none" title="View in changelog" class="text-small">${version}</a>
+                        ${versionIsStable ? "" : `<span title="${notStableMessage}" class="text-small cursor-help">${versionIsStable ? "" : "(not stable)"}</span>`}
+                    </div> 
                 </div>
             </div>
         </div>
