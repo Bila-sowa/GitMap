@@ -1,6 +1,6 @@
 import * as gitHubClientTests from "./gitHubClient/index";
 import * as utilsTests from "./utils/index";
-
+import * as appDataTests from "./data/index";
 
 const dataTests = [
     gitHubClientTests.test_3j3f8_Data,
@@ -8,6 +8,7 @@ const dataTests = [
     gitHubClientTests.test_nd2u3_Data,
     utilsTests.test_0c2os_Data,
     utilsTests.test_gj781_Data,
+    appDataTests.test_8je0j_Data,
 ];
 
 const uiTests = [

@@ -3,11 +3,12 @@ import notifications from "../utils/notificationManager.js";
 
 export default class LocalStorageController {
     save() {
+        const currentData = storage.getData();
         const dataToSave = {
-            ...storage,
-            localStorage: { ...storage.localStorage },
-            link: storage.localStorage.saveLink ? storage.link : "",
-            token: storage.localStorage.saveToken ? storage.token : "",
+            ...currentData,
+            localStorage: { ...currentData.localStorage },
+            link: storage.saveLink ? storage.link : "",
+            token: storage.saveToken ? storage.token : "",
         };
 
         localStorage.setItem("GitMap", JSON.stringify(dataToSave));
@@ -43,17 +44,17 @@ export default class LocalStorageController {
         }
 
         if (data.localStorage) {
-            Object.assign(storage.localStorage, data.localStorage);
+            storage.localStorage = data.localStorage;
         }
 
-        if (storage.localStorage.saveLink && data.link) {
+        if (storage.saveLink && data.link) {
             storage.link = data.link;
         }
 
-        if (storage.localStorage.saveToken && data.token) {
+        if (storage.saveToken && data.token) {
             storage.token = data.token;
         }
 
-        return { success: true, data: storage };
+        return { success: true, data: storage.getData() };
     }
 }

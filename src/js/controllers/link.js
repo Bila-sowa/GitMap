@@ -22,7 +22,7 @@ class LinkController {
             }
 
             storage.link = inputValue;
-            if (storage.localStorage.saveLink) {
+            if (storage.saveLink) {
                 this.#localStorage.save();
             }
 

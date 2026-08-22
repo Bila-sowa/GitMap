@@ -7,7 +7,8 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
 
     const tokenActiveMessage = "The token is active, now your limit is 5000 requests per hour.";
     const tokenNonActiveMessage = "The token is not active, your limit is 60 requests per hour.";
-    const notStableMessage = "This version provides no guarantees regarding your security and the program's operability.";
+    const notStableMessage =
+        "This version provides no guarantees regarding your security and the program's operability.";
 
     let authenticated = false;
 
@@ -95,7 +96,7 @@ function bindSettingsModalEvents() {
 
     function saveToken() {
         storage.token = tokenInput.value.trim();
-        if (storage.localStorage.saveToken) {
+        if (storage.saveToken) {
             localStorage.save();
         }
     }
@@ -118,12 +119,12 @@ function bindSettingsModalEvents() {
     }
 
     function toggleSaveLink() {
-        storage.localStorage.saveLink = saveLinkToggle.checked;
+        storage.saveLink = saveLinkToggle.checked;
         localStorage.save();
     }
 
     function toggleSaveToken() {
-        storage.localStorage.saveToken = saveTokenToggle.checked;
+        storage.saveToken = saveTokenToggle.checked;
         localStorage.save();
     }
 
@@ -132,10 +133,10 @@ function bindSettingsModalEvents() {
     document.addEventListener("click", handleOutsideClick, { signal });
     document.addEventListener("keydown", handleEscapeKey, { signal });
 
-    saveLinkToggle.checked = storage.localStorage.saveLink;
+    saveLinkToggle.checked = storage.saveLink;
     saveLinkToggle.addEventListener("change", toggleSaveLink, { signal });
 
-    saveTokenToggle.checked = storage.localStorage.saveToken;
+    saveTokenToggle.checked = storage.saveToken;
     saveTokenToggle.addEventListener("change", toggleSaveToken, { signal });
 }
 

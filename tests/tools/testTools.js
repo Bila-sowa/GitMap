@@ -94,11 +94,32 @@ class TestFeedback {
 };
 
 class TestConfig {
-    constructor(details, expected, testData) {
+    constructor(details, expected, testData = {}) {
         this.details = details;
         this.expected = expected;
-        this.testData = testData
-    };
+        this.testData = testData;
+    }
+
+    async run(testCallback) {
+        let data = {};
+        try {
+            data = await testCallback(this.testData, this);
+            const success = validateTestData(data, this.expected);
+
+            return new TestFeedback({
+                ...this.details,
+                success,
+                data,
+            });
+        } catch (err) {
+            console.error(err);
+            return new TestFeedback({
+                ...this.details,
+                success: false,
+                data,
+            });
+        }
+    }
 }
 
 const validateTestData = (object, expected) => {

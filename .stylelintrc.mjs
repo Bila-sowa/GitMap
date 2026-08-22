@@ -4,7 +4,7 @@ export default {
     rules: {
         "declaration-block-no-duplicate-custom-properties": true,
         "declaration-block-no-duplicate-properties": true,
-        "declaration-property-value-keyword-no-deprecated": false,
+        "declaration-property-value-keyword-no-deprecated": null,
         "keyframe-block-no-duplicate-selectors": true,
         "no-duplicate-at-import-rules": true,
         "no-duplicate-selectors": true,

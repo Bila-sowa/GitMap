@@ -1,5 +1,5 @@
 import GitHubClient from "@/js/services/getGitHubData";
-import * as tools from "../tools/testTools";
+import { TestConfig, ANY_VALID } from "../tools/testTools";
 
 /**
  * #### Description:
@@ -7,54 +7,34 @@ import * as tools from "../tools/testTools";
  * The test verifies the formatted data for commits and branches.
  * 
  * #### Params:
- * - file: getGitHubData.js
- * - test: test_hvnws_Data
- * - name: getData
- * - type: method
+ * - file: `getGitHubData.js`
+ * - test: `test_hvnws_Data`
+ * - name: `getData`
+ * - type: `method`
  * 
  * @returns TestFeedback
  */
 export default async function test_hvnws_Data() {
-    const config = new tools.TestConfig(
+    const config = new TestConfig(
         {
             file: "getGitHubData.js",
             test: "test_hvnws_Data",
             name: "getData",
             type: "method",
         },
-
         {
-            commitsDetails: tools.ANY_VALID,
-            branchesDetails: tools.ANY_VALID,
+            commitsDetails: ANY_VALID,
+            branchesDetails: ANY_VALID,
             success: true,
         },
-
         {
-            TEST_REPO_URL: "https://github.com/Bila-sowa/GitMap"
-        }
-
-    )
+            TEST_REPO_URL: "https://github.com/Bila-sowa/GitMap",
+        },
+    );
 
     const client = new GitHubClient();
 
-    let data = {};
-
-    try {
-        data = await client.getData(config.testData.TEST_REPO_URL);
-
-        const result = tools.validateTestData(data, config.expected);
-
-        return new tools.TestFeedback({
-            ...config.details,
-            success: result,
-            data: data,
-        });
-    } catch (err) {
-        console.error(err);
-        return new tools.TestFeedback({
-            ...config.details,
-            success: false,
-            data: data,
-        });
-    };
-};
+    return config.run(async ({ TEST_REPO_URL }) => {
+        return await client.getData(TEST_REPO_URL);
+    });
+}
