@@ -1,11 +1,12 @@
-import * as gitHubClientTests from "./gitHubClient/index";
+import * as apiTests from "./api/index";
 import * as utilsTests from "./utils/index";
 import * as appDataTests from "./data/index";
 
 const dataTests = [
-    gitHubClientTests.test_3j3f8_Data,
-    gitHubClientTests.test_hvnws_Data,
-    gitHubClientTests.test_nd2u3_Data,
+    apiTests.test_3j3f8_Data,
+    apiTests.test_hvnws_Data,
+    apiTests.test_nd2u3_Data,
+    apiTests.test_483nq_Data,
     utilsTests.test_0c2os_Data,
     utilsTests.test_gj781_Data,
     appDataTests.test_8je0j_Data,

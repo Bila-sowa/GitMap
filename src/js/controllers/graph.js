@@ -1,5 +1,5 @@
 import storage from "../data/storage.js";
-import GitHubClient from "../services/getGitHubData.js";
+import gitHubClient from "../api/gitHubClient.js";
 import { generateFullCommitModalHTML, bindFullComitEvents } from "../components/FullCommitModal/index.js";
 import { generateHoverCommitModalHTML, closeHoverCommitModals } from "../components/HoverCommitModal/index.js";
 import { appendHTML, positionModalNearElement, truncateTitle, getConfigData } from "../utils/utils.js";
@@ -9,7 +9,6 @@ import notifications from "../utils/notificationManager.js";
 export default class GraphController {
     #body = document.querySelector("body");
     #graph = null;
-    #client = new GitHubClient();
     #link = null;
     #data = null;
     #configData = null;
@@ -36,19 +35,19 @@ export default class GraphController {
     async #getGeneralData(link) {
         if (!link) return;
 
-        await this.#client.setToken(storage?.token);
+        await gitHubClient.setToken(storage?.token);
 
         this.#link = link;
-        this.#data = await this.#client.getData(link);
+        this.#data = await gitHubClient.getData(link);
         this.#configData = await getConfigData();
     }
 
     #getFilesData = async (sha) => {
         if (!this.#link || !sha) return;
 
-        await this.#client.setToken(storage?.token);
+        await gitHubClient.setToken(storage?.token);
 
-        const filesData = await this.#client.getCommitFiles(this.#link, sha);
+        const filesData = await gitHubClient.getCommitFiles(this.#link, sha);
 
         return filesData;
     };

@@ -1,5 +1,5 @@
-import GitHubClient from "@/js/services/getGitHubData";
-import { TestConfig, ANY_VALID } from "../tools/testTools";
+import { GitHubClient } from "@/js/api/gitHubClient";
+import { TestConfig, ANY_VALID } from "../../tools/testTools";
 
 /**
  * #### Description:
@@ -7,7 +7,7 @@ import { TestConfig, ANY_VALID } from "../tools/testTools";
  * The test verifies the formatted data for commits and branches.
  * 
  * #### Params:
- * - file: `getGitHubData.js`
+ * - file: `gitHubClient.js`
  * - test: `test_nd2u3_Data`
  * - name: `getCommitFiles`
  * - type: `method`
@@ -25,6 +25,7 @@ export default async function test_nd2u3_Data() {
         {
             files: ANY_VALID,
             success: true,
+            truncated: false
         },
         {
             TEST_REPO_URL: "https://github.com/Bila-sowa/GitMap",
