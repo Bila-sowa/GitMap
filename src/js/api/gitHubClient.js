@@ -2,9 +2,15 @@ import GitHubHttpApi from "./gitHubHttpApi";
 import formatter from "../utils/formatter.js";
 import notifications from "../utils/notificationManager.js";
 import { escapeHTML } from "../utils/utils.js";
+import storage from "../data/storage";
 
 class GitHubClient extends GitHubHttpApi {
     #headers = { Accept: "application/vnd.github+json" };
+
+    constructor() {
+        super();
+        if (storage.token) this.setToken(storage.token);
+    }
 
     #formatGitHubUrl = (url) => {
         try {
@@ -266,18 +272,22 @@ class GitHubClient extends GitHubHttpApi {
     async setToken(token) {
         if (!token) {
             delete this.#headers.Authorization;
+            delete storage.token;
             return { success: true };
         }
 
+        storage.token = token;
         this.#headers.Authorization = `Bearer ${token}`;
         const validation = await this.#validateToken();
 
         if (!validation.success) {
             delete this.#headers.Authorization;
+            delete storage.token;
             notifications.notify(validation.error, "error");
             return validation;
         }
 
+        notifications.notify("The token has been successfully set", "success");
         return { success: true };
     }
 

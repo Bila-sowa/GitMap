@@ -35,8 +35,6 @@ export default class GraphController {
     async #getGeneralData(link) {
         if (!link) return;
 
-        await gitHubClient.setToken(storage?.token);
-
         this.#link = link;
         this.#data = await gitHubClient.getData(link);
         this.#configData = await getConfigData();
@@ -44,8 +42,6 @@ export default class GraphController {
 
     #getFilesData = async (sha) => {
         if (!this.#link || !sha) return;
-
-        await gitHubClient.setToken(storage?.token);
 
         const filesData = await gitHubClient.getCommitFiles(this.#link, sha);
 

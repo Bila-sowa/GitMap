@@ -1,6 +1,7 @@
 import storage from "@/js/data/storage";
 import LocalStorage from "@/js/controllers/localStorage";
 import styles from "./styles.module.scss";
+import gitHubClient from "@/js/api/gitHubClient";
 
 const generateSettingsModalHTML = (limit, versionDetails) => {
     const { usedPerNumber, limitPerNumber, usedPerPercent } = limit;
@@ -95,7 +96,7 @@ function bindSettingsModalEvents() {
     const localStorage = new LocalStorage();
 
     function saveToken() {
-        storage.token = tokenInput.value.trim();
+        gitHubClient.setToken(tokenInput.value.trim());
         if (storage.saveToken) {
             localStorage.save();
         }

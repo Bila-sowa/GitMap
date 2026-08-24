@@ -38,8 +38,8 @@ class GitHubHttpApi {
             if (apiResponse && typeof apiResponse === "object" && apiResponse.message) {
                 apiMessage = apiResponse.message;
             }
-        } catch {
-            console.warn(`createHttpError: failed to parse JSON response body for "${url}".`, error);
+        } catch (err) {
+            console.warn(`createHttpError: failed to parse JSON response body for "${url}".`, err);
         }
 
         const userError = this.getHttpErrorMessage(res.status);
