@@ -40,7 +40,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
         url: commitUrl,
     } = commitData;
 
-    const { success, files } = filesData;
+    const { success, files, truncated } = filesData;
 
     closeFullCommitModals();
 
@@ -82,28 +82,35 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
                         ? files
                               .map(
                                   (file) => `
-                    <div class="${styles["modal-file"]} rounded-normal">
-                        <img class="${styles["modal-file-icon"]}" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
-                        <code class="${styles["modal-file-path"]} text-small">${file.name}</code>
-                        <div class="${styles["modal-file-changes"]}">
-                            ${
-                                file.status === "R"
-                                    ? `<span class="text-small" style="color: ${statusColors[`${theme}`][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>`
-                                    : `
-                                <code class="${styles["modal-file-changes-additions"]} text-small">+${file.additions}</code>
-                                <code class="${styles["modal-file-changes-deletions"]} text-small">-${file.deletions}</code>
-                                <code class="text-small" style="color: ${statusColors?.[`${theme}`][file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</code>
-                            `
-                            }
+                        <div class="${styles["modal-file"]} rounded-normal">
+                            <img class="${styles["modal-file-icon"]}" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
+                            <code class="${styles["modal-file-path"]} text-small">${file.name}</code>
+                            <div class="${styles["modal-file-changes"]}">
+                                ${
+                                    file.status === "R"
+                                        ? `<span class="text-small" style="color: ${statusColors[`${theme}`][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>`
+                                        : `
+                                    <code class="${styles["modal-file-changes-additions"]} text-small">+${file.additions}</code>
+                                    <code class="${styles["modal-file-changes-deletions"]} text-small">-${file.deletions}</code>
+                                    <code class="text-small" style="color: ${statusColors?.[`${theme}`][file.fullStatus] ?? "#8B949E"}" title="${file.fullStatus}">${file.status}</code>
+                                `
+                                }
+                            </div>
                         </div>
-                    </div>
-                `,
+                    `,
                               )
                               .join("")
                         : `<p class="text-small">No files details available.</p>`
                 }
+            ${
+                truncated
+                    ? `<p class="text-small">The files were truncated to 300 due to <a class="link text-small" href="https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#get-a-commit" target="_blank">limits.</a></p>`
+                    : ""
+            }
             </div>
-            <a href="${commitUrl}" target="_blank" rel="noopener noreferrer">View in <b>GitHub</b><img width="32" src="${gitHubLogoSrc}" alt></a>
+            <a class="${styles["modal-changes-github-button"]}" href="${commitUrl}" target="_blank" rel="noopener noreferrer">
+                View in GitHub<img width="32" src="${gitHubLogoSrc}" alt="GitHub logo">
+            </a>
         </div>
     </div>
     `;

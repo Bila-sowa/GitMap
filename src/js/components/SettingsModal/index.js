@@ -1,6 +1,7 @@
 import storage from "@/js/data/storage";
 import LocalStorage from "@/js/controllers/localStorage";
 import styles from "./styles.module.scss";
+import gitHubClient from "@/js/api/gitHubClient";
 
 const generateSettingsModalHTML = (limit, versionDetails) => {
     const { usedPerNumber, limitPerNumber, usedPerPercent } = limit;
@@ -70,7 +71,7 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
                     <div class="${styles["settings-version-text-container"]}">
                         <span class="text-small">Version: </span>
                         <span class="text-small">${versionType}</span>
-                        <a class="text-small bg-none-important" href="#" target="_blank" class="bg-none" title="View in changelog" class="text-small">${version}</a>
+                        <a class="text-small link" href="#" target="_blank" class="bg-none" title="View in changelog" class="text-small">${version}</a>
                         ${versionIsStable ? "" : `<span title="${notStableMessage}" class="text-small cursor-help">${versionIsStable ? "" : "(not stable)"}</span>`}
                     </div> 
                 </div>
@@ -95,7 +96,7 @@ function bindSettingsModalEvents() {
     const localStorage = new LocalStorage();
 
     function saveToken() {
-        storage.token = tokenInput.value.trim();
+        gitHubClient.setToken(tokenInput.value.trim());
         if (storage.saveToken) {
             localStorage.save();
         }

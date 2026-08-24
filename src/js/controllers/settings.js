@@ -1,12 +1,11 @@
 import storage from "../data/storage.js";
-import GitHubClient from "../services/getGitHubData.js";
+import gitHubClient from "../api/gitHubClient.js";
 import { appendHTML, getConfigData } from "../utils/utils.js";
 import { bindSettingsModalEvents, generateSettingsModalHTML } from "../components/SettingsModal/index.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 
 class SettingsController {
     #button;
-    #client = new GitHubClient();
 
     constructor(button) {
         this.#button = button;
@@ -18,11 +17,11 @@ class SettingsController {
     }
 
     async #openSettings() {
-        storage.token ? await this.#client.setToken(storage.token) : "";
+        storage.token ? await gitHubClient.setToken(storage.token) : "";
 
         generateLoader();
 
-        const rateLimitRes = await this.#client.getRateLimitData();
+        const rateLimitRes = await gitHubClient.getRateLimitData();
         const limit = rateLimitRes.data;
         const config = await getConfigData();
         const versionDetails = config.versionDetails;

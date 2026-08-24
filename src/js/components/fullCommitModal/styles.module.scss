@@ -73,11 +73,10 @@
             border-bottom: var(--border-color-1) 2px solid;
         }
 
-        a {
+        &-github-button {
             background: var(--color-4);
             width: 260px;
             height: 50px;
-            font-size: 1rem;
             display: flex;
             justify-content: center;
             align-items: center;

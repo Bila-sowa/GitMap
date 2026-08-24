@@ -1,4 +1,4 @@
-import Formatter from "@/js/utils/formatter";
+import { Formatter } from "@/js/utils/formatter";
 import { TestConfig } from "../tools/testTools";
 
 /**

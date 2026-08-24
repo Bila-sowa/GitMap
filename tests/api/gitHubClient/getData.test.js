@@ -1,5 +1,5 @@
-import GitHubClient from "@/js/services/getGitHubData";
-import { TestConfig, ANY_VALID } from "../tools/testTools";
+import { GitHubClient } from "@/js/api/gitHubClient";
+import { TestConfig, ANY_VALID } from "../../tools/testTools";
 
 /**
  * #### Description:
@@ -7,7 +7,7 @@ import { TestConfig, ANY_VALID } from "../tools/testTools";
  * The test verifies the formatted data for commits and branches.
  * 
  * #### Params:
- * - file: `getGitHubData.js`
+ * - file: `gitHubClient.js`
  * - test: `test_hvnws_Data`
  * - name: `getData`
  * - type: `method`
