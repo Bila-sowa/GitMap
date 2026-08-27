@@ -2,12 +2,12 @@ import "../styles.scss";
 import * as DOM from "./controllers/dom.js";
 import storage from "./data/storage.js";
 
+import { CanvasController } from "./controllers/canvas.js";
 import GraphController from "./controllers/graph.js";
-import CanvasController from "./controllers/canvas.js";
-import SettingsController from "./controllers/settings.js";
 import LinkController from "./controllers/link";
-import ThemeController from "./controllers/theme";
 import RefreshButtonController from "./controllers/refresh";
+import SettingsController from "./controllers/settings.js";
+import ThemeController from "./controllers/theme";
 
 import LocalStorageController from "./controllers/localStorage.js";
 const persistence = new LocalStorageController();
