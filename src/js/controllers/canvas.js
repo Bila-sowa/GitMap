@@ -1,30 +1,30 @@
-export default class CanvasController {
+class CanvasController {
     #abortController = null;
+    #isPanning = false;
+    #startX = 0;
+    #startY = 0;
+    #lastOffsetX = 0;
+    #lastOffsetY = 0;
+    #lastPinchDist = 0;
+    #pinchMidX = 0;
+    #pinchMidY = 0;
+    #pinchStartScale = 1;
+    #pinchStartOffsetX = 0;
+    #pinchStartOffsetY = 0;
 
-    constructor(viewport, canvas) {
+    constructor(viewport, canvasElement) {
         this.viewport = viewport;
-        this.canvas = canvas;
+        this.canvas = canvasElement;
         this.scale = 1;
         this.offsetX = 0;
         this.offsetY = 0;
-        this.isPanning = false;
-        this.startX = 0;
-        this.startY = 0;
-        this.lastOffsetX = 0;
-        this.lastOffsetY = 0;
         this.minScale = 0.1;
         this.maxScale = 5;
         this.zoomSensitivity = 0.001;
+        this.onChange = null;
+        this.canvas.style.transformOrigin = "0 0";
         this.#bindEvents();
         this.#applyTransform();
-    }
-
-    #applyTransform() {
-        this.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
-    }
-
-    #clamp(value, min, max) {
-        return Math.min(Math.max(value, min), max);
     }
 
     #bindEvents() {
@@ -32,44 +32,64 @@ export default class CanvasController {
         this.#abortController = new AbortController();
         const { signal } = this.#abortController;
 
-        this.viewport.addEventListener("mousedown", (e) => this.#onMouseDown(e), { signal });
-        window.addEventListener("mousemove", (e) => this.#onMouseMove(e), { signal });
-        window.addEventListener("mouseup", () => this.#onMouseUp(), { signal });
-
-        this.viewport.addEventListener("wheel", (e) => this.#onWheel(e), { passive: false, signal });
-
-        this.viewport.addEventListener("touchstart", (e) => this.#onTouchStart(e), { passive: false, signal });
-        this.viewport.addEventListener("touchmove", (e) => this.#onTouchMove(e), { passive: false, signal });
-        this.viewport.addEventListener("touchend", () => this.#onTouchEnd(), { signal });
+        this.viewport.addEventListener("mousedown", this.#onMouseDown, { signal });
+        window.addEventListener("mousemove", this.#onMouseMove, { signal });
+        window.addEventListener("mouseup", this.#onMouseUp, { signal });
+        this.viewport.addEventListener("wheel", this.#onWheel, { passive: false, signal });
+        this.viewport.addEventListener("touchstart", this.#onTouchStart, { passive: false, signal });
+        this.viewport.addEventListener("touchmove", this.#onTouchMove, { passive: false, signal });
+        this.viewport.addEventListener("touchend", this.#onTouchEnd, { signal });
     }
 
-    #onMouseDown(e) {
-        if (e.button !== 0) return;
-        if (e.target !== this.viewport && e.target !== this.canvas) return;
+    #clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
 
-        this.isPanning = true;
-        this.startX = e.clientX;
-        this.startY = e.clientY;
-        this.lastOffsetX = this.offsetX;
-        this.lastOffsetY = this.offsetY;
+    #startPan(x, y) {
+        this.#isPanning = true;
+        this.#startX = x;
+        this.#startY = y;
+        this.#lastOffsetX = this.offsetX;
+        this.#lastOffsetY = this.offsetY;
         this.viewport.classList.add("is-panning");
     }
 
-    #onMouseMove(e) {
-        if (!this.isPanning) return;
-
-        this.offsetX = this.lastOffsetX + (e.clientX - this.startX);
-        this.offsetY = this.lastOffsetY + (e.clientY - this.startY);
+    #movePan(x, y) {
+        if (!this.#isPanning) return;
+        this.offsetX = this.#lastOffsetX + (x - this.#startX);
+        this.offsetY = this.#lastOffsetY + (y - this.#startY);
         this.#applyTransform();
     }
 
-    #onMouseUp() {
-        if (!this.isPanning) return;
-        this.isPanning = false;
+    #endPan() {
+        if (!this.#isPanning) return;
+        this.#isPanning = false;
         this.viewport.classList.remove("is-panning");
     }
 
-    #onWheel(e) {
+    #getPinchDistance(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    #onMouseDown = (e) => {
+        if (e.button !== 0) return;
+        if (e.target !== this.viewport && e.target !== this.canvas && !this.canvas.contains(e.target)) {
+            return;
+        }
+        this.#startPan(e.clientX, e.clientY);
+    };
+
+    #onMouseMove = (e) => {
+        this.#movePan(e.clientX, e.clientY);
+    };
+
+    #onMouseUp = () => {
+        this.#endPan();
+    };
+
+    #onWheel = (e) => {
         e.preventDefault();
 
         const rect = this.viewport.getBoundingClientRect();
@@ -78,75 +98,91 @@ export default class CanvasController {
 
         if (e.ctrlKey) {
             const delta = -e.deltaY * this.zoomSensitivity;
-            const newScale = this.#clamp(this.scale * (1 + delta), this.minScale, this.maxScale);
-            const scaleRatio = newScale / this.scale;
-
-            this.offsetX = mouseX - scaleRatio * (mouseX - this.offsetX);
-            this.offsetY = mouseY - scaleRatio * (mouseY - this.offsetY);
-            this.scale = newScale;
-        } else {
-            this.offsetX -= e.deltaX;
-            this.offsetY -= e.deltaY;
+            this.zoomAt(mouseX, mouseY, this.scale * (1 + delta));
+            return;
         }
 
-        this.#applyTransform();
-    }
+        this.panBy(-e.deltaX, -e.deltaY);
+    };
 
-    #onTouchStart(e) {
+    #onTouchStart = (e) => {
         if (e.touches.length === 1) {
-            this.isPanning = true;
-            this.startX = e.touches[0].clientX;
-            this.startY = e.touches[0].clientY;
-            this.lastOffsetX = this.offsetX;
-            this.lastOffsetY = this.offsetY;
-        } else if (e.touches.length === 2) {
-            this.isPanning = false;
-            this._lastPinchDist = this.#getPinchDistance(e.touches);
-            this._pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            this._pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            this._pinchStartScale = this.scale;
-            this._pinchStartOffsetX = this.offsetX;
-            this._pinchStartOffsetY = this.offsetY;
+            this.#startPan(e.touches[0].clientX, e.touches[0].clientY);
+            return;
         }
-    }
 
-    #onTouchMove(e) {
+        if (e.touches.length === 2) {
+            this.#isPanning = false;
+            this.#lastPinchDist = this.#getPinchDistance(e.touches);
+            this.#pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            this.#pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            this.#pinchStartScale = this.scale;
+            this.#pinchStartOffsetX = this.offsetX;
+            this.#pinchStartOffsetY = this.offsetY;
+        }
+    };
+
+    #onTouchMove = (e) => {
         e.preventDefault();
 
-        if (e.touches.length === 1 && this.isPanning) {
-            this.offsetX = this.lastOffsetX + (e.touches[0].clientX - this.startX);
-            this.offsetY = this.lastOffsetY + (e.touches[0].clientY - this.startY);
-            this.#applyTransform();
-        } else if (e.touches.length === 2) {
-            const dist = this.#getPinchDistance(e.touches);
-            const scaleRatio = dist / this._lastPinchDist;
+        if (e.touches.length === 1 && this.#isPanning) {
+            this.#movePan(e.touches[0].clientX, e.touches[0].clientY);
+            return;
+        }
 
+        if (e.touches.length === 2) {
+            const dist = this.#getPinchDistance(e.touches);
+            const scaleRatio = dist / this.#lastPinchDist;
             const rect = this.viewport.getBoundingClientRect();
             const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
             const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
 
-            this.scale = this.#clamp(this._pinchStartScale * scaleRatio, this.minScale, this.maxScale);
+            this.scale = this.#clamp(this.#pinchStartScale * scaleRatio, this.minScale, this.maxScale);
             this.offsetX =
                 midX -
-                (this._pinchMidX - rect.left - this._pinchStartOffsetX) * (this.scale / this._pinchStartScale) -
-                (midX - (this._pinchMidX - rect.left));
+                (this.#pinchMidX - rect.left - this.#pinchStartOffsetX) * (this.scale / this.#pinchStartScale) -
+                (midX - (this.#pinchMidX - rect.left));
             this.offsetY =
                 midY -
-                (this._pinchMidY - rect.top - this._pinchStartOffsetY) * (this.scale / this._pinchStartScale) -
-                (midY - (this._pinchMidY - rect.top));
-
+                (this.#pinchMidY - rect.top - this.#pinchStartOffsetY) * (this.scale / this.#pinchStartScale) -
+                (midY - (this.#pinchMidY - rect.top));
             this.#applyTransform();
         }
+    };
+
+    #onTouchEnd = () => {
+        this.#endPan();
+    };
+
+    #applyTransform() {
+        this.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+        this.onChange?.(this);
     }
 
-    #onTouchEnd() {
-        this.isPanning = false;
+    panBy(dx, dy) {
+        this.offsetX += dx;
+        this.offsetY += dy;
+        this.#applyTransform();
     }
 
-    #getPinchDistance(touches) {
-        const dx = touches[0].clientX - touches[1].clientX;
-        const dy = touches[0].clientY - touches[1].clientY;
-        return Math.sqrt(dx * dx + dy * dy);
+    panTo(offsetX, offsetY) {
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+        this.#applyTransform();
+    }
+
+    setScale(scale) {
+        this.scale = this.#clamp(scale, this.minScale, this.maxScale);
+        this.#applyTransform();
+    }
+
+    zoomAt(originX, originY, newScale) {
+        const clamped = this.#clamp(newScale, this.minScale, this.maxScale);
+        const scaleRatio = clamped / this.scale;
+        this.offsetX = originX - scaleRatio * (originX - this.offsetX);
+        this.offsetY = originY - scaleRatio * (originY - this.offsetY);
+        this.scale = clamped;
+        this.#applyTransform();
     }
 
     reset() {
@@ -165,15 +201,15 @@ export default class CanvasController {
 
     zoom(factor) {
         const rect = this.viewport.getBoundingClientRect();
-        const midX = rect.width / 2;
-        const midY = rect.height / 2;
-        const newScale = this.#clamp(this.scale * factor, this.minScale, this.maxScale);
-        const scaleRatio = newScale / this.scale;
+        this.zoomAt(rect.width / 2, rect.height / 2, this.scale * factor);
+    }
 
-        this.offsetX = midX - scaleRatio * (midX - this.offsetX);
-        this.offsetY = midY - scaleRatio * (midY - this.offsetY);
-        this.scale = newScale;
-        this.#applyTransform();
+    getTransform() {
+        return {
+            scale: this.scale,
+            offsetX: this.offsetX,
+            offsetY: this.offsetY,
+        };
     }
 
     destroy() {
@@ -181,5 +217,8 @@ export default class CanvasController {
             this.#abortController.abort();
             this.#abortController = null;
         }
+        this.viewport.classList.remove("is-panning");
     }
 }
+
+export { CanvasController };
