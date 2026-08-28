@@ -16,7 +16,7 @@ class RefreshButtonController {
     }
 }
 
-const refreshButtonController = new RefreshButtonController(DOM.refreshButton, graphController);
+const refresh = new RefreshButtonController(DOM.refreshButton, graphController);
 
 export { RefreshButtonController };
-export default refreshButtonController;
+export default refresh;

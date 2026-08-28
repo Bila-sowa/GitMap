@@ -1,17 +1,15 @@
 import storage from "../data/storage.js";
 import * as DOM from "./dom.js";
 import graphController from "./graph.js";
-import { LocalStorageController } from "./localStorage.js";
+import localStorage from "./localStorage.js";
 
 class LinkController {
     #input;
     #graph;
-    #localStorage;
 
     constructor(input, graph) {
         this.#input = input;
         this.#graph = graph;
-        this.#localStorage = new LocalStorageController();
         this.#input.value = storage.link || "";
         this.#bindEvents();
     }
@@ -25,7 +23,7 @@ class LinkController {
 
             storage.link = inputValue;
             if (storage.saveLink) {
-                this.#localStorage.save();
+                localStorage.save();
             }
 
             this.#graph.render();
@@ -33,7 +31,7 @@ class LinkController {
     }
 }
 
-const linkController = new LinkController(DOM.linkInput, graphController);
+const linkInput = new LinkController(DOM.linkInput, graphController);
 
 export { LinkController };
-export default linkController;
+export default linkInput;

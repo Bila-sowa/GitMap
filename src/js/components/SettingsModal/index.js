@@ -1,5 +1,5 @@
 import storage from "@/js/data/storage";
-import LocalStorage from "@/js/controllers/localStorage";
+import localStorage from "@/js/controllers/localStorage";
 import styles from "./styles.module.scss";
 import gitHubClient from "@/js/api/gitHubClient";
 
@@ -93,8 +93,6 @@ function bindSettingsModalEvents() {
     const tokenInput = modal.querySelector("#token-input");
     const saveLinkToggle = document.querySelector("#save-link");
     const saveTokenToggle = document.querySelector("#save-token");
-    const localStorage = new LocalStorage();
-
     function saveToken() {
         gitHubClient.setToken(tokenInput.value.trim());
         if (storage.saveToken) {

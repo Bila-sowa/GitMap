@@ -141,11 +141,11 @@ class GraphController {
     }
 }
 
-const graphController = new GraphController(DOM.graph);
+const graph = new GraphController(DOM.graph);
 
 if (storage.link) {
-    graphController.render();
+    graph.render();
 }
 
 export { GraphController };
-export default graphController;
+export default graph;

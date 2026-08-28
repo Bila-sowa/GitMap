@@ -1,10 +1,9 @@
 import storage from "../data/storage.js";
 import * as DOM from "./dom.js";
-import { LocalStorageController } from "./localStorage.js";
+import localStorage from "./localStorage.js";
 
 class ThemeController {
     #button;
-    #localStorage = new LocalStorageController();
 
     constructor(button) {
         this.#button = button;
@@ -23,7 +22,7 @@ class ThemeController {
         document.body.classList.add(validTheme);
         storage.theme = validTheme;
 
-        this.#localStorage.save();
+        localStorage.save();
     }
 
     #changeTheme() {
@@ -32,7 +31,7 @@ class ThemeController {
     }
 }
 
-const themeController = new ThemeController(DOM.themeButton);
+const theme = new ThemeController(DOM.themeButton);
 
 export { ThemeController };
-export default themeController;
+export default theme;

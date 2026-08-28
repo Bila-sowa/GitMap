@@ -223,7 +223,7 @@ class CanvasController {
     }
 }
 
-const canvasController = new CanvasController(DOM.viewport, DOM.canvas);
+const canvas = new CanvasController(DOM.viewport, DOM.canvas);
 
 export { CanvasController };
-export default canvasController;
+export default canvas;

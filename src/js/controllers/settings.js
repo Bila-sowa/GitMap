@@ -38,7 +38,7 @@ class SettingsController {
     }
 }
 
-const settingsController = new SettingsController(DOM.settingsButton);
+const settings = new SettingsController(DOM.settingsButton);
 
 export { SettingsController };
-export default settingsController;
+export default settings;
