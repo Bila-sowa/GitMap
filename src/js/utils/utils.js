@@ -53,46 +53,6 @@ const truncateTitle = (title, wordCount = 5) => {
     return words.length > wordCount ? words.slice(0, 3).join(" ") + "..." : title;
 };
 
-const getDefaultConfig = () => {
-    return {
-        name: "GitMap",
-        debug: false,
-        versionDetails: {
-            version: "not found",
-            versionType: "not found",
-            versionIsStable: false,
-        },
-        graph: {
-            renderLimit: 30,
-        },
-        notifications: {
-            showNotifications: true,
-            COOLDOWN_MS: 5000,
-        },
-    };
-};
-
-const getConfigData = async (url = `${import.meta.env.BASE_URL}config.json`) => {
-    try {
-        const configRes = await fetch(url);
-
-        if (!configRes.ok) {
-            throw new Error(`Failed to load config.json: ${configRes.status}`);
-        }
-
-        const configData = await configRes.json();
-
-        if (!Object.entries(configData).length) {
-            throw new Error("Config is empty");
-        }
-
-        return configData;
-    } catch (error) {
-        console.error("Returning default config, error fetching config:", error);
-        return getDefaultConfig();
-    }
-};
-
 function appendHTML(HTML) {
     const body = document.body;
 
@@ -101,12 +61,4 @@ function appendHTML(HTML) {
     body.insertAdjacentHTML("beforeend", HTML);
 }
 
-export {
-    copyValueToClipboard,
-    getRandomID,
-    escapeHTML,
-    positionModalNearElement,
-    truncateTitle,
-    getConfigData,
-    appendHTML,
-};
+export { copyValueToClipboard, getRandomID, escapeHTML, positionModalNearElement, truncateTitle, appendHTML };

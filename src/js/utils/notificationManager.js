@@ -1,4 +1,5 @@
-import { getConfigData, getRandomID } from "./utils";
+import getConfigData from "../api/getConfigData";
+import { getRandomID } from "./utils";
 
 class NotificationManager {
     #queue = [];
