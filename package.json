@@ -1,6 +1,6 @@
 {
     "name": "gitmap",
-    "version": "2.6.3",
+    "version": "2.7.3",
     "private": true,
     "type": "module",
     "scripts": {
