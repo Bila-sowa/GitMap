@@ -1,5 +1,6 @@
-import LocalStorageController from "./localStorage";
-import storage from "../data/storage";
+import storage from "../data/storage.js";
+import * as DOM from "./dom.js";
+import { LocalStorageController } from "./localStorage.js";
 
 class ThemeController {
     #button;
@@ -31,4 +32,7 @@ class ThemeController {
     }
 }
 
-export default ThemeController;
+const themeController = new ThemeController(DOM.themeButton);
+
+export { ThemeController };
+export default themeController;

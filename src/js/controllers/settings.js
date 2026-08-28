@@ -1,8 +1,9 @@
-import storage from "../data/storage.js";
 import gitHubClient from "../api/gitHubClient.js";
-import { appendHTML, getConfigData } from "../utils/utils.js";
-import { bindSettingsModalEvents, generateSettingsModalHTML } from "../components/SettingsModal/index.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
+import { bindSettingsModalEvents, generateSettingsModalHTML } from "../components/SettingsModal/index.js";
+import storage from "../data/storage.js";
+import { appendHTML, getConfigData } from "../utils/utils.js";
+import * as DOM from "./dom.js";
 
 class SettingsController {
     #button;
@@ -37,4 +38,7 @@ class SettingsController {
     }
 }
 
-export default SettingsController;
+const settingsController = new SettingsController(DOM.settingsButton);
+
+export { SettingsController };
+export default settingsController;

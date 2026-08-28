@@ -1,25 +1,8 @@
 import "../styles.scss";
-import * as DOM from "./controllers/dom.js";
-import storage from "./data/storage.js";
-
-import { CanvasController } from "./controllers/canvas.js";
-import GraphController from "./controllers/graph.js";
-import LinkController from "./controllers/link";
-import RefreshButtonController from "./controllers/refresh";
-import SettingsController from "./controllers/settings.js";
-import ThemeController from "./controllers/theme";
-
-import LocalStorageController from "./controllers/localStorage.js";
-const persistence = new LocalStorageController();
-persistence.load();
-
-const graph = new GraphController(DOM.graph);
-const canvas = new CanvasController(DOM.viewport, DOM.canvas);
-const linkInput = new LinkController(DOM.linkInput, graph);
-const theme = new ThemeController(DOM.themeButton);
-const refresh = new RefreshButtonController(DOM.refreshButton, graph);
-const settings = new SettingsController(DOM.settingsButton);
-
-if (storage.link) {
-    graph.render();
-}
+import "./controllers/canvas.js";
+import "./controllers/graph.js";
+import "./controllers/link.js";
+import "./controllers/localStorage.js";
+import "./controllers/refresh.js";
+import "./controllers/settings.js";
+import "./controllers/theme.js";

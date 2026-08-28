@@ -1,3 +1,6 @@
+import * as DOM from "./dom.js";
+import graphController from "./graph.js";
+
 class RefreshButtonController {
     #button;
     #graph;
@@ -13,4 +16,7 @@ class RefreshButtonController {
     }
 }
 
-export default RefreshButtonController;
+const refreshButtonController = new RefreshButtonController(DOM.refreshButton, graphController);
+
+export { RefreshButtonController };
+export default refreshButtonController;

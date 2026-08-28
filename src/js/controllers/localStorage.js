@@ -1,7 +1,7 @@
 import storage from "../data/storage.js";
 import notifications from "../utils/notificationManager.js";
 
-export default class LocalStorageController {
+class LocalStorageController {
     save() {
         const currentData = storage.getData();
         const dataToSave = {
@@ -58,3 +58,9 @@ export default class LocalStorageController {
         return { success: true, data: storage.getData() };
     }
 }
+
+const localStorageController = new LocalStorageController();
+localStorageController.load();
+
+export { LocalStorageController };
+export default localStorageController;
