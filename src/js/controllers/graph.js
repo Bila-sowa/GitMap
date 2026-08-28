@@ -1,12 +1,13 @@
-import storage from "../data/storage.js";
 import gitHubClient from "../api/gitHubClient.js";
-import { generateFullCommitModalHTML, bindFullComitEvents } from "../components/FullCommitModal/index.js";
-import { generateHoverCommitModalHTML, closeHoverCommitModals } from "../components/HoverCommitModal/index.js";
-import { appendHTML, positionModalNearElement, truncateTitle, getConfigData } from "../utils/utils.js";
+import { bindFullComitEvents, generateFullCommitModalHTML } from "../components/FullCommitModal/index.js";
+import { closeHoverCommitModals, generateHoverCommitModalHTML } from "../components/HoverCommitModal/index.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
+import storage from "../data/storage.js";
 import notifications from "../utils/notificationManager.js";
+import { appendHTML, getConfigData, positionModalNearElement, truncateTitle } from "../utils/utils.js";
+import * as DOM from "./dom.js";
 
-export default class GraphController {
+class GraphController {
     #body = document.querySelector("body");
     #graph = null;
     #link = null;
@@ -139,3 +140,12 @@ export default class GraphController {
         this.#graph.addEventListener("mouseout", () => closeHoverCommitModals(), { signal });
     }
 }
+
+const graphController = new GraphController(DOM.graph);
+
+if (storage.link) {
+    graphController.render();
+}
+
+export { GraphController };
+export default graphController;

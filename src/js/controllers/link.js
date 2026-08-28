@@ -1,5 +1,7 @@
-import LocalStorageController from "./localStorage";
-import storage from "../data/storage";
+import storage from "../data/storage.js";
+import * as DOM from "./dom.js";
+import graphController from "./graph.js";
+import { LocalStorageController } from "./localStorage.js";
 
 class LinkController {
     #input;
@@ -31,4 +33,7 @@ class LinkController {
     }
 }
 
-export default LinkController;
+const linkController = new LinkController(DOM.linkInput, graphController);
+
+export { LinkController };
+export default linkController;

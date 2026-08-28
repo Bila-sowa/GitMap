@@ -1,3 +1,5 @@
+import * as DOM from "./dom.js";
+
 class CanvasController {
     #abortController = null;
     #isPanning = false;
@@ -221,4 +223,7 @@ class CanvasController {
     }
 }
 
+const canvasController = new CanvasController(DOM.viewport, DOM.canvas);
+
 export { CanvasController };
+export default canvasController;
