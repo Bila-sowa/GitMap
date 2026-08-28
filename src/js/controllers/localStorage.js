@@ -11,15 +11,25 @@ class LocalStorageController {
             token: storage.saveToken ? storage.token : "",
         };
 
-        localStorage.setItem("GitMap", JSON.stringify(dataToSave));
+        try {
+            globalThis.localStorage.setItem("GitMap", JSON.stringify(dataToSave));
+            return { success: true };
+        } catch (err) {
+            notifications.notify("Unable to save data in local storage.", "error");
+            return { error: err.name, success: false };
+        }
     }
 
     get() {
         try {
-            const value = localStorage.getItem("GitMap");
+            const value = globalThis.localStorage.getItem("GitMap");
             let parse = {};
 
             if (value) parse = JSON.parse(value);
+
+            if (!parse || typeof parse !== "object" || Array.isArray(parse)) {
+                return { data: {}, success: false };
+            }
 
             return { data: parse, success: true };
         } catch (err) {
@@ -59,8 +69,8 @@ class LocalStorageController {
     }
 }
 
-const localStorageController = new LocalStorageController();
-localStorageController.load();
+const localStorage = new LocalStorageController();
+localStorage.load();
 
 export { LocalStorageController };
-export default localStorageController;
+export default localStorage;

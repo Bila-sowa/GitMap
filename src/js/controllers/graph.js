@@ -1,10 +1,11 @@
 import gitHubClient from "../api/gitHubClient.js";
+import getConfigData from "../api/getConfigData.js";
 import { bindFullComitEvents, generateFullCommitModalHTML } from "../components/FullCommitModal/index.js";
 import { closeHoverCommitModals, generateHoverCommitModalHTML } from "../components/HoverCommitModal/index.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 import storage from "../data/storage.js";
 import notifications from "../utils/notificationManager.js";
-import { appendHTML, getConfigData, positionModalNearElement, truncateTitle } from "../utils/utils.js";
+import { appendHTML, positionModalNearElement, truncateTitle } from "../utils/utils.js";
 import * as DOM from "./dom.js";
 
 class GraphController {
@@ -141,11 +142,11 @@ class GraphController {
     }
 }
 
-const graphController = new GraphController(DOM.graph);
+const graph = new GraphController(DOM.graph);
 
 if (storage.link) {
-    graphController.render();
+    graph.render();
 }
 
 export { GraphController };
-export default graphController;
+export default graph;

@@ -1,5 +1,5 @@
 import storage from "@/js/data/storage";
-import LocalStorage from "@/js/controllers/localStorage";
+import localStorage from "@/js/controllers/localStorage";
 import styles from "./styles.module.scss";
 import gitHubClient from "@/js/api/gitHubClient";
 
@@ -16,7 +16,7 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
     // Basic token limit with authorization.
     if (limitPerNumber >= 5000) authenticated = true;
 
-    const { version, versionType, versionIsStable } = versionDetails;
+    const { version, versionIsStable } = versionDetails;
 
     return `
         <div class="overlay">
@@ -35,7 +35,7 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>GitHub Rest api token status:</span>
                             <span class="
-                                ${authenticated ? "active-color" : "non-active-color"} 
+                                ${authenticated ? "active-color" : "non-active-color"}
                                 ${styles["settings-token-status"]} rounded-full"
                                 title="${authenticated ? tokenActiveMessage : tokenNonActiveMessage}"
                             >
@@ -43,7 +43,7 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
                             </span>
                         </div>
                     </div>
-                    <div class="${styles["settings-section"]}"> 
+                    <div class="${styles["settings-section"]}">
                         <h3>LocalStorage</h3>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span for="save-link">Save current repo in page</span>
@@ -57,23 +57,22 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>Rest API Limit:</span>
-                            <div 
-                                class="${styles["settings-rest-api-limit-progress"]} 
-                                rounded-full border-normal" 
+                            <div
+                                class="${styles["settings-rest-api-limit-progress"]}
+                                rounded-full border-normal"
                                 title="Used: ${usedPerNumber} / ${limitPerNumber}"
                             >
-                                <span 
-                                    class="${styles["settings-rest-api-limit-bar"]}" 
+                                <span
+                                    class="${styles["settings-rest-api-limit-bar"]}"
                                     style="width: ${usedPerPercent}%"></span>
                             </div>
                         </div>
                     </div>
                     <div class="${styles["settings-version-text-container"]}">
                         <span class="text-small">Version: </span>
-                        <span class="text-small">${versionType}</span>
-                        <a class="text-small link" href="#" target="_blank" class="bg-none" title="View in changelog" class="text-small">${version}</a>
+                        <a class="text-small link is-disabled" href="#" target="_blank" title="View in changelog" class="text-small" aria-disabled="true">${version}</a>
                         ${versionIsStable ? "" : `<span title="${notStableMessage}" class="text-small cursor-help">${versionIsStable ? "" : "(not stable)"}</span>`}
-                    </div> 
+                    </div>
                 </div>
             </div>
         </div>
@@ -93,8 +92,6 @@ function bindSettingsModalEvents() {
     const tokenInput = modal.querySelector("#token-input");
     const saveLinkToggle = document.querySelector("#save-link");
     const saveTokenToggle = document.querySelector("#save-token");
-    const localStorage = new LocalStorage();
-
     function saveToken() {
         gitHubClient.setToken(tokenInput.value.trim());
         if (storage.saveToken) {
