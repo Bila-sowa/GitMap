@@ -6,6 +6,9 @@ const refreshButton = document.querySelector("#refresh");
 const themeButton = document.querySelector("#theme");
 const settingsButton = document.querySelector("#settings");
 const graph = document.querySelector("#graph");
+const scaleIncreaseButton = document.querySelector("#scale-increase");
+const scaleDisplay = document.querySelector("#scale-display");
+const scaleDecreaseButton = document.querySelector("#scale-decrese");
 let pageFocusElements = [];
 
 const updateElements = () => {
@@ -23,4 +26,7 @@ export {
     settingsButton,
     graph,
     updateElements,
+    scaleIncreaseButton,
+    scaleDisplay,
+    scaleDecreaseButton,
 };
