@@ -29,6 +29,17 @@
     display: none;
 }
 
+*:disabled {
+    opacity: 70%;
+    pointer-events: none;
+}
+
+.is-disabled {
+    opacity: 70%;
+    pointer-events: none;
+    cursor: default;
+}
+
 h1,
 h2,
 h3 {

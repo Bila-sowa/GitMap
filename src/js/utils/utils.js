@@ -72,7 +72,7 @@ const getDefaultConfig = () => {
     };
 };
 
-const getConfigData = async (url = "src/js/data/config.json") => {
+const getConfigData = async (url = `${import.meta.env.BASE_URL}config.json`) => {
     try {
         const configRes = await fetch(url);
 
