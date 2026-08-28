@@ -1,0 +1,16 @@
+{
+    "name": "GitMap",
+    "debug": true,
+    "versionDetails": {
+        "version": "2.6.3",
+        "versionType": "alpha",
+        "versionIsStable": false
+    },
+    "graph": {
+        "renderLimit": 30
+    },
+    "notifications": {
+        "showNotifications": true,
+        "COOLDOWN_MS": 5000
+    }
+}
