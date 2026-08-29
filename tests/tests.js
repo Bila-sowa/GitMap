@@ -8,6 +8,7 @@ const dataTests = [
     apiTests.test_nd2u3_Data,
     apiTests.test_483nq_Data,
     apiTests.test_idi3p_Data,
+    apiTests.test_rz8ou_Data,
     utilsTests.test_0c2os_Data,
     utilsTests.test_gj781_Data,
     appDataTests.test_8je0j_Data,

@@ -234,6 +234,7 @@ class GitHubClient extends GitHubHttpApi {
             }
 
             const data = await fileRes.json();
+            console.log(data);
             const parsed = this.#parseCommitFiles(data);
 
             return parsed;

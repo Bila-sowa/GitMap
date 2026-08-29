@@ -13,7 +13,7 @@ import { ANY_VALID, TestConfig } from "../../tools/testTools";
  *
  * @returns TestFeedback
  */
-export default async function test_idi3p_Data() {
+export default function test_idi3p_Data() {
     const config = new TestConfig(
         {
             file: "gitHubDataParser",
@@ -138,7 +138,7 @@ export default async function test_idi3p_Data() {
 
     const parser = new GitHubDataParser();
 
-    return config.run(async (testData) => {
+    return config.run((testData) => {
         return parser.parseRepoData(testData);
     });
 }

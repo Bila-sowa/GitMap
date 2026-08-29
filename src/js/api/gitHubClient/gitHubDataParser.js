@@ -53,7 +53,7 @@ class GitHubDataParser {
         return { success: true, commitsDetails, branchesDetails };
     }
 
-    parseCommitFiles(raw) {
+    parseCommitFilesData(raw) {
         const files = Array.isArray(raw.files) ? raw.files : [];
         const formattedData = [];
 
