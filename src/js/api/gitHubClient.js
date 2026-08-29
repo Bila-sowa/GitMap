@@ -110,7 +110,7 @@ class GitHubClient extends GitHubHttpApi {
         const branches = Array.isArray(data.branches) ? data.branches : [];
         const commits = Array.isArray(data.commits) ? data.commits : [];
 
-        if (!branches.length || !commits.length) {
+        if (!branches.length || !commits.length || !data.success) {
             return {
                 success: false,
                 error: "Unexpected response format from GitHub",
