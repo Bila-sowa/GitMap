@@ -165,6 +165,8 @@ class GitHubClient extends GitHubHttpApi {
             return data;
         }
 
+        await this.getRateLimitData();
+
         const parsed = this.#parseData(data);
 
         if (!parsed.success) {
@@ -217,6 +219,8 @@ class GitHubClient extends GitHubHttpApi {
             return { success: false, error, devError };
         }
 
+        await this.getRateLimitData();
+
         try {
             const commitUrl = `${formatted.commitsLink}/${sha}`;
             const fileRes = await fetch(commitUrl, {
@@ -242,6 +246,21 @@ class GitHubClient extends GitHubHttpApi {
             notifications.notify(error, "error");
             return { success: false, error, devError };
         }
+    }
+
+    checkIsRateLimitHigh(response, percent = 70) {
+        if (
+            response?.success &&
+            typeof response.data?.usedPerPercent === "number" &&
+            response.data.usedPerPercent >= percent
+        ) {
+            notifications.notify(
+                `GitHub API rate limit is above ${percent}%. Consider reducing request volume or adding a personal access token.`,
+                "warning",
+            );
+        }
+
+        return response;
     }
 
     async #validateToken() {
@@ -329,7 +348,7 @@ class GitHubClient extends GitHubHttpApi {
             const usedCount = used !== undefined ? used : limit - remaining;
             const formattedPercent = limit > 0 ? Number(((usedCount / limit) * 100).toFixed(2)) : 0;
 
-            return {
+            const response = {
                 success: true,
                 data: {
                     limitPerNumber: limit,
@@ -337,6 +356,9 @@ class GitHubClient extends GitHubHttpApi {
                     usedPerPercent: formattedPercent,
                 },
             };
+
+            this.checkIsRateLimitHigh(response);
+            return response;
         } catch (err) {
             const error = "Failed to fetch rate limit data";
             const devError = {
