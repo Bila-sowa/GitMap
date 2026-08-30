@@ -1,15 +1,13 @@
 import notifications from "@/js/utils/notificationManager";
 import storage from "@/js/data/storage";
-import GitHubHttpApi from "./gitHubHttpApi";
 
-class GitHubTokenManager extends GitHubHttpApi {
-    #headers = { Accept: "application/vnd.github+json" };
+class GitHubTokenManager {
+    #headers;
+    #httpApi;
 
-    constructor() {
-        super();
-        if (storage.token) {
-            this.setToken(storage.token);
-        }
+    constructor(headers, httpApi) {
+        this.#headers = headers;
+        this.#httpApi = httpApi;
     }
 
     #getSafeHeaders(url) {
@@ -37,7 +35,7 @@ class GitHubTokenManager extends GitHubHttpApi {
             });
 
             if (!res.ok) {
-                const httpError = await this.createHttpError(res, url);
+                const httpError = await this.#httpApi.createHttpError(res, url);
                 return { success: false, ...httpError };
             }
 
@@ -85,7 +83,4 @@ class GitHubTokenManager extends GitHubHttpApi {
     }
 }
 
-const gitHubTokenManager = new GitHubTokenManager();
-
-export { GitHubTokenManager };
-export default gitHubTokenManager;
+export default GitHubTokenManager;

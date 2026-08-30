@@ -1,4 +1,5 @@
-import { GitHubTokenManager } from "@/js/api/gitHubClient/GitHubTokenManager";
+import GitHubTokenManager from "@/js/api/gitHubClient/gitHubTokenManager";
+import GitHubHttpApi from "@/js/api/gitHubClient/gitHubHttpApi";
 import { ANY_VALID, TestConfig } from "../../tools/testTools";
 
 /**
@@ -32,7 +33,9 @@ export default async function test_05yau_Data() {
         },
     );
 
-    const gitHubTokenManager = new GitHubTokenManager();
+    const headers = { Accept: "application/vnd.github+json" };
+    const httpApi = new GitHubHttpApi();
+    const gitHubTokenManager = new GitHubTokenManager(headers, httpApi);
 
     return config.run(async ({ token }) => {
         return gitHubTokenManager.setToken(token);

@@ -81,7 +81,4 @@ class GitHubDataParser {
     }
 }
 
-const gitHubDataParser = new GitHubDataParser();
-
-export { GitHubDataParser };
-export default gitHubDataParser;
+export default GitHubDataParser;

@@ -1,4 +1,4 @@
-import { GitHubDataParser } from "@/js/api/gitHubClient/gitHubDataParser";
+import GitHubDataParser from "@/js/api/gitHubClient/gitHubDataParser";
 import { ANY_VALID, TestConfig } from "../../tools/testTools";
 
 /**

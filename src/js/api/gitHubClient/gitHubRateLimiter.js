@@ -1,9 +1,13 @@
 import notifications from "@/js/utils/notificationManager";
-import storage from "@/js/data/storage";
-import GitHubHttpApi from "./gitHubHttpApi";
 
-class GitHubRateLimiter extends GitHubHttpApi {
-    #headers = { Accept: "application/vnd.github+json" };
+class GitHubRateLimiter {
+    #headers;
+    #httpApi;
+
+    constructor(headers, httpApi) {
+        this.#headers = headers;
+        this.#httpApi = httpApi;
+    }
 
     #getSafeHeaders(url) {
         const headers = { Accept: this.#headers.Accept };
@@ -15,11 +19,8 @@ class GitHubRateLimiter extends GitHubHttpApi {
             console.warn(`getSafeHeaders: invalid URL "${url}", Authorization header omitted.`, error);
         }
 
-        const token = storage.token;
-        const auth = token ? `Bearer ${token}` : this.#headers.Authorization;
-
-        if (hostname === "api.github.com" && auth) {
-            headers.Authorization = auth;
+        if (hostname === "api.github.com" && this.#headers.Authorization) {
+            headers.Authorization = this.#headers.Authorization;
         }
 
         return headers;
@@ -48,7 +49,7 @@ class GitHubRateLimiter extends GitHubHttpApi {
             });
 
             if (!res.ok) {
-                const httpError = await this.createHttpError(res, url);
+                const httpError = await this.#httpApi.createHttpError(res, url);
                 notifications.notify(httpError.error, "error");
                 return {
                     success: false,
@@ -106,7 +107,4 @@ class GitHubRateLimiter extends GitHubHttpApi {
     }
 }
 
-const gitHubRateLimiter = new GitHubRateLimiter();
-
-export { GitHubRateLimiter };
-export default gitHubRateLimiter;
+export default GitHubRateLimiter;
