@@ -1,4 +1,4 @@
-import GitHubHttpApi from "@/js/api/gitHubHttpApi";
+import GitHubHttpApi from "@/js/api/gitHubClient/gitHubHttpApi";
 import { TestConfig } from "../../tools/testTools";
 
 /**

@@ -1,6 +1,6 @@
-import notifications from "../../utils/notificationManager.js";
-import storage from "../../data/storage.js";
-import GitHubHttpApi from "../gitHubHttpApi.js";
+import notifications from "@/js/utils/notificationManager";
+import storage from "@/js/data/storage";
+import GitHubHttpApi from "./gitHubHttpApi";
 
 class GitHubTokenManager extends GitHubHttpApi {
     #headers = { Accept: "application/vnd.github+json" };

@@ -1,5 +1,5 @@
-import formatter from "../../utils/formatter.js";
-import { escapeHTML } from "../../utils/utils.js";
+import formatter from "@/js/utils/formatter";
+import { escapeHTML } from "@/js/utils/utils";
 
 class GitHubDataParser {
     parseRepoData(raw) {

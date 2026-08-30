@@ -1,8 +1,8 @@
 import GitHubHttpApi from "./gitHubHttpApi";
-import formatter from "../utils/formatter.js";
-import notifications from "../utils/notificationManager.js";
-import { escapeHTML } from "../utils/utils.js";
-import storage from "../data/storage";
+import formatter from "@/js/utils/formatter";
+import notifications from "@/js/utils/notificationManager";
+import { escapeHTML } from "@/js/utils/utils";
+import storage from "@/js/data/storage";
 
 class GitHubClient extends GitHubHttpApi {
     #headers = { Accept: "application/vnd.github+json" };
