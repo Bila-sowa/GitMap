@@ -5,7 +5,7 @@ import * as appDataTests from "./data/index";
 const dataTests = [
     apiTests.test_nd2u3_Data,
     apiTests.test_hvnws_Data,
-    apiTests.test_nd2u3_Data,
+    apiTests.test_3j3f8_Data,
     apiTests.test_483nq_Data,
     apiTests.test_idi3p_Data,
     apiTests.test_rz8ou_Data,
