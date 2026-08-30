@@ -4,6 +4,7 @@ import { ANY_VALID, TestConfig } from "../../tools/testTools";
 /**
  * #### Description:
  *
+ * The test parses raw data from the GitHub REST API about branches and commits into more convenient and understandable data, extracting only what is needed.
  *
  * #### Params:
  * - file: `gitHubDataParser`
