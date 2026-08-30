@@ -70,6 +70,8 @@ async function runUiTests(tests = uiTests) {
 async function runTests() {
     const config = await loadTestConfig();
 
+    console.group("Unit tests");
+
     if (config.dataTests) {
         await runDataTests();
     }
@@ -77,6 +79,8 @@ async function runTests() {
     if (config.uiTests) {
         await runUiTests();
     }
+
+    console.groupEnd();
 }
 
 runTests();
