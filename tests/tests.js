@@ -58,7 +58,7 @@ async function runDataTests(tests = dataTests) {
         );
     }
 
-    console.dir(results);
+    console.table(results);
     return results;
 }
 
