@@ -3,15 +3,15 @@ import { TestConfig, ANY_VALID } from "../../tools/testTools";
 
 /**
  * #### Description:
- * 
+ *
  * The test verifies that the rate limit data has been successfully retrieved. The values cannot be arbitrary, as the limits are dynamic.
- * 
+ *
  * #### Params:
  * - file: `gitHubClient.js`
  * - test: `test_3j3f8_Data`
  * - name: `getRateLimitData`
  * - type: `method`
- * 
+ *
  * @returns TestFeedback
  */
 export default async function test_3j3f8_Data() {

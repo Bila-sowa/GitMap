@@ -1,6 +1,6 @@
 import storage from "../data/storage.js";
 import * as DOM from "./dom.js";
-import graphController from "./graph.js";
+import graph from "./graph.js";
 import localStorage from "./localStorage.js";
 
 class LinkController {
@@ -31,7 +31,7 @@ class LinkController {
     }
 }
 
-const linkInput = new LinkController(DOM.linkInput, graphController);
+const linkInput = new LinkController(DOM.linkInput, graph);
 
 export { LinkController };
 export default linkInput;

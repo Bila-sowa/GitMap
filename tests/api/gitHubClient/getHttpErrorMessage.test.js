@@ -1,15 +1,17 @@
-import GitHubHttpApi from "@/js/api/gitHubHttpApi";
+import GitHubHttpApi from "@/js/api/gitHubClient/gitHubHttpApi";
 import { TestConfig } from "../../tools/testTools";
 
 /**
  * #### Description
- * 
+ *
+ * The test returns an array of HTTP errors for the user based on the specified patterns.
+ *
  * #### Params
  * - file: `gitHubHttpApi.js`
  * - test: `test_483nq_Data`
  * - name: `getHttpErrorMessage`
  * - type: `method`
- * 
+ *
  * @returns TestFeedback
  */
 export default async function test_483nq_Data() {
@@ -19,7 +21,7 @@ export default async function test_483nq_Data() {
             file: "httpController.js",
             test: "test_483nq_Data",
             name: "httpController",
-            type: "method"
+            type: "method",
         },
         [
             "Bad Request (400): Unable to process request.",
@@ -35,5 +37,4 @@ export default async function test_483nq_Data() {
         testData.map((error) => result.push(httpController.getHttpErrorMessage(error)));
         return result;
     });
-
 }

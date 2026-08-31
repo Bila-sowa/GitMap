@@ -1,26 +1,54 @@
-const findAndThrowError = (object) => {
+/**
+ * Walks `object` looking for a "failed" result (`success === false`) at the
+ * top level or one level of nesting, and throws if a failure is found that
+ * isn't the *expected* outcome for that same spot in `expected`.
+ *
+ * This acts as an early "fail fast" guard for *unexpected* failures (e.g. a
+ * method that was supposed to succeed but blew up). It intentionally skips
+ * throwing when `expected` says that particular field is supposed to have
+ * `success: false`, so that legitimate "this should fail" test cases can
+ * proceed to the normal `equalKeysAndValidValues` comparison instead of
+ * being short-circuited here.
+ *
+ * @param {*} object - the actual value returned by the tested method; checked
+ *   for a `success === false` shape at the top level and one level deep.
+ * @param {*} [expected] - the expected shape for `object`, used only to check
+ *   whether a `success: false` at a given key is the *expected* result
+ *   (in which case no error is thrown for that key). If omitted, any
+ *   `success: false` found is treated as unexpected and throws.
+ * @throws {Error} if `object.success === false` (or a nested field's
+ *   `success === false`) and the corresponding spot in `expected` does not
+ *   also expect `success: false`.
+ * @returns {void}
+ */
+const findAndThrowError = (object, expected) => {
     if (!object || typeof object !== "object") return;
 
-    if (object.success === false) {
+    const topLevelExpectsFailure = expected && typeof expected === "object" && expected.success === false;
+
+    if (object.success === false && !topLevelExpectsFailure) {
         throw new Error(object.error ? object.error.message || object.error : "Request failed");
     }
 
     for (const [key, value] of Object.entries(object)) {
         if (value && typeof value === "object") {
-            if (value.success === false) {
+            const nestedExpected = expected && typeof expected === "object" ? expected[key] : undefined;
+            const nestedExpectsFailure =
+                nestedExpected && typeof nestedExpected === "object" && nestedExpected.success === false;
+
+            if (value.success === false && !nestedExpectsFailure) {
                 throw new Error(`${key}: ${value.error ? value.error.message || value.error : "Request failed"}`);
             }
         }
-    };
+    }
 };
-
 /**
  * Marker used inside an `expected` value to say "I don't care about the
  * exact value here — just make sure it's present and not undefined,
  * null, or NaN". Import and use it as a placeholder value for any key
  * where only presence/validity matters, not the exact value.
  */
-const ANY_VALID = Symbol('ANY_VALID');
+const ANY_VALID = Symbol("ANY_VALID");
 
 /**
  * Checks whether a value is "forbidden": undefined, null, or NaN.
@@ -29,7 +57,7 @@ const ANY_VALID = Symbol('ANY_VALID');
  * @returns {boolean} true if the value is undefined, null, or NaN
  */
 const isInvalidValue = (value) =>
-    value === undefined || value === null || (typeof value === 'number' && Number.isNaN(value));
+    value === undefined || value === null || (typeof value === "number" && Number.isNaN(value));
 
 /**
  * Compares `actual` against `expected`. For every key in `expected`:
@@ -51,12 +79,12 @@ const equalKeysAndValidValues = (actual, expected, seen = new WeakMap()) => {
     }
 
     // expected is a primitive (or null): require an exact match
-    if (typeof expected !== 'object' || expected === null) {
+    if (typeof expected !== "object" || expected === null) {
         return Object.is(actual, expected);
     }
 
     // expected is an object/array, so actual must be one too
-    if (typeof actual !== 'object' || actual === null) {
+    if (typeof actual !== "object" || actual === null) {
         return false;
     }
 
@@ -90,8 +118,8 @@ class TestFeedback {
         this.type = type;
         this.success = success;
         this.data = data;
-    };
-};
+    }
+}
 
 class TestConfig {
     constructor(details, expected, testData = {}) {
@@ -125,18 +153,11 @@ class TestConfig {
 const validateTestData = (object, expected) => {
     if (!object) return true;
 
-    findAndThrowError(object);
+    findAndThrowError(object, expected);
 
     if (!expected) return true;
 
     return equalKeysAndValidValues(object, expected);
 };
 
-export {
-    findAndThrowError,
-    ANY_VALID,
-    equalKeysAndValidValues,
-    TestFeedback,
-    TestConfig,
-    validateTestData,
-};
+export { findAndThrowError, ANY_VALID, equalKeysAndValidValues, TestFeedback, TestConfig, validateTestData };
