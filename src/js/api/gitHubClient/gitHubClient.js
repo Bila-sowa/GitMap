@@ -7,7 +7,10 @@ import notifications from "@/js/utils/notificationManager";
 import storage from "@/js/data/storage";
 
 class GitHubClient extends GitHubHttpApi {
-    #headers = { Accept: "application/vnd.github+json" };
+    #headers = {
+        Accept: "application/vnd.github+json",
+        "Content-Type": "application/json",
+    };
     #tokenManager;
     #rateLimiter;
     #parser;
@@ -22,7 +25,10 @@ class GitHubClient extends GitHubHttpApi {
     }
 
     #getSafeHeaders(url) {
-        const headers = { Accept: this.#headers.Accept };
+        const headers = {
+            Accept: this.#headers.Accept,
+            "Content-Type": "application/json",
+        };
         let hostname = "";
 
         try {
@@ -43,24 +49,77 @@ class GitHubClient extends GitHubHttpApi {
 
         if (!formatted.success) return formatted;
 
+        const { owner, repo } = formatted;
+        const graphqlUrl = "https://api.github.com/graphql";
+
+        const query = `
+            query ($owner: String!, $name: String!) {
+                repository(owner: $owner, name: $name) {
+                    isEmpty
+                    refs(refPrefix: "refs/heads/", first: 100) {
+                        nodes {
+                            name
+                        }
+                    }
+                    defaultBranchRef {
+                        target {
+                            ... on Commit {
+                                history(first: 30) {
+                                    nodes {
+                                        oid
+                                        message
+                                        url
+                                        author {
+                                            name
+                                            email
+                                            date
+                                            avatarUrl
+                                            user {
+                                                url
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        `;
+
         try {
-            const [branchesRes, commitsRes] = await Promise.all([
-                fetch(formatted.branchLink, { headers: this.#getSafeHeaders(formatted.branchLink) }),
-                fetch(formatted.commitsLink, { headers: this.#getSafeHeaders(formatted.commitsLink) }),
-            ]);
+            const res = await fetch(graphqlUrl, {
+                method: "POST",
+                headers: this.#getSafeHeaders(graphqlUrl),
+                body: JSON.stringify({
+                    query,
+                    variables: { owner, name: repo },
+                }),
+            });
 
-            if (!branchesRes.ok) {
-                const httpError = await this.createHttpError(branchesRes, formatted.branchLink);
-                return { success: false, ...httpError };
+            if (!res.ok) {
+                throw res;
             }
 
-            if (!commitsRes.ok) {
-                const httpError = await this.createHttpError(commitsRes, formatted.commitsLink);
-                return { success: false, ...httpError };
+            const body = await res.json();
+
+            if (body.errors?.length) {
+                const primaryError = body.errors[0];
+                const status = primaryError.type === "NOT_FOUND" ? 404 : 400;
+                throw new Response(JSON.stringify({ message: primaryError.message }), { status });
             }
 
-            const branches = await branchesRes.json();
-            const commits = await commitsRes.json();
+            const repository = body.data?.repository;
+            if (!repository) {
+                throw new Response(JSON.stringify({ message: "Not Found" }), { status: 404 });
+            }
+
+            if (repository.isEmpty || !repository.defaultBranchRef) {
+                throw new Response(JSON.stringify({ message: "Git Repository is empty." }), { status: 409 });
+            }
+
+            const branches = repository.refs?.nodes || [];
+            const commits = repository.defaultBranchRef.target?.history?.nodes || [];
 
             return {
                 success: true,
@@ -68,6 +127,11 @@ class GitHubClient extends GitHubHttpApi {
                 commits,
             };
         } catch (err) {
+            if (err instanceof Response || typeof err?.status === "number") {
+                const httpError = await this.createHttpError(err, graphqlUrl);
+                return { success: false, ...httpError };
+            }
+
             return {
                 success: false,
                 error: "Failed to fetch repository data",
@@ -123,14 +187,18 @@ class GitHubClient extends GitHubHttpApi {
             });
 
             if (!fileRes.ok) {
-                const httpError = await this.createHttpError(fileRes, commitUrl);
-                notifications.notify(httpError.error, "error");
-                return { success: false, ...httpError };
+                throw fileRes;
             }
 
             const data = await fileRes.json();
             return this.#parser.parseCommitFilesData(data);
         } catch (err) {
+            if (err instanceof Response || typeof err?.status === "number") {
+                const httpError = await this.createHttpError(err, `${formatted.commitsLink}/${sha}`);
+                notifications.notify(httpError.error, "error");
+                return { success: false, ...httpError };
+            }
+
             const error = "Failed to fetch commit files";
             const devError = {
                 message: `Network or fetch exception in getCommitFiles: ${err.message}`,

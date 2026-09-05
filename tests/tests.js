@@ -17,6 +17,14 @@ const dataTests = [
 
 const uiTests = [utilsTests.test_44ibx_Ui];
 
+async function sleap(ms = 500) {
+    return new Promise((resolve) =>
+        setTimeout(() => {
+            resolve();
+        }, ms),
+    );
+}
+
 async function loadTestConfig() {
     try {
         const response = await fetch(new URL("./config.json", import.meta.url));
@@ -45,11 +53,17 @@ function shuffle(array) {
 
 async function runDataTests(tests = dataTests) {
     const shuffled = shuffle(tests);
-    const results = await Promise.all(shuffled.map((fn) => fn()));
+    const results = [];
+
+    for (const fn of shuffled) {
+        await sleap();
+        const result = await fn();
+        results.push(result);
+    }
 
     const failed = results
         .map((result, i) => ({ name: shuffled[i].name, result }))
-        .filter(({ result }) => !result.success);
+        .filter(({ result }) => !result || !result.success);
 
     console.log(`Tests done: ${results.length - failed.length} passed, ${failed.length} failed.`);
     if (failed.length > 0) {
@@ -64,7 +78,10 @@ async function runDataTests(tests = dataTests) {
 }
 
 async function runUiTests(tests = uiTests) {
-    await Promise.all(shuffle(tests).map((fn) => fn()));
+    for (const fn of shuffle(tests)) {
+        await sleap();
+        await fn();
+    }
     console.log(`Ui tests done`);
 }
 
@@ -72,6 +89,7 @@ async function runTests() {
     const config = await loadTestConfig();
 
     console.group("Unit tests");
+    const startTime = performance.now();
 
     if (config.dataTests) {
         await runDataTests();
@@ -81,6 +99,8 @@ async function runTests() {
         await runUiTests();
     }
 
+    const endTime = performance.now();
+    console.log(`Test execution time: ${Math.round(endTime - startTime)} ms`);
     console.groupEnd();
 }
 

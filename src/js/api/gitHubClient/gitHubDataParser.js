@@ -22,24 +22,33 @@ class GitHubDataParser {
         const branchesDetails = [];
 
         commits.forEach((commit) => {
-            const formattedTitle = formatter.getFormattedTitle(commit.commit.message);
-            const formattedDescription = formatter.getFormattedDescription(commit.commit.message);
-            const formattedDate = formatter.getDateInLocaleString(commit.commit.author.date);
-            const shortHash = formatter.getShortHash(commit.sha);
+            const message = commit.message || commit.commit?.message || "";
+            const sha = commit.oid || commit.sha || "";
+            const authorDate = commit.author?.date || commit.commit?.author?.date;
+            const authorName = commit.author?.name || commit.commit?.author?.name || "";
+            const authorEmail = commit.author?.email || commit.commit?.author?.email || "";
+            const avatarUrl = commit.author?.avatarUrl || commit.author?.avatar_url;
+            const userUrl = commit.author?.user?.url || commit.author?.html_url;
+            const commitUrl = commit.url || commit.html_url;
+
+            const formattedTitle = formatter.getFormattedTitle(message);
+            const formattedDescription = formatter.getFormattedDescription(message);
+            const formattedDate = formatter.getDateInLocaleString(authorDate);
+            const shortHash = formatter.getShortHash(sha);
 
             const details = {
                 author: {
-                    name: escapeHTML(commit.commit.author.name),
-                    email: escapeHTML(commit.commit.author.email),
-                    avatar: commit.author?.avatar_url,
-                    url: commit.author?.html_url,
+                    name: escapeHTML(authorName),
+                    email: escapeHTML(authorEmail),
+                    avatar: avatarUrl,
+                    url: userUrl,
                     date: formattedDate,
                 },
                 title: escapeHTML(formattedTitle),
                 description: formattedDescription ? escapeHTML(formattedDescription) : "",
                 hash: shortHash,
-                url: commit.html_url,
-                sha: commit.sha,
+                url: commitUrl,
+                sha: sha,
             };
 
             commitsDetails.push(details);
