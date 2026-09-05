@@ -55,13 +55,13 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
         </div>
         <p>Description:</p>
         <div class="${styles["modal-description"]}">
-            ${parsedDescription ? parsedDescription : ""} 
+            ${parsedDescription ? parsedDescription : ""}
         </div>
         <div class="${styles["modal-data"]}">
             <a class="${styles["modal-item"]} rounded-normal" href="${authorUrl}" target="_blank" rel="noopener noreferrer" title="Email: ${authorEmail}">
                 <span>Author: </span>
                 <div class="flex-align-center">
-                    ${authorName} 
+                    ${authorName}
                     <img class="avatar rounded-full" src="${authorAvatar}" alt="${authorName}'s Avatar">
                 </div>
             </a>
@@ -83,7 +83,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
                               .map(
                                   (file) => `
                         <div class="${styles["modal-file"]} rounded-normal">
-                            <img class="${styles["modal-file-icon"]}" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
+                            <img class="modal-file-icon" src="https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/${file.extension}.svg" alt>
                             <code class="${styles["modal-file-path"]} text-small">${file.name}</code>
                             <div class="${styles["modal-file-changes"]}">
                                 ${
@@ -124,7 +124,7 @@ function bindFullComitEvents() {
     const { signal } = controller;
 
     const closeButton = modal.querySelector("#close-full-commit-button");
-    const icons = [...modal.querySelectorAll(".file-icon")];
+    const icons = [...modal.querySelectorAll(".modal-file-icon")];
     const copyableItems = [...modal.querySelectorAll(".copyable")];
     const theme = getTheme();
 
