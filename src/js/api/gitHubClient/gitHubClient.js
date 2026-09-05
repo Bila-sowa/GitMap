@@ -99,6 +99,54 @@ class GitHubClient extends GitHubHttpApi {
         return parsed;
     }
 
+    async getDataByBranch(name) {
+        if (!name) {
+            const error = "Missing branch name";
+            const devError = { message: "getDataByBranch requires a valid branch name parameter" };
+            notifications.notify(error, "error");
+            return { success: false, error, devError };
+        }
+
+        const formatted = parseGitHubUrl(storage.link);
+
+        if (!formatted.success) {
+            notifications.notify(formatted.error, "error");
+            return formatted;
+        }
+
+        await this.getRateLimitData();
+
+        try {
+            const commitsUrl = `${formatted.commitsLink}?sha=${encodeURIComponent(name)}`;
+            const commitsRes = await fetch(commitsUrl, {
+                headers: this.#getSafeHeaders(commitsUrl),
+            });
+
+            if (!commitsRes.ok) {
+                const httpError = await this.createHttpError(commitsRes, commitsUrl);
+                notifications.notify(httpError.error, "error");
+                return { success: false, ...httpError };
+            }
+
+            const commits = await commitsRes.json();
+            const parsed = this.#parser.parseCommitsData(commits);
+
+            if (!parsed.success) {
+                notifications.notify(parsed.error, "error");
+            }
+
+            return parsed;
+        } catch (err) {
+            const error = "Failed to fetch branch commits";
+            const devError = {
+                message: `Network or fetch exception in getDataByBranch: ${err.message}`,
+                stack: err.stack,
+            };
+            notifications.notify(error, "error");
+            return { success: false, error, devError };
+        }
+    }
+
     async getCommitFiles(url, sha) {
         const formatted = parseGitHubUrl(url);
 

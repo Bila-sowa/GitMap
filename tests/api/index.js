@@ -5,6 +5,7 @@ import test_idi3p_Data from "./gitHubClient/parseRepoData.test";
 import test_rz8ou_Data from "./gitHubClient/parseCommitFilesData.test";
 import test_05yau_Data from "./gitHubClient/setToken.test";
 import test_3j3f8_Data from "./gitHubClient/getRateLimitData.test";
+import test_vt6mk_Data from "./gitHubClient/getDataByBranch.test";
 
 export {
     test_nd2u3_Data,
@@ -14,4 +15,5 @@ export {
     test_rz8ou_Data,
     test_05yau_Data,
     test_3j3f8_Data,
+    test_vt6mk_Data,
 };

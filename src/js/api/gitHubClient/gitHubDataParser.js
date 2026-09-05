@@ -2,26 +2,47 @@ import formatter from "@/js/utils/formatter";
 import { escapeHTML } from "@/js/utils/utils";
 
 class GitHubDataParser {
-    parseRepoData(raw) {
-        const branches = Array.isArray(raw.branches) ? raw.branches : [];
-        const commits = Array.isArray(raw.commits) ? raw.commits : [];
+    parseBranchesData(branches) {
+        const branchesList = Array.isArray(branches) ? branches : [];
 
-        if (!branches.length || !commits.length) {
+        if (!branchesList.length) {
             return {
                 success: false,
                 error: "Unexpected response format from GitHub",
                 devError: {
-                    message: `Missing data in parseRepoData: branches count = ${branches.length}, commits count = ${commits.length}`,
-                    branches,
-                    commits,
+                    message: `Missing data in parseBranchData: branches count = ${branchesList.length}`,
+                    branches: branchesList,
+                },
+            };
+        }
+
+        const branchesDetails = [];
+
+        branchesList.forEach((branch) => {
+            const details = escapeHTML(branch.name);
+            branchesDetails.push(details);
+        });
+
+        return { success: true, branchesDetails };
+    }
+
+    parseCommitsData(commits) {
+        const commitsList = Array.isArray(commits) ? commits : [];
+
+        if (!commitsList.length) {
+            return {
+                success: false,
+                error: "Unexpected response format from GitHub",
+                devError: {
+                    message: `Missing data in parseCommitsData: commits count = ${commitsList.length}`,
+                    commits: commitsList,
                 },
             };
         }
 
         const commitsDetails = [];
-        const branchesDetails = [];
 
-        commits.forEach((commit) => {
+        commitsList.forEach((commit) => {
             const formattedTitle = formatter.getFormattedTitle(commit.commit.message);
             const formattedDescription = formatter.getFormattedDescription(commit.commit.message);
             const formattedDate = formatter.getDateInLocaleString(commit.commit.author.date);
@@ -45,12 +66,23 @@ class GitHubDataParser {
             commitsDetails.push(details);
         });
 
-        branches.forEach((branch) => {
-            const details = { name: escapeHTML(branch.name) };
-            branchesDetails.push(details);
-        });
+        return { success: true, commitsDetails };
+    }
 
-        return { success: true, commitsDetails, branchesDetails };
+    parseRepoData(raw) {
+        const branchesResult = this.parseBranchesData(raw.branches);
+
+        if (!branchesResult.success) return branchesResult;
+
+        const commitsResult = this.parseCommitsData(raw.commits);
+
+        if (!commitsResult.success) return commitsResult;
+
+        return {
+            success: true,
+            commitsDetails: commitsResult.commitsDetails,
+            branchesDetails: branchesResult.branchesDetails,
+        };
     }
 
     parseCommitFilesData(raw) {
