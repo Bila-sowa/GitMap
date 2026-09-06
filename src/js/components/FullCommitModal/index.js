@@ -55,7 +55,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
         </div>
         <p>Description:</p>
         <div class="${styles["modal-description"]}">
-            ${parsedDescription ? parsedDescription : ""}
+            ${parsedDescription ? parsedDescription : ""} 
         </div>
         <div class="${styles["modal-data"]}">
             <a class="${styles["modal-item"]} rounded-normal" href="${authorUrl}" target="_blank" rel="noopener noreferrer" title="Email: ${authorEmail}">
