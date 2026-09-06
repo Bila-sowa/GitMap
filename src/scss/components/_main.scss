@@ -37,6 +37,7 @@
     align-items: center;
     height: fit-content;
     pointer-events: none;
+    margin: 30px 0;
 }
 
 .commit {
@@ -62,6 +63,27 @@
     right: 60px;
     transform: translateY(-50%);
     width: 240px;
+}
+
+.head-commit::after {
+    position: absolute;
+    left: 50%;
+    right: 0;
+    width: fit-content;
+    transform: translateX(-50%);
+    top: -60px;
+    padding: 5px 15px;
+    background: var(--accent-color-1);
+    border-radius: 20px;
+    content: attr(aria-branch);
+}
+
+.triangular-connector {
+    background: var(--accent-color-1);
+    width: 10px;
+    height: 10px;
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+    margin-bottom: 5px;
 }
 
 .commit:hover,
