@@ -9,14 +9,14 @@ export default defineConfig([
         extends: ["js/recommended"],
         languageOptions: { globals: globals.browser },
         rules: {
-            "no-console": "warn",
+            "no-console": "off",
             "no-unused-vars": "error",
-            "eqeqeq": "error",
+            eqeqeq: "error",
             "no-debugger": "error",
             "no-dupe-else-if": "error",
             "no-duplicate-case": "error",
             "no-duplicate-imports": "error",
             "no-unsafe-optional-chaining": "off",
-        }
+        },
     },
 ]);

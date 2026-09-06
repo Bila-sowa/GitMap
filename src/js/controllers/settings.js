@@ -1,4 +1,4 @@
-import gitHubClient from "../api/gitHubClient.js";
+import gitHubClient from "../api/gitHubClient";
 import getConfigData from "../api/getConfigData.js";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 import { bindSettingsModalEvents, generateSettingsModalHTML } from "../components/SettingsModal/index.js";

@@ -1,4 +1,4 @@
-import gitHubClient from "../api/gitHubClient.js";
+import gitHubClient from "../api/gitHubClient";
 import getConfigData from "../api/getConfigData.js";
 import { bindFullComitEvents, generateFullCommitModalHTML } from "../components/FullCommitModal/index";
 import { closeHoverCommitModals, generateHoverCommitModalHTML } from "../components/HoverCommitModal/index";
