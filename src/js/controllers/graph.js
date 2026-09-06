@@ -50,7 +50,7 @@ class GraphController {
         return filesData;
     };
 
-    #generateGraph(array) {
+    #generateGraph(array, branchName = "main") {
         if (!array) return;
 
         this.#graph.innerHTML = "";
@@ -62,10 +62,25 @@ class GraphController {
 
             if (index >= renderLimit) return;
 
+            const isFirst = index === 0;
             const isLast = index === Math.min(array.length, renderLimit) - 1;
 
             const commitCard = `
-                <button class="commit neon rounded-full" data-id="${index}" data-sha="${commit.sha}" name="${formattedTitle}" aria-expanded="false" aria-label="Open commit: ${commit.title}"></button>
+                ${isFirst ? "<div class='triangular-connector'></div>" : ""}
+                <button
+                    class="
+                        commit
+                        neon
+                        rounded-full
+                        ${isFirst ? "head-commit" : ""}
+                    "
+                    data-id="${index}"
+                    data-sha="${commit.sha}"
+                    name="${formattedTitle}"
+                    aria-expanded="false"
+                    aria-label="Open commit: ${commit.title}"
+                    aria-branch="${branchName}"
+                ></button>
                 ${
                     isLast
                         ? `<span class="limit-description text-smallest">The REST API supports only the last 30 commits from one branch.</span>`
