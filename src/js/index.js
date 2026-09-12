@@ -7,4 +7,5 @@ import "./controllers/link.js";
 import "./controllers/refresh.js";
 import "./controllers/settings.js";
 import "./controllers/theme.js";
+import "./controllers/branchDropDown";
 

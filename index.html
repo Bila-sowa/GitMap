@@ -92,6 +92,27 @@
                 </div>
             </div>
         </div>
+
+        <div class="branch-dropdown" id="branch-dropdown">
+            <button
+                class="branch-dropdown-trigger rounded-normal"
+                id="branch-dropdown-trigger"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-controls="branch-dropdown-list"
+            >
+                <span class="branch-dropdown-label" id="branch-dropdown-label">Set a branch</span>
+                <svg class="branch-dropdown-arrow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none">
+                    <path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
+                </svg>
+            </button>
+            <ul class="branch-dropdown-list hidden" id="branch-dropdown-list" role="listbox" aria-label="Branch list">
+                <li class="branch-dropdown-item" role="option" aria-selected="false" tabindex="0">main</li>
+                <li class="branch-dropdown-item" role="option" aria-selected="false" tabindex="0">dev</li>
+                <li class="branch-dropdown-item" role="option" aria-selected="false" tabindex="0">dev2</li>
+            </ul>
+        </div>
+
         <div class="scale-menu rounded-normal border-normal">
             <button class="scale-menu-button rounded-small" id="scale-increase" aria-label="Increase scale">+</button>
             <span class="scale-menu-display" id="scale-display">100%</span>
