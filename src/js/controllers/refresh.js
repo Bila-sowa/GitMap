@@ -12,7 +12,7 @@ class RefreshButtonController {
     }
 
     #bindEvents() {
-        this.#button.addEventListener("click", () => this.#graph.render());
+        this.#button.addEventListener("click", () => this.#graph.refresh());
     }
 }
 

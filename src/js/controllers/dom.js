@@ -9,6 +9,9 @@ const graph = document.querySelector("#graph");
 const scaleIncreaseButton = document.querySelector("#scale-increase");
 const scaleDisplay = document.querySelector("#scale-display");
 const scaleDecreaseButton = document.querySelector("#scale-decrese");
+const dropDownTrigger = document.querySelector("#branch-dropdown-trigger");
+const dropDownList = document.querySelector("#branch-dropdown-list");
+const dropDownLabel = document.querySelector("#branch-dropdown-label");
 let pageFocusElements = [];
 
 const updateElements = () => {
@@ -29,4 +32,8 @@ export {
     scaleIncreaseButton,
     scaleDisplay,
     scaleDecreaseButton,
+    dropDownTrigger,
+    dropDownList,
+    dropDownLabel,
 };
+

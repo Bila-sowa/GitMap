@@ -23,6 +23,7 @@ export default async function test_hvnws_Data() {
             type: "method",
         },
         {
+            defaultBranch: ANY_VALID,
             commitsDetails: ANY_VALID,
             branchesDetails: ANY_VALID,
             success: true,

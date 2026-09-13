@@ -1,5 +1,4 @@
 import { GitHubClient } from "@/js/api/gitHubClient";
-import { Storage } from "@/js/data/storage";
 import { TestConfig, ANY_VALID } from "../../tools/testTools";
 
 /**
@@ -34,10 +33,8 @@ export default async function test_vt6mk_Data() {
     );
 
     const client = new GitHubClient();
-    const storage = new Storage();
 
     return config.run(async ({ TEST_REPO_URL, TEST_BRANCH_NAME }) => {
-        storage.link = TEST_REPO_URL;
-        return await client.getDataByBranch(TEST_BRANCH_NAME);
+        return await client.getDataByBranch(TEST_BRANCH_NAME, TEST_REPO_URL);
     });
 }

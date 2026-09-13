@@ -19,8 +19,9 @@ class GitHubDataParser {
         const branchesDetails = [];
 
         branchesList.forEach((branch) => {
-            const details = escapeHTML(branch.name);
-            branchesDetails.push(details);
+            if (typeof branch?.name === "string" && branch.name.trim()) {
+                branchesDetails.push(branch.name);
+            }
         });
 
         return { success: true, branchesDetails };
@@ -78,10 +79,19 @@ class GitHubDataParser {
 
         if (!commitsResult.success) return commitsResult;
 
+        const branchesDetails = [...branchesResult.branchesDetails];
+        const hasDefaultBranch = typeof raw.defaultBranch === "string" && raw.defaultBranch.trim();
+        const defaultBranch = hasDefaultBranch ? raw.defaultBranch.trim() : branchesDetails[0];
+
+        if (defaultBranch && !branchesDetails.includes(defaultBranch)) {
+            branchesDetails.unshift(defaultBranch);
+        }
+
         return {
             success: true,
+            defaultBranch,
             commitsDetails: commitsResult.commitsDetails,
-            branchesDetails: branchesResult.branchesDetails,
+            branchesDetails,
         };
     }
 
