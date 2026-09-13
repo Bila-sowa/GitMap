@@ -22,8 +22,8 @@
     <title>GitMap</title>
     <link rel="icon" href="/GitMap/favicon.png">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script type="module" crossorigin src="/GitMap/assets/index-DfmaneG3.js"></script>
-  <link rel="stylesheet" crossorigin href="/GitMap/assets/index-DQ6moilW.css">
+  <script type="module" crossorigin src="/GitMap/assets/index-CO5x6vNP.js"></script>
+  <link rel="stylesheet" crossorigin href="/GitMap/assets/index-BfL-jJ90.css">
 </head>
 
 <body class="dark-theme">
@@ -92,6 +92,24 @@
                 </div>
             </div>
         </div>
+
+        <div class="branch-dropdown" id="branch-dropdown">
+            <button
+                class="branch-dropdown-trigger rounded-normal"
+                id="branch-dropdown-trigger"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-controls="branch-dropdown-list"
+                disabled
+            >
+                <span class="branch-dropdown-label" id="branch-dropdown-label">Set a branch</span>
+                <svg class="branch-dropdown-arrow" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none">
+                    <path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
+                </svg>
+            </button>
+            <ul class="branch-dropdown-list hidden" id="branch-dropdown-list" role="listbox" aria-label="Branch list"></ul>
+        </div>
+
         <div class="scale-menu rounded-normal border-normal">
             <button class="scale-menu-button rounded-small" id="scale-increase" aria-label="Increase scale">+</button>
             <span class="scale-menu-display" id="scale-display">100%</span>
