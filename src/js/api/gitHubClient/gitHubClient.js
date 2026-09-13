@@ -38,16 +38,31 @@ class GitHubClient extends GitHubHttpApi {
         return headers;
     }
 
-    async #getRawData(url) {
+    async #getRawData(url, options = {}) {
         const formatted = parseGitHubUrl(url);
 
         if (!formatted.success) return formatted;
 
         try {
-            const [branchesRes, commitsRes] = await Promise.all([
-                fetch(formatted.branchLink, { headers: this.#getSafeHeaders(formatted.branchLink) }),
-                fetch(formatted.commitsLink, { headers: this.#getSafeHeaders(formatted.commitsLink) }),
+            const [repositoryRes, branchesRes, commitsRes] = await Promise.all([
+                fetch(formatted.repositoryLink, {
+                    headers: this.#getSafeHeaders(formatted.repositoryLink),
+                    signal: options.signal,
+                }),
+                fetch(formatted.branchLink, {
+                    headers: this.#getSafeHeaders(formatted.branchLink),
+                    signal: options.signal,
+                }),
+                fetch(formatted.commitsLink, {
+                    headers: this.#getSafeHeaders(formatted.commitsLink),
+                    signal: options.signal,
+                }),
             ]);
+
+            if (!repositoryRes.ok) {
+                const httpError = await this.createHttpError(repositoryRes, formatted.repositoryLink);
+                return { success: false, ...httpError };
+            }
 
             if (!branchesRes.ok) {
                 const httpError = await this.createHttpError(branchesRes, formatted.branchLink);
@@ -59,15 +74,21 @@ class GitHubClient extends GitHubHttpApi {
                 return { success: false, ...httpError };
             }
 
+            const repository = await repositoryRes.json();
             const branches = await branchesRes.json();
             const commits = await commitsRes.json();
 
             return {
                 success: true,
+                defaultBranch: repository.default_branch,
                 branches,
                 commits,
             };
         } catch (err) {
+            if (err.name === "AbortError") {
+                return { success: false, cancelled: true };
+            }
+
             return {
                 success: false,
                 error: "Failed to fetch repository data",
@@ -79,11 +100,11 @@ class GitHubClient extends GitHubHttpApi {
         }
     }
 
-    async getData(url) {
-        const data = await this.#getRawData(url);
+    async getData(url, options = {}) {
+        const data = await this.#getRawData(url, options);
 
         if (!data.success) {
-            notifications.notify(data.error, "error");
+            if (!data.cancelled) notifications.notify(data.error, "error");
             return data;
         }
 
@@ -99,27 +120,28 @@ class GitHubClient extends GitHubHttpApi {
         return parsed;
     }
 
-    async getDataByBranch(name) {
-        if (!name) {
+    async getDataByBranch(name, url = storage.link, options = {}) {
+        const branchName = typeof name === "string" ? name.trim() : "";
+
+        if (!branchName) {
             const error = "Missing branch name";
             const devError = { message: "getDataByBranch requires a valid branch name parameter" };
             notifications.notify(error, "error");
             return { success: false, error, devError };
         }
 
-        const formatted = parseGitHubUrl(storage.link);
+        const formatted = parseGitHubUrl(url);
 
         if (!formatted.success) {
             notifications.notify(formatted.error, "error");
             return formatted;
         }
 
-        await this.getRateLimitData();
-
         try {
-            const commitsUrl = `${formatted.commitsLink}?sha=${encodeURIComponent(name)}`;
+            const commitsUrl = `${formatted.commitsLink}?sha=${encodeURIComponent(branchName)}`;
             const commitsRes = await fetch(commitsUrl, {
                 headers: this.#getSafeHeaders(commitsUrl),
+                signal: options.signal,
             });
 
             if (!commitsRes.ok) {
@@ -135,8 +157,13 @@ class GitHubClient extends GitHubHttpApi {
                 notifications.notify(parsed.error, "error");
             }
 
+            this.getRateLimitData();
             return parsed;
         } catch (err) {
+            if (err.name === "AbortError") {
+                return { success: false, cancelled: true };
+            }
+
             const error = "Failed to fetch branch commits";
             const devError = {
                 message: `Network or fetch exception in getDataByBranch: ${err.message}`,

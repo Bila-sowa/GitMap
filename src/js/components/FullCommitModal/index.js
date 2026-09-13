@@ -6,7 +6,14 @@ const getTheme = () => {
     return document.body.classList.contains("dark-theme") ? "dark" : "light";
 };
 
+let activeModalController = null;
+let activeModalTrigger = null;
+
 const closeFullCommitModals = () => {
+    activeModalController?.abort();
+    activeModalTrigger?.setAttribute("aria-expanded", "false");
+    activeModalController = null;
+    activeModalTrigger = null;
     [...document.querySelectorAll(".full-commit-modal")].forEach((modal) => modal.remove());
 };
 
@@ -44,7 +51,8 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
 
     closeFullCommitModals();
 
-    const parsedDescription = typeof marked !== "undefined" ? marked.parse(description) : description;
+    const parsedDescription =
+        typeof globalThis.marked?.parse === "function" ? globalThis.marked.parse(description) : description;
     const theme = getTheme();
 
     return `
@@ -116,11 +124,14 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
     `;
 };
 
-function bindFullComitEvents() {
+function bindFullComitEvents(trigger) {
     const modal = document.querySelector("#full-commit-modal");
     if (!modal) return;
 
+    activeModalController?.abort();
     const controller = new AbortController();
+    activeModalController = controller;
+    activeModalTrigger = trigger;
     const { signal } = controller;
 
     const closeButton = modal.querySelector("#close-full-commit-button");
@@ -146,9 +157,11 @@ function bindFullComitEvents() {
     closeButton?.focus();
 
     const cleanup = () => {
-        controller.abort();
         closeFullCommitModals();
+        trigger?.focus();
     };
+
+    trigger?.setAttribute("aria-expanded", "true");
 
     closeButton?.addEventListener("click", cleanup, { signal });
     document.addEventListener(
@@ -162,4 +175,4 @@ function bindFullComitEvents() {
     );
 }
 
-export { generateFullCommitModalHTML, bindFullComitEvents };
+export { generateFullCommitModalHTML, bindFullComitEvents, closeFullCommitModals };

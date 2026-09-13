@@ -39,11 +39,14 @@
     }
 
     &-list {
+        height: fit-content;
+        max-height: 360px;
         margin-top: 4px;
         background: var(--color-4);
         border: 2px solid var(--border-color-1);
         border-radius: 10px;
-        overflow: hidden;
+        overflow: hidden scroll;
+        word-break: break-all;
     }
 
     &-item {

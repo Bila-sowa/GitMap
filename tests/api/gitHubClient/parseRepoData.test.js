@@ -23,14 +23,16 @@ export default function test_idi3p_Data() {
             type: "method",
         },
         {
-            branchesDetails: ANY_VALID,
+            branchesDetails: ["feature/a&b", "main"],
             commitsDetails: ANY_VALID,
+            defaultBranch: "feature/a&b",
             success: true,
         },
         {
+            defaultBranch: "feature/a&b",
             branches: [
                 {
-                    name: "gh-pages",
+                    name: "main",
                     commit: {
                         sha: "1cbed9ccd45d045ade461da424696b46322a7f56",
                         url: "https://api.github.com/repos/Bila-sowa/GitMap/commits/1cbed9ccd45d045ade461da424696b46322a7f56",

@@ -22,6 +22,7 @@ function parseGitHubUrl(url) {
 
         return {
             success: true,
+            repositoryLink: `https://api.github.com/repos/${owner}/${repo}`,
             branchLink: `https://api.github.com/repos/${owner}/${repo}/branches`,
             commitsLink: `https://api.github.com/repos/${owner}/${repo}/commits`,
         };
