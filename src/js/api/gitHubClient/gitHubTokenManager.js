@@ -4,10 +4,14 @@ import storage from "@/js/data/storage";
 class GitHubTokenManager {
     #headers;
     #httpApi;
+    #storage;
+    #fetch;
 
-    constructor(headers, httpApi) {
+    constructor(headers, httpApi, storageInstance = storage, fetcher = globalThis.fetch) {
         this.#headers = headers;
         this.#httpApi = httpApi;
+        this.#storage = storageInstance;
+        this.#fetch = fetcher;
     }
 
     #getSafeHeaders(url) {
@@ -30,7 +34,7 @@ class GitHubTokenManager {
     async #validateToken() {
         try {
             const url = "https://api.github.com/rate_limit";
-            const res = await fetch(url, {
+            const res = await this.#fetch(url, {
                 headers: this.#getSafeHeaders(url),
             });
 
@@ -55,17 +59,17 @@ class GitHubTokenManager {
     async setToken(token) {
         if (!token) {
             delete this.#headers.Authorization;
-            delete storage.token;
+            this.#storage.token = "";
             return { success: true };
         }
 
-        storage.token = token;
+        this.#storage.token = token;
         this.#headers.Authorization = `Bearer ${token}`;
         const validation = await this.#validateToken();
 
         if (!validation.success) {
             delete this.#headers.Authorization;
-            delete storage.token;
+            this.#storage.token = "";
             notifications.notify(validation.error, "error");
             return validation;
         }

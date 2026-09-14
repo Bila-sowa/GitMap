@@ -1,11 +1,11 @@
 import GitHubTokenManager from "@/js/api/gitHubClient/gitHubTokenManager";
-import GitHubHttpApi from "@/js/api/gitHubClient/gitHubHttpApi";
-import { ANY_VALID, TestConfig } from "../../tools/testTools";
+import { Storage } from "@/js/data/storage";
+import { TestConfig } from "../../tools/testTools";
 
 /**
  * #### Description:
  *
- * The test verifies that the rate limit data has been successfully retrieved. The values cannot be arbitrary, as the limits are dynamic.
+ * The test verifies that both explicit token removal and rejected tokens clear authorization and stored state.
  *
  * #### Params:
  * - file: `gitHubTokenManager.js`
@@ -24,20 +24,39 @@ export default async function test_05yau_Data() {
             type: "method",
         },
         {
-            success: false,
-            error: ANY_VALID,
-            devError: ANY_VALID,
-        },
-        {
-            token: "ghu_example_token",
+            explicitAuthorizationCleared: true,
+            explicitStorageCleared: true,
+            explicitSuccess: true,
+            rejectedAuthorizationCleared: true,
+            rejectedStorageCleared: true,
+            rejectedToken: true,
         },
     );
 
-    const headers = { Accept: "application/vnd.github+json" };
-    const httpApi = new GitHubHttpApi();
-    const gitHubTokenManager = new GitHubTokenManager(headers, httpApi);
+    const headers = {
+        Accept: "application/vnd.github+json",
+        Authorization: "Bearer active-token",
+    };
+    const storage = new Storage({ token: "active-token" });
+    const httpApi = {
+        createHttpError: async () => ({ error: "Unauthorized" }),
+    };
+    const fetcher = async () => ({ ok: false, status: 401 });
+    const gitHubTokenManager = new GitHubTokenManager(headers, httpApi, storage, fetcher);
 
-    return config.run(async ({ token }) => {
-        return gitHubTokenManager.setToken(token);
+    return config.run(async () => {
+        const explicitResult = await gitHubTokenManager.setToken("");
+        const explicitAuthorizationCleared = gitHubTokenManager.getAuthorizationHeader() === null;
+        const explicitStorageCleared = storage.token === "";
+        const rejectedResult = await gitHubTokenManager.setToken("invalid-token");
+
+        return {
+            explicitAuthorizationCleared,
+            explicitStorageCleared,
+            explicitSuccess: explicitResult.success,
+            rejectedAuthorizationCleared: gitHubTokenManager.getAuthorizationHeader() === null,
+            rejectedStorageCleared: storage.token === "",
+            rejectedToken: !rejectedResult.success,
+        };
     });
 }
