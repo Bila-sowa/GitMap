@@ -217,11 +217,11 @@ class GitHubClient extends GitHubHttpApi {
     }
 
     async setToken(token) {
-        return this.#tokenManager.setToken(token);
+        return await this.#tokenManager.setToken(token);
     }
 
     async getRateLimitData() {
-        return this.#rateLimiter.getRateLimitData();
+        return await this.#rateLimiter.getRateLimitData();
     }
 
     checkIsRateLimitHigh(response, percent = 70) {
