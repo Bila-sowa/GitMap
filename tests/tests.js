@@ -13,6 +13,7 @@ const dataTests = [
     apiTests.test_vt6mk_Data,
     utilsTests.test_0c2os_Data,
     utilsTests.test_gj781_Data,
+    utilsTests.test_d4x9p_Data,
     appDataTests.test_8je0j_Data,
 ];
 
