@@ -30,7 +30,8 @@ class GitHubRateLimiter {
         if (
             response?.success &&
             typeof response.data?.usedPerPercent === "number" &&
-            response.data.usedPerPercent >= percent
+            response.data.usedPerPercent >= percent &&
+            response.data.usedPerPercent !== 100
         ) {
             notifications.notify(
                 `GitHub API rate limit is above ${percent}%. Consider reducing request volume or adding a personal access token.`,

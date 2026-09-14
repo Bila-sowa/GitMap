@@ -1,6 +1,6 @@
-import * as apiTests from "./api/index";
-import * as utilsTests from "./utils/index";
-import * as appDataTests from "./data/index";
+import * as apiTests from "./api";
+import * as utilsTests from "./utils";
+import * as appDataTests from "./data";
 
 const dataTests = [
     apiTests.test_nd2u3_Data,

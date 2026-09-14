@@ -14,6 +14,9 @@ const getDefaultConfig = () => {
             showNotifications: true,
             COOLDOWN_MS: 5000,
         },
+        loader: {
+            showLoader: false,
+        },
     };
 };
 
@@ -38,4 +41,6 @@ const getConfigData = async (url = `${import.meta.env.BASE_URL}config.json`) => 
     }
 };
 
-export default getConfigData;
+const config = await getConfigData();
+
+export { config, getConfigData };
