@@ -1,5 +1,5 @@
 import gitHubClient from "../api/gitHubClient";
-import getConfigData from "../api/getConfigData.js";
+import { config } from "../api/config";
 import {
     bindFullComitEvents,
     closeFullCommitModals,
@@ -11,14 +11,13 @@ import storage from "../data/storage.js";
 import notifications from "../utils/notificationManager.js";
 import { appendHTML, escapeHTML, positionModalNearElement, truncateTitle } from "../utils/utils.js";
 import * as DOM from "./dom.js";
-import dropDown from "./downdrop";
+import dropDown from "./dropDown";
 
 class GraphController {
     #body = document.querySelector("body");
     #graph = null;
     #link = null;
     #data = null;
-    #configData = null;
     #eventsController = null;
     #requestController = null;
     #requestId = 0;
@@ -37,10 +36,7 @@ class GraphController {
         generateLoader();
 
         try {
-            const [data, configData] = await Promise.all([
-                gitHubClient.getData(link, { signal: request.signal }),
-                getConfigData(),
-            ]);
+            const data = await gitHubClient.getData(link, { signal: request.signal });
 
             if (!this.#isCurrentRequest(request.id, link)) {
                 return { success: false, cancelled: true };
@@ -50,7 +46,6 @@ class GraphController {
 
             this.#link = link;
             this.#data = data;
-            this.#configData = configData;
             this.#currentBranch = data.defaultBranch || data.branchesDetails[0] || null;
 
             this.#generateGraph(data.commitsDetails, this.#currentBranch);
@@ -146,8 +141,9 @@ class GraphController {
         const safeBranchName = escapeHTML(branchName);
 
         array.forEach((commit, index) => {
+            const GITHUB_RENDER_LIMIT = 30;
             const formattedTitle = truncateTitle(commit.title, 5);
-            const renderLimit = +this.#configData.graph.renderLimit;
+            const renderLimit = +config.graph.renderLimit;
 
             if (index >= renderLimit) return;
 
@@ -172,7 +168,7 @@ class GraphController {
                 ></button>
                 ${
                     isLast
-                        ? `<span class="limit-description text-smallest">Showing up to ${renderLimit} of the most recent commits for this branch.</span>`
+                        ? `<span class="limit-description text-smallest">Showing up to ${renderLimit > GITHUB_RENDER_LIMIT ? GITHUB_RENDER_LIMIT : renderLimit} of the most recent commits for this branch.</span>`
                         : `
                 <div class="connection neon">
                     <span></span>

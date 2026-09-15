@@ -1,5 +1,5 @@
 import gitHubClient from "../api/gitHubClient";
-import getConfigData from "../api/getConfigData.js";
+import { config } from "../api/config";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 import { bindSettingsModalEvents, generateSettingsModalHTML } from "../components/SettingsModal/index.js";
 import storage from "../data/storage.js";
@@ -25,7 +25,6 @@ class SettingsController {
 
         const rateLimitRes = await gitHubClient.getRateLimitData();
         const limit = rateLimitRes.data;
-        const config = await getConfigData();
         const versionDetails = config.versionDetails;
 
         removeLoader();

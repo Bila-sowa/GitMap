@@ -1,4 +1,5 @@
 import { copyValueToClipboard } from "@/js/utils/utils.js";
+import { sanitizeMarkdown } from "@/js/utils/sanitizeMarkdown.js";
 import styles from "./styles.module.scss";
 import gitHubLogoSrc from "@/assets/github-logo.webp";
 
@@ -51,8 +52,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
 
     closeFullCommitModals();
 
-    const parsedDescription =
-        typeof globalThis.marked?.parse === "function" ? globalThis.marked.parse(description) : description;
+    const parsedDescription = sanitizeMarkdown(description);
     const theme = getTheme();
 
     return `

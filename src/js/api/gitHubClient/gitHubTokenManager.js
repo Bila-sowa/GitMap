@@ -4,13 +4,18 @@ import storage from "@/js/data/storage";
 class GitHubTokenManager {
     #headers;
     #httpApi;
+    #storage;
+    #fetch;
+    #tokenOperationId = 0;
 
-    constructor(headers, httpApi) {
+    constructor(headers, httpApi, storageInstance = storage, fetcher = globalThis.fetch) {
         this.#headers = headers;
         this.#httpApi = httpApi;
+        this.#storage = storageInstance;
+        this.#fetch = fetcher;
     }
 
-    #getSafeHeaders(url) {
+    #getSafeHeaders(url, authorization = this.#headers.Authorization) {
         const headers = { Accept: this.#headers.Accept };
         let hostname = "";
 
@@ -20,18 +25,18 @@ class GitHubTokenManager {
             console.warn(`getSafeHeaders: invalid URL "${url}", Authorization header omitted.`, error);
         }
 
-        if (hostname === "api.github.com" && this.#headers.Authorization) {
-            headers.Authorization = this.#headers.Authorization;
+        if (hostname === "api.github.com" && authorization) {
+            headers.Authorization = authorization;
         }
 
         return headers;
     }
 
-    async #validateToken() {
+    async #validateToken(token) {
         try {
             const url = "https://api.github.com/rate_limit";
-            const res = await fetch(url, {
-                headers: this.#getSafeHeaders(url),
+            const res = await this.#fetch(url, {
+                headers: this.#getSafeHeaders(url, `Bearer ${token}`),
             });
 
             if (!res.ok) {
@@ -53,23 +58,27 @@ class GitHubTokenManager {
     }
 
     async setToken(token) {
+        const operationId = ++this.#tokenOperationId;
+
         if (!token) {
             delete this.#headers.Authorization;
-            delete storage.token;
+            this.#storage.token = "";
             return { success: true };
         }
 
-        storage.token = token;
-        this.#headers.Authorization = `Bearer ${token}`;
-        const validation = await this.#validateToken();
+        const validation = await this.#validateToken(token);
+
+        if (operationId !== this.#tokenOperationId) {
+            return { success: false, cancelled: true };
+        }
 
         if (!validation.success) {
-            delete this.#headers.Authorization;
-            delete storage.token;
             notifications.notify(validation.error, "error");
             return validation;
         }
 
+        this.#storage.token = token;
+        this.#headers.Authorization = `Bearer ${token}`;
         notifications.notify("The token has been successfully set", "success");
         return { success: true };
     }

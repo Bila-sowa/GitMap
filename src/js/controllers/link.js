@@ -15,18 +15,20 @@ class LinkController {
     }
 
     #bindEvents() {
-        this.#input.addEventListener("blur", () => {
-            const inputValue = this.#input.value.trim();
-            if (!inputValue) {
-                return;
-            }
+        this.#input.addEventListener("keydown", (e) => {
+            if (e.code === "Enter") {
+                const inputValue = this.#input.value.trim();
+                if (!inputValue) {
+                    return;
+                }
 
-            storage.link = inputValue;
-            if (storage.saveLink) {
-                localStorage.save();
-            }
+                storage.link = inputValue;
+                if (storage.saveLink) {
+                    localStorage.save();
+                }
 
-            this.#graph.render();
+                this.#graph.render();
+            }
         });
     }
 }

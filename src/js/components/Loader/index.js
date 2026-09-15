@@ -1,6 +1,9 @@
+import { config } from "@/js/api/config";
 import styles from "./styles.module.scss";
 
 function generateLoader() {
+    if (!config.loader.showLoader) return;
+
     const loaders = [...document.querySelectorAll(".loader")];
 
     if (loaders.length) removeLoader();

@@ -2,7 +2,7 @@
     "name": "GitMap",
     "debug": true,
     "versionDetails": {
-        "version": "2.9.1",
+        "version": "2.9.7",
         "versionType": "alpha",
         "versionIsStable": false
     },
@@ -12,5 +12,8 @@
     "notifications": {
         "showNotifications": true,
         "COOLDOWN_MS": 5000
+    },
+    "loader": {
+        "showLoader": true
     }
 }
