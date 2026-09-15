@@ -92,9 +92,10 @@ function bindSettingsModalEvents() {
     const tokenInput = modal.querySelector("#token-input");
     const saveLinkToggle = document.querySelector("#save-link");
     const saveTokenToggle = document.querySelector("#save-token");
-    function saveToken() {
-        gitHubClient.setToken(tokenInput.value.trim());
-        if (storage.saveToken) {
+    async function saveToken() {
+        const result = await gitHubClient.setToken(tokenInput.value.trim());
+
+        if (result.success && storage.saveToken) {
             localStorage.save();
         }
     }

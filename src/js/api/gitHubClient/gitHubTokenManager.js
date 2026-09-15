@@ -14,7 +14,7 @@ class GitHubTokenManager {
         this.#fetch = fetcher;
     }
 
-    #getSafeHeaders(url) {
+    #getSafeHeaders(url, authorization = this.#headers.Authorization) {
         const headers = { Accept: this.#headers.Accept };
         let hostname = "";
 
@@ -24,18 +24,18 @@ class GitHubTokenManager {
             console.warn(`getSafeHeaders: invalid URL "${url}", Authorization header omitted.`, error);
         }
 
-        if (hostname === "api.github.com" && this.#headers.Authorization) {
-            headers.Authorization = this.#headers.Authorization;
+        if (hostname === "api.github.com" && authorization) {
+            headers.Authorization = authorization;
         }
 
         return headers;
     }
 
-    async #validateToken() {
+    async #validateToken(token) {
         try {
             const url = "https://api.github.com/rate_limit";
             const res = await this.#fetch(url, {
-                headers: this.#getSafeHeaders(url),
+                headers: this.#getSafeHeaders(url, `Bearer ${token}`),
             });
 
             if (!res.ok) {
@@ -63,17 +63,15 @@ class GitHubTokenManager {
             return { success: true };
         }
 
-        this.#storage.token = token;
-        this.#headers.Authorization = `Bearer ${token}`;
-        const validation = await this.#validateToken();
+        const validation = await this.#validateToken(token);
 
         if (!validation.success) {
-            delete this.#headers.Authorization;
-            this.#storage.token = "";
             notifications.notify(validation.error, "error");
             return validation;
         }
 
+        this.#storage.token = token;
+        this.#headers.Authorization = `Bearer ${token}`;
         notifications.notify("The token has been successfully set", "success");
         return { success: true };
     }
