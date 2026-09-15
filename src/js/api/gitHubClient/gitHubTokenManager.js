@@ -6,6 +6,7 @@ class GitHubTokenManager {
     #httpApi;
     #storage;
     #fetch;
+    #tokenOperationId = 0;
 
     constructor(headers, httpApi, storageInstance = storage, fetcher = globalThis.fetch) {
         this.#headers = headers;
@@ -57,6 +58,8 @@ class GitHubTokenManager {
     }
 
     async setToken(token) {
+        const operationId = ++this.#tokenOperationId;
+
         if (!token) {
             delete this.#headers.Authorization;
             this.#storage.token = "";
@@ -64,6 +67,10 @@ class GitHubTokenManager {
         }
 
         const validation = await this.#validateToken(token);
+
+        if (operationId !== this.#tokenOperationId) {
+            return { success: false, cancelled: true };
+        }
 
         if (!validation.success) {
             notifications.notify(validation.error, "error");
