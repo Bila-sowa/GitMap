@@ -62,6 +62,9 @@ class GitHubDataParser {
                 hash: shortHash,
                 url: commit.html_url,
                 sha: commit.sha,
+                parents: Array.isArray(commit.parents)
+                    ? commit.parents.map((parent) => parent?.sha).filter((sha) => typeof sha === "string" && sha)
+                    : [],
             };
 
             commitsDetails.push(details);

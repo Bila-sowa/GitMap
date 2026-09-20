@@ -16,20 +16,20 @@ class LinkController {
 
     #bindEvents() {
         this.#input.addEventListener("keydown", (e) => {
-            if (e.code === "Enter") {
-                const inputValue = this.#input.value.trim();
-                if (!inputValue) {
-                    return;
-                }
-
-                storage.link = inputValue;
-                if (storage.saveLink) {
-                    localStorage.save();
-                }
-
-                this.#graph.render();
-            }
+            const value = this.#input.value.trim();
+            if (e.code === "Enter") this.#setLink(value);
         });
+
+        this.#input.addEventListener("blur", () => {
+            const value = this.#input.value.trim();
+            if (this.#input.value.trim()) this.#setLink(value);
+        });
+    }
+
+    #setLink(value) {
+        storage.link = value;
+        if (storage.saveLink) localStorage.save();
+        this.#graph.render();
     }
 }
 

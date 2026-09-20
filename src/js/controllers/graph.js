@@ -8,8 +8,9 @@ import {
 import { closeHoverCommitModals, generateHoverCommitModalHTML } from "../components/HoverCommitModal/index";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 import storage from "../data/storage.js";
+import { buildCommitGraphLayout } from "../utils/commitGraph.js";
 import notifications from "../utils/notificationManager.js";
-import { appendHTML, escapeHTML, positionModalNearElement, truncateTitle } from "../utils/utils.js";
+import { appendHTML, positionModalNearElement, truncateTitle } from "../utils/utils.js";
 import * as DOM from "./dom.js";
 import dropDown from "./dropDown";
 
@@ -134,52 +135,89 @@ class GraphController {
     #generateGraph(array, branchName = "main") {
         if (!array) return;
 
+        const COMMIT_SIZE = 40;
+        const LANE_GAP = 88;
+        const ROW_GAP = 160;
+        const CONTINUATION_LENGTH = 70;
+        const renderLimit = +config.graph.renderLimit;
+        const layout = buildCommitGraphLayout(array, renderLimit);
+        const hasContinuation = layout.edges.some((edge) => edge.isContinuation);
+        const graphWidth = (layout.laneCount - 1) * LANE_GAP + COMMIT_SIZE;
+        const graphHeight = layout.nodes.length
+            ? (layout.nodes.length - 1) * ROW_GAP + COMMIT_SIZE + (hasContinuation ? CONTINUATION_LENGTH : 0)
+            : 0;
+
         closeFullCommitModals();
         closeHoverCommitModals();
-        this.#graph.innerHTML = "";
+        this.#graph.replaceChildren();
         this.#graph.dataset.repoUrl = storage.link;
-        const safeBranchName = escapeHTML(branchName);
+        this.#graph.style.width = `${graphWidth}px`;
+        this.#graph.style.height = `${graphHeight}px`;
 
-        array.forEach((commit, index) => {
-            const GITHUB_RENDER_LIMIT = 30;
-            const formattedTitle = truncateTitle(commit.title, 5);
-            const renderLimit = +config.graph.renderLimit;
+        const svgNamespace = "http://www.w3.org/2000/svg";
+        const edgesSvg = document.createElementNS(svgNamespace, "svg");
+        edgesSvg.setAttribute("aria-hidden", "true");
+        edgesSvg.setAttribute("class", "commit-edges");
+        edgesSvg.setAttribute("viewBox", `0 0 ${graphWidth} ${graphHeight}`);
 
-            if (index >= renderLimit) return;
+        layout.edges.forEach((edge) => {
+            const startX = edge.fromLane * LANE_GAP + COMMIT_SIZE / 2;
+            const startY = edge.fromRow * ROW_GAP + COMMIT_SIZE;
+            const endX = edge.toLane * LANE_GAP + COMMIT_SIZE / 2;
+            const endY = edge.isContinuation ? startY + CONTINUATION_LENGTH : edge.toRow * ROW_GAP;
+            const path = document.createElementNS(svgNamespace, "path");
+            const pathData =
+                startX === endX
+                    ? `M ${startX} ${startY} V ${endY}`
+                    : `M ${startX} ${startY} C ${startX} ${(startY + endY) / 2}, ${endX} ${(startY + endY) / 2}, ${endX} ${endY}`;
 
-            const isFirst = index === 0;
-            const isLast = index === Math.min(array.length, renderLimit) - 1;
+            path.setAttribute("class", edge.isContinuation ? "commit-edge commit-edge-continuation" : "commit-edge");
+            path.setAttribute("d", pathData);
+            edgesSvg.append(path);
 
-            const commitCard = `
-                ${isFirst ? "<div class='triangular-connector'></div>" : ""}
-                <button
-                    class="
-                        commit
-                        neon
-                        rounded-full
-                        ${isFirst ? "head-commit" : ""}
-                    "
-                    data-id="${index}"
-                    data-sha="${commit.sha}"
-                    name="${formattedTitle}"
-                    aria-expanded="false"
-                    aria-label="Open commit: ${commit.title}"
-                    aria-branch="${safeBranchName}"
-                ></button>
-                ${
-                    isLast
-                        ? `<span class="limit-description text-smallest">Showing up to ${renderLimit > GITHUB_RENDER_LIMIT ? GITHUB_RENDER_LIMIT : renderLimit} of the most recent commits for this branch.</span>`
-                        : `
-                <div class="connection neon">
-                    <span></span>
-                    <span></span>
-                </div>
-                `
-                }
-            `;
-
-            this.#graph.insertAdjacentHTML("beforeend", commitCard);
+            if (edge.isContinuation) {
+                const endpoint = document.createElementNS(svgNamespace, "circle");
+                endpoint.setAttribute("class", "commit-continuation-marker");
+                endpoint.setAttribute("cx", String(endX));
+                endpoint.setAttribute("cy", String(endY));
+                endpoint.setAttribute("r", "4");
+                edgesSvg.append(endpoint);
+            }
         });
+
+        this.#graph.append(edgesSvg);
+
+        layout.nodes.forEach(({ commit, lane, row }, index) => {
+            const formattedTitle = truncateTitle(commit.title, 5);
+            const isFirst = index === 0;
+            const commitButton = document.createElement("button");
+
+            commitButton.className = `commit neon rounded-full${isFirst ? " head-commit" : ""}`;
+            commitButton.dataset.id = String(index);
+            commitButton.dataset.lane = String(lane);
+            commitButton.dataset.sha = commit.sha;
+            commitButton.setAttribute("name", formattedTitle);
+            commitButton.setAttribute("aria-expanded", "false");
+            commitButton.setAttribute("aria-label", `Open commit: ${commit.title}`);
+            commitButton.setAttribute("aria-branch", branchName);
+            commitButton.style.setProperty("--commit-lane", lane);
+            commitButton.style.setProperty("--commit-row", row);
+            this.#graph.append(commitButton);
+
+            if (isFirst) {
+                const connector = document.createElement("div");
+                connector.className = "triangular-connector";
+                connector.style.setProperty("--commit-lane", lane);
+                this.#graph.append(connector);
+            }
+        });
+
+        const limitDescription = document.createElement("span");
+        limitDescription.className = "limit-description text-smallest";
+        limitDescription.textContent = layout.hasHiddenCommits
+            ? `Showing ${layout.nodes.length} of ${array.length} loaded commits for this branch.`
+            : `Showing all ${layout.nodes.length} loaded commits for this branch.`;
+        this.#graph.append(limitDescription);
 
         notifications.notify("The graph has been successfully generated", "success");
     }
