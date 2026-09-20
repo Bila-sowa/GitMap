@@ -121,7 +121,7 @@ class GitHubDataParser {
         return {
             success: true,
             files: formattedData,
-            truncated: files.length === 300,
+            truncated: files.length >= 300,
         };
     }
 }

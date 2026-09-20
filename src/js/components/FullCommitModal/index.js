@@ -63,7 +63,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
         </div>
         <p>Description:</p>
         <div class="${styles["modal-description"]}">
-            ${parsedDescription ? parsedDescription : ""} 
+            ${parsedDescription ? parsedDescription : ""}
         </div>
         <div class="${styles["modal-data"]}">
             <a class="${styles["modal-item"]} rounded-normal" href="${authorUrl}" target="_blank" rel="noopener noreferrer" title="Email: ${authorEmail}">
@@ -139,15 +139,15 @@ function bindFullComitEvents(trigger) {
     const copyableItems = [...modal.querySelectorAll(".copyable")];
     const theme = getTheme();
 
+    const setDefaultIcon = (e) => {
+        const icon = e.currentTarget;
+
+        icon.removeEventListener("error", setDefaultIcon);
+        icon.src = `https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/file.svg`;
+    };
+
     icons.forEach((icon) => {
-        icon.addEventListener(
-            "error",
-            () => {
-                icon.onerror = null;
-                icon.src = `https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/file.svg`;
-            },
-            { signal },
-        );
+        icon.addEventListener("error", setDefaultIcon, { signal });
     });
 
     copyableItems.forEach((item) => {
