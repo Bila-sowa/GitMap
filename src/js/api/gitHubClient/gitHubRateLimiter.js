@@ -1,4 +1,6 @@
 import notifications from "@/js/utils/notificationManager";
+import { config } from "@/js/api/config";
+import createRequestControl from "./requestControl";
 
 class GitHubRateLimiter {
     #headers;
@@ -42,11 +44,14 @@ class GitHubRateLimiter {
         return response;
     }
 
-    async getRateLimitData() {
+    async getRateLimitData(options = {}) {
+        const request = createRequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+
         try {
             const url = "https://api.github.com/rate_limit";
             const res = await fetch(url, {
                 headers: this.#getSafeHeaders(url),
+                signal: request.signal,
             });
 
             if (!res.ok) {
@@ -92,6 +97,25 @@ class GitHubRateLimiter {
             this.checkIsRateLimitHigh(response);
             return response;
         } catch (err) {
+            if (request.didTimeout()) {
+                const error = "GitHub request timed out";
+                notifications.notify(error, "error");
+                return {
+                    success: false,
+                    timedOut: true,
+                    error,
+                    data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 },
+                };
+            }
+
+            if (err.name === "AbortError") {
+                return {
+                    success: false,
+                    cancelled: true,
+                    data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 },
+                };
+            }
+
             const error = "Failed to fetch rate limit data";
             const devError = {
                 message: `Network or fetch exception in getRateLimitData: ${err.message}`,
@@ -104,6 +128,8 @@ class GitHubRateLimiter {
                 devError,
                 data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 },
             };
+        } finally {
+            request.cleanup();
         }
     }
 }

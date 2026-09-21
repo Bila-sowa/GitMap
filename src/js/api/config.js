@@ -10,6 +10,9 @@ const getDefaultConfig = () => {
         graph: {
             renderLimit: 30,
         },
+        gitHub: {
+            REQUEST_TIMEOUT_MS: 15000,
+        },
         notifications: {
             showNotifications: true,
             COOLDOWN_MS: 5000,
@@ -48,6 +51,14 @@ const mergeConfigs = (invalidConfig) => {
                 Number.isInteger(config.graph?.renderLimit) && config.graph.renderLimit > 0
                     ? config.graph.renderLimit
                     : defaultConfig.graph.renderLimit,
+        },
+        gitHub: {
+            REQUEST_TIMEOUT_MS:
+                Number.isInteger(config.gitHub?.REQUEST_TIMEOUT_MS) &&
+                config.gitHub.REQUEST_TIMEOUT_MS >= 1000 &&
+                config.gitHub.REQUEST_TIMEOUT_MS <= 120000
+                    ? config.gitHub.REQUEST_TIMEOUT_MS
+                    : defaultConfig.gitHub.REQUEST_TIMEOUT_MS,
         },
         notifications: {
             showNotifications:

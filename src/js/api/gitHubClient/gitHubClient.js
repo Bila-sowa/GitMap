@@ -5,6 +5,8 @@ import GitHubDataParser from "./gitHubDataParser";
 import parseGitHubUrl from "./gitHubUrlParser";
 import notifications from "@/js/utils/notificationManager";
 import storage from "@/js/data/storage";
+import { config } from "@/js/api/config";
+import createRequestControl from "./requestControl";
 
 class GitHubClient extends GitHubHttpApi {
     #headers = { Accept: "application/vnd.github+json" };
@@ -43,19 +45,21 @@ class GitHubClient extends GitHubHttpApi {
 
         if (!formatted.success) return formatted;
 
+        const request = createRequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+
         try {
             const [repositoryRes, branchesRes, commitsRes] = await Promise.all([
                 fetch(formatted.repositoryLink, {
                     headers: this.#getSafeHeaders(formatted.repositoryLink),
-                    signal: options.signal,
+                    signal: request.signal,
                 }),
                 fetch(formatted.branchLink, {
                     headers: this.#getSafeHeaders(formatted.branchLink),
-                    signal: options.signal,
+                    signal: request.signal,
                 }),
                 fetch(formatted.commitsLink, {
                     headers: this.#getSafeHeaders(formatted.commitsLink),
-                    signal: options.signal,
+                    signal: request.signal,
                 }),
             ]);
 
@@ -85,6 +89,10 @@ class GitHubClient extends GitHubHttpApi {
                 commits,
             };
         } catch (err) {
+            if (request.didTimeout()) {
+                return { success: false, timedOut: true, error: "GitHub request timed out" };
+            }
+
             if (err.name === "AbortError") {
                 return { success: false, cancelled: true };
             }
@@ -97,6 +105,8 @@ class GitHubClient extends GitHubHttpApi {
                     stack: err.stack,
                 },
             };
+        } finally {
+            request.cleanup();
         }
     }
 
@@ -108,7 +118,7 @@ class GitHubClient extends GitHubHttpApi {
             return data;
         }
 
-        await this.getRateLimitData();
+        await this.getRateLimitData(options);
 
         const parsed = this.#parser.parseRepoData(data);
 
@@ -137,11 +147,13 @@ class GitHubClient extends GitHubHttpApi {
             return formatted;
         }
 
+        const request = createRequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+
         try {
             const commitsUrl = `${formatted.commitsLink}?sha=${encodeURIComponent(branchName)}`;
             const commitsRes = await fetch(commitsUrl, {
                 headers: this.#getSafeHeaders(commitsUrl),
-                signal: options.signal,
+                signal: request.signal,
             });
 
             if (!commitsRes.ok) {
@@ -157,9 +169,15 @@ class GitHubClient extends GitHubHttpApi {
                 notifications.notify(parsed.error, "error");
             }
 
-            this.getRateLimitData();
+            this.getRateLimitData(options);
             return parsed;
         } catch (err) {
+            if (request.didTimeout()) {
+                const error = "GitHub request timed out";
+                notifications.notify(error, "error");
+                return { success: false, timedOut: true, error };
+            }
+
             if (err.name === "AbortError") {
                 return { success: false, cancelled: true };
             }
@@ -171,10 +189,12 @@ class GitHubClient extends GitHubHttpApi {
             };
             notifications.notify(error, "error");
             return { success: false, error, devError };
+        } finally {
+            request.cleanup();
         }
     }
 
-    async getCommitFiles(url, sha) {
+    async getCommitFiles(url, sha, options = {}) {
         const formatted = parseGitHubUrl(url);
 
         if (!formatted.success) {
@@ -189,12 +209,16 @@ class GitHubClient extends GitHubHttpApi {
             return { success: false, error, devError };
         }
 
-        await this.getRateLimitData();
+        const rateLimit = await this.getRateLimitData(options);
+        if (rateLimit.cancelled || options.signal?.aborted) return { success: false, cancelled: true };
+
+        const request = createRequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
 
         try {
             const commitUrl = `${formatted.commitsLink}/${sha}`;
             const fileRes = await fetch(commitUrl, {
                 headers: this.#getSafeHeaders(commitUrl),
+                signal: request.signal,
             });
 
             if (!fileRes.ok) {
@@ -206,6 +230,16 @@ class GitHubClient extends GitHubHttpApi {
             const data = await fileRes.json();
             return this.#parser.parseCommitFilesData(data);
         } catch (err) {
+            if (request.didTimeout()) {
+                const error = "GitHub request timed out";
+                notifications.notify(error, "error");
+                return { success: false, timedOut: true, error };
+            }
+
+            if (err.name === "AbortError") {
+                return { success: false, cancelled: true };
+            }
+
             const error = "Failed to fetch commit files";
             const devError = {
                 message: `Network or fetch exception in getCommitFiles: ${err.message}`,
@@ -213,15 +247,17 @@ class GitHubClient extends GitHubHttpApi {
             };
             notifications.notify(error, "error");
             return { success: false, error, devError };
+        } finally {
+            request.cleanup();
         }
     }
 
-    async setToken(token) {
-        return await this.#tokenManager.setToken(token);
+    async setToken(token, options = {}) {
+        return await this.#tokenManager.setToken(token, options);
     }
 
-    async getRateLimitData() {
-        return await this.#rateLimiter.getRateLimitData();
+    async getRateLimitData(options = {}) {
+        return await this.#rateLimiter.getRateLimitData(options);
     }
 
     checkIsRateLimitHigh(response, percent = 70) {

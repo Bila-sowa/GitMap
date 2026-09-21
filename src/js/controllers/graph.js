@@ -21,6 +21,7 @@ class GraphController {
     #data = null;
     #eventsController = null;
     #requestController = null;
+    #detailsRequestController = null;
     #requestId = 0;
     #currentBranch = null;
 
@@ -112,6 +113,7 @@ class GraphController {
 
     #startRequest() {
         this.#requestController?.abort();
+        this.#detailsRequestController?.abort();
         this.#requestController = new AbortController();
 
         return {
@@ -124,10 +126,10 @@ class GraphController {
         return requestId === this.#requestId && link === storage.link;
     }
 
-    #getFilesData = async (sha) => {
+    #getFilesData = async (sha, options = {}) => {
         if (!this.#link || !sha) return;
 
-        const filesData = await gitHubClient.getCommitFiles(this.#link, sha);
+        const filesData = await gitHubClient.getCommitFiles(this.#link, sha, options);
 
         return filesData;
     };
@@ -236,14 +238,18 @@ class GraphController {
                 const { sha } = commitButton.dataset;
                 const commit = this.#data?.commitsDetails.find((item) => item.sha === sha);
                 if (!commit) return;
-                const requestId = this.#requestId;
+
+                this.#detailsRequestController?.abort();
+                const detailsRequest = new AbortController();
+                this.#detailsRequestController = detailsRequest;
 
                 const loader = generateLoader();
 
                 try {
-                    const filesData = await this.#getFilesData(sha);
+                    const filesData = await this.#getFilesData(sha, { signal: detailsRequest.signal });
 
-                    if (requestId !== this.#requestId || !commitButton.isConnected) return;
+                    if (detailsRequest !== this.#detailsRequestController || !commitButton.isConnected) return;
+                    if (!filesData?.success) return;
 
                     const modal = generateFullCommitModalHTML(commit, filesData);
                     if (!modal) return;
@@ -251,6 +257,9 @@ class GraphController {
                     appendHTML(modal);
                     bindFullComitEvents(commitButton);
                 } finally {
+                    if (detailsRequest === this.#detailsRequestController) {
+                        this.#detailsRequestController = null;
+                    }
                     removeLoader(loader);
                 }
             },

@@ -1,5 +1,7 @@
 import notifications from "@/js/utils/notificationManager";
 import storage from "@/js/data/storage";
+import { config } from "@/js/api/config";
+import createRequestControl from "./requestControl";
 
 class GitHubTokenManager {
     #headers;
@@ -32,11 +34,14 @@ class GitHubTokenManager {
         return headers;
     }
 
-    async #validateToken(token) {
+    async #validateToken(token, options = {}) {
+        const request = createRequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+
         try {
             const url = "https://api.github.com/rate_limit";
             const res = await this.#fetch(url, {
                 headers: this.#getSafeHeaders(url, `Bearer ${token}`),
+                signal: request.signal,
             });
 
             if (!res.ok) {
@@ -46,6 +51,14 @@ class GitHubTokenManager {
 
             return { success: true };
         } catch (err) {
+            if (request.didTimeout()) {
+                return { success: false, timedOut: true, error: "GitHub request timed out" };
+            }
+
+            if (err.name === "AbortError") {
+                return { success: false, cancelled: true };
+            }
+
             return {
                 success: false,
                 error: "Failed to validate GitHub token",
@@ -54,10 +67,12 @@ class GitHubTokenManager {
                     stack: err.stack,
                 },
             };
+        } finally {
+            request.cleanup();
         }
     }
 
-    async setToken(token) {
+    async setToken(token, options = {}) {
         const operationId = ++this.#tokenOperationId;
 
         if (!token) {
@@ -66,7 +81,7 @@ class GitHubTokenManager {
             return { success: true };
         }
 
-        const validation = await this.#validateToken(token);
+        const validation = await this.#validateToken(token, options);
 
         if (operationId !== this.#tokenOperationId) {
             return { success: false, cancelled: true };

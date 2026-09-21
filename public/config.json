@@ -2,12 +2,15 @@
     "name": "GitMap",
     "debug": true,
     "versionDetails": {
-        "version": "2.10.5",
+        "version": "2.10.6",
         "versionType": "alpha",
         "versionIsStable": false
     },
     "graph": {
         "renderLimit": 30
+    },
+    "gitHub": {
+        "REQUEST_TIMEOUT_MS": 15000
     },
     "notifications": {
         "showNotifications": true,

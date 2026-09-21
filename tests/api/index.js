@@ -7,6 +7,7 @@ import test_05yau_Data from "./gitHubClient/setToken.test";
 import test_3j3f8_Data from "./gitHubClient/getRateLimitData.test";
 import test_vt6mk_Data from "./gitHubClient/getDataByBranch.test";
 import test_anl95_Data from "./config/mergeConfigs.test";
+import test_4lmw4_Data from "./gitHubClient/requestControl.test";
 
 export {
     test_nd2u3_Data,
@@ -18,4 +19,5 @@ export {
     test_3j3f8_Data,
     test_vt6mk_Data,
     test_anl95_Data,
+    test_4lmw4_Data,
 };

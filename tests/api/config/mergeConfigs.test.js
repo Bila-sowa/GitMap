@@ -59,6 +59,7 @@ export default function test_anl95_Data() {
                 showNotifications: "yes",
                 COOLDOWN_MS: Number.POSITIVE_INFINITY,
             },
+            gitHub: { REQUEST_TIMEOUT_MS: 0 },
             loader: {
                 showLoader: 1,
                 CLEANUP_TIMEOUT_MS: -1,
