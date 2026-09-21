@@ -34,7 +34,7 @@ class GraphController {
 
         const request = this.#startRequest();
 
-        generateLoader();
+        const loader = generateLoader();
 
         try {
             const data = await gitHubClient.getData(link, { signal: request.signal });
@@ -58,7 +58,7 @@ class GraphController {
             notifications.notify("Failed to render the repository graph", "error");
             return { success: false, error: error.message };
         } finally {
-            if (request.id === this.#requestId) removeLoader();
+            removeLoader(loader);
         }
     }
 
@@ -72,7 +72,7 @@ class GraphController {
 
         const request = this.#startRequest();
 
-        generateLoader();
+        const loader = generateLoader();
 
         try {
             const commits = await gitHubClient.getDataByBranch(branchName, link, { signal: request.signal });
@@ -98,7 +98,7 @@ class GraphController {
             notifications.notify("Failed to render the selected branch", "error");
             return { success: false, error: error.message };
         } finally {
-            if (request.id === this.#requestId) removeLoader();
+            removeLoader(loader);
         }
     }
 
@@ -238,7 +238,7 @@ class GraphController {
                 if (!commit) return;
                 const requestId = this.#requestId;
 
-                generateLoader();
+                const loader = generateLoader();
 
                 try {
                     const filesData = await this.#getFilesData(sha);
@@ -251,7 +251,7 @@ class GraphController {
                     appendHTML(modal);
                     bindFullComitEvents(commitButton);
                 } finally {
-                    if (requestId === this.#requestId) removeLoader();
+                    removeLoader(loader);
                 }
             },
             { signal },

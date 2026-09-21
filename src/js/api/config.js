@@ -16,6 +16,7 @@ const getDefaultConfig = () => {
         },
         loader: {
             showLoader: false,
+            CLEANUP_TIMEOUT_MS: 30000,
         },
     };
 };
@@ -65,6 +66,12 @@ const mergeConfigs = (invalidConfig) => {
                 typeof config.loader?.showLoader === "boolean"
                     ? config.loader.showLoader
                     : defaultConfig.loader.showLoader,
+            CLEANUP_TIMEOUT_MS:
+                Number.isInteger(config.loader?.CLEANUP_TIMEOUT_MS) &&
+                config.loader.CLEANUP_TIMEOUT_MS >= 1000 &&
+                config.loader.CLEANUP_TIMEOUT_MS <= 120000
+                    ? config.loader.CLEANUP_TIMEOUT_MS
+                    : defaultConfig.loader.CLEANUP_TIMEOUT_MS,
         },
     };
 };

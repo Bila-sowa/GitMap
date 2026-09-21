@@ -59,7 +59,10 @@ export default function test_anl95_Data() {
                 showNotifications: "yes",
                 COOLDOWN_MS: Number.POSITIVE_INFINITY,
             },
-            loader: { showLoader: 1 },
+            loader: {
+                showLoader: 1,
+                CLEANUP_TIMEOUT_MS: -1,
+            },
         }),
         nonObjectConfig: mergeConfigs(null),
     }));

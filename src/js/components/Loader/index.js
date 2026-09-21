@@ -1,30 +1,44 @@
 import { config } from "@/js/api/config";
 import styles from "./styles.module.scss";
 
-function generateLoader() {
+const loaderTimeouts = new WeakMap();
+
+function generateLoader(timeout = config.loader.CLEANUP_TIMEOUT_MS) {
     if (!config.loader.showLoader) return;
 
-    const loaders = [...document.querySelectorAll(".loader")];
+    removeLoader();
 
-    if (loaders.length) removeLoader();
-
-    const loaderHTML = `
-        <div class="overlay loader">
-            <div class="${styles.loader}" role="status" aria-label="Loading">
-                <div class="${styles["loader-bar"]}"></div>
-                <div class="${styles["loader-bar"]}"></div>
-                <div class="${styles["loader-bar"]}"></div>
-                <div class="${styles["loader-bar"]}"></div>
-                <div class="${styles["loader-bar"]}"></div>
-            </div>
+    const loader = document.createElement("div");
+    loader.className = "overlay loader";
+    loader.innerHTML = `
+        <div class="${styles.loader}" role="status" aria-label="Loading">
+            <div class="${styles["loader-bar"]}"></div>
+            <div class="${styles["loader-bar"]}"></div>
+            <div class="${styles["loader-bar"]}"></div>
+            <div class="${styles["loader-bar"]}"></div>
+            <div class="${styles["loader-bar"]}"></div>
         </div>
     `;
 
-    document.body.insertAdjacentHTML("beforeend", loaderHTML);
+    document.body.append(loader);
+    loaderTimeouts.set(
+        loader,
+        setTimeout(() => removeLoader(loader), timeout),
+    );
+
+    return loader;
 }
 
-function removeLoader() {
-    [...document.querySelectorAll(".loader")].forEach((loader) => loader.remove());
+function removeLoader(loader) {
+    const loaders = loader ? [loader] : [...document.querySelectorAll(".loader")];
+
+    loaders.forEach((loaderElement) => {
+        const timeout = loaderTimeouts.get(loaderElement);
+        if (timeout) clearTimeout(timeout);
+
+        loaderTimeouts.delete(loaderElement);
+        loaderElement.remove();
+    });
 }
 
 export { generateLoader, removeLoader };

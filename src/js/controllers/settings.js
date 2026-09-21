@@ -3,6 +3,7 @@ import { config } from "../api/config";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
 import { bindSettingsModalEvents, generateSettingsModalHTML } from "../components/SettingsModal/index.js";
 import storage from "../data/storage.js";
+import notifications from "../utils/notificationManager.js";
 import { appendHTML } from "../utils/utils.js";
 import * as DOM from "./dom.js";
 
@@ -19,22 +20,24 @@ class SettingsController {
     }
 
     async #openSettings() {
-        storage.token ? await gitHubClient.setToken(storage.token) : "";
+        const loader = generateLoader();
 
-        generateLoader();
+        try {
+            if (storage.token) await gitHubClient.setToken(storage.token);
 
-        const rateLimitRes = await gitHubClient.getRateLimitData();
-        const limit = rateLimitRes.data;
-        const versionDetails = config.versionDetails;
+            const rateLimitRes = await gitHubClient.getRateLimitData();
+            const modal = generateSettingsModalHTML(rateLimitRes.data, config.versionDetails);
 
-        removeLoader();
+            if (!modal) return;
 
-        const modal = generateSettingsModalHTML(limit, versionDetails);
-
-        if (!modal) return;
-
-        appendHTML(modal);
-        bindSettingsModalEvents();
+            appendHTML(modal);
+            bindSettingsModalEvents();
+        } catch (error) {
+            notifications.notify("Failed to open settings", "error");
+            console.error("Failed to open settings:", error);
+        } finally {
+            removeLoader(loader);
+        }
     }
 }
 
