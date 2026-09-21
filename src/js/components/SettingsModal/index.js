@@ -46,14 +46,14 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
                     <div class="${styles["settings-section"]}">
                         <h3>LocalStorage</h3>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
-                            <span for="save-link">Save current repo in page</span>
-                            <input class="hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-link">
-                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-link" aria-label="toggle save link option"></label>
+                            <span id="save-link-label">Save current repo in page</span>
+                            <input class="visually-hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-link" aria-labelledby="save-link-label">
+                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-link"></label>
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
-                            <span>Save current token in page</span>
-                            <input class="hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-token">
-                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-token" aria-label="toggle save token option"></label>
+                            <span id="save-token-label">Save current token in page</span>
+                            <input class="visually-hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-token" aria-labelledby="save-token-label">
+                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-token"></label>
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>Rest API Limit:</span>
