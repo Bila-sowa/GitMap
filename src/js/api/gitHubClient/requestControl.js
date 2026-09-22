@@ -1,28 +1,38 @@
-function createRequestControl(externalSignal, timeout) {
-    const controller = new AbortController();
-    let timedOut = false;
+class RequestControl {
+    #controller = new AbortController();
+    #externalSignal;
+    #timedOut = false;
+    #timeoutId;
 
-    const abortFromExternalSignal = () => controller.abort(externalSignal.reason);
+    constructor(externalSignal, timeout) {
+        this.#externalSignal = externalSignal;
 
-    if (externalSignal?.aborted) {
-        abortFromExternalSignal();
-    } else {
-        externalSignal?.addEventListener("abort", abortFromExternalSignal, { once: true });
+        if (externalSignal?.aborted) {
+            this.#abortFromExternalSignal();
+        } else {
+            externalSignal?.addEventListener("abort", this.#abortFromExternalSignal, { once: true });
+        }
+
+        this.#timeoutId = setTimeout(() => {
+            this.#timedOut = true;
+            this.#controller.abort(new DOMException("GitHub request timed out", "TimeoutError"));
+        }, timeout);
     }
 
-    const timeoutId = setTimeout(() => {
-        timedOut = true;
-        controller.abort(new DOMException("GitHub request timed out", "TimeoutError"));
-    }, timeout);
+    #abortFromExternalSignal = () => this.#controller.abort(this.#externalSignal.reason);
 
-    return {
-        signal: controller.signal,
-        didTimeout: () => timedOut,
-        cleanup: () => {
-            clearTimeout(timeoutId);
-            externalSignal?.removeEventListener("abort", abortFromExternalSignal);
-        },
-    };
+    get signal() {
+        return this.#controller.signal;
+    }
+
+    didTimeout() {
+        return this.#timedOut;
+    }
+
+    cleanup() {
+        clearTimeout(this.#timeoutId);
+        this.#externalSignal?.removeEventListener("abort", this.#abortFromExternalSignal);
+    }
 }
 
-export default createRequestControl;
+export default RequestControl;

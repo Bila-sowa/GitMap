@@ -6,7 +6,7 @@ import parseGitHubUrl from "./gitHubUrlParser";
 import notifications from "@/js/utils/notificationManager";
 import storage from "@/js/data/storage";
 import { config } from "@/js/api/config";
-import createRequestControl from "./requestControl";
+import RequestControl from "./requestControl";
 
 class GitHubClient extends GitHubHttpApi {
     #headers = { Accept: "application/vnd.github+json" };
@@ -45,7 +45,7 @@ class GitHubClient extends GitHubHttpApi {
 
         if (!formatted.success) return formatted;
 
-        const request = createRequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+        const request = new RequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
 
         try {
             const [repositoryRes, branchesRes, commitsRes] = await Promise.all([
@@ -147,7 +147,7 @@ class GitHubClient extends GitHubHttpApi {
             return formatted;
         }
 
-        const request = createRequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+        const request = new RequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
 
         try {
             const commitsUrl = `${formatted.commitsLink}?sha=${encodeURIComponent(branchName)}`;
@@ -212,7 +212,7 @@ class GitHubClient extends GitHubHttpApi {
         const rateLimit = await this.getRateLimitData(options);
         if (rateLimit.cancelled || options.signal?.aborted) return { success: false, cancelled: true };
 
-        const request = createRequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+        const request = new RequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
 
         try {
             const commitUrl = `${formatted.commitsLink}/${sha}`;

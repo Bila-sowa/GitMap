@@ -8,11 +8,10 @@ class CanvasController {
     #lastOffsetX = 0;
     #lastOffsetY = 0;
     #lastPinchDist = 0;
-    #pinchMidX = 0;
-    #pinchMidY = 0;
+    #isPinching = false;
+    #pinchWorldX = 0;
+    #pinchWorldY = 0;
     #pinchStartScale = 1;
-    #pinchStartOffsetX = 0;
-    #pinchStartOffsetY = 0;
 
     constructor(viewport, canvasElement) {
         this.viewport = viewport;
@@ -41,6 +40,8 @@ class CanvasController {
         this.viewport.addEventListener("touchstart", this.#onTouchStart, { passive: false, signal });
         this.viewport.addEventListener("touchmove", this.#onTouchMove, { passive: false, signal });
         this.viewport.addEventListener("touchend", this.#onTouchEnd, { signal });
+        this.viewport.addEventListener("touchcancel", this.#onTouchCancel, { signal });
+        window.addEventListener("blur", this.#endTouchGesture, { signal });
     }
 
     #clamp(value, min, max) {
@@ -64,9 +65,25 @@ class CanvasController {
     }
 
     #endPan() {
-        if (!this.#isPanning) return;
         this.#isPanning = false;
         this.viewport.classList.remove("is-panning");
+    }
+
+    #startPinch(touches) {
+        const rect = this.viewport.getBoundingClientRect();
+        const midX = (touches[0].clientX + touches[1].clientX) / 2 - rect.left;
+        const midY = (touches[0].clientY + touches[1].clientY) / 2 - rect.top;
+
+        this.#endPan();
+        this.#isPinching = true;
+        this.#lastPinchDist = this.#getPinchDistance(touches);
+        this.#pinchStartScale = this.scale;
+        this.#pinchWorldX = (midX - this.offsetX) / this.scale;
+        this.#pinchWorldY = (midY - this.offsetY) / this.scale;
+    }
+
+    #endPinch() {
+        this.#isPinching = false;
     }
 
     #getPinchDistance(touches) {
@@ -109,18 +126,13 @@ class CanvasController {
 
     #onTouchStart = (e) => {
         if (e.touches.length === 1) {
+            this.#endPinch();
             this.#startPan(e.touches[0].clientX, e.touches[0].clientY);
             return;
         }
 
         if (e.touches.length === 2) {
-            this.#isPanning = false;
-            this.#lastPinchDist = this.#getPinchDistance(e.touches);
-            this.#pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            this.#pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            this.#pinchStartScale = this.scale;
-            this.#pinchStartOffsetX = this.offsetX;
-            this.#pinchStartOffsetY = this.offsetY;
+            this.#startPinch(e.touches);
         }
     };
 
@@ -133,27 +145,40 @@ class CanvasController {
         }
 
         if (e.touches.length === 2) {
+            if (!this.#isPinching) this.#startPinch(e.touches);
+
             const dist = this.#getPinchDistance(e.touches);
+            if (this.#lastPinchDist === 0) return;
+
             const scaleRatio = dist / this.#lastPinchDist;
             const rect = this.viewport.getBoundingClientRect();
             const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
             const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
 
             this.scale = this.#clamp(this.#pinchStartScale * scaleRatio, this.minScale, this.maxScale);
-            this.offsetX =
-                midX -
-                (this.#pinchMidX - rect.left - this.#pinchStartOffsetX) * (this.scale / this.#pinchStartScale) -
-                (midX - (this.#pinchMidX - rect.left));
-            this.offsetY =
-                midY -
-                (this.#pinchMidY - rect.top - this.#pinchStartOffsetY) * (this.scale / this.#pinchStartScale) -
-                (midY - (this.#pinchMidY - rect.top));
+            this.offsetX = midX - this.#pinchWorldX * this.scale;
+            this.offsetY = midY - this.#pinchWorldY * this.scale;
             this.#applyTransform();
         }
     };
 
-    #onTouchEnd = () => {
+    #onTouchEnd = (e) => {
+        if (e.touches.length === 1) {
+            this.#endPinch();
+            this.#startPan(e.touches[0].clientX, e.touches[0].clientY);
+            return;
+        }
+
+        if (e.touches.length === 0) this.#endTouchGesture();
+    };
+
+    #onTouchCancel = () => {
+        this.#endTouchGesture();
+    };
+
+    #endTouchGesture = () => {
         this.#endPan();
+        this.#endPinch();
     };
 
     #applyTransform() {
@@ -219,7 +244,7 @@ class CanvasController {
             this.#abortController.abort();
             this.#abortController = null;
         }
-        this.viewport.classList.remove("is-panning");
+        this.#endTouchGesture();
     }
 }
 

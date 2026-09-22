@@ -1,7 +1,7 @@
 import notifications from "@/js/utils/notificationManager";
 import storage from "@/js/data/storage";
 import { config } from "@/js/api/config";
-import createRequestControl from "./requestControl";
+import RequestControl from "./requestControl";
 
 class GitHubTokenManager {
     #headers;
@@ -35,7 +35,7 @@ class GitHubTokenManager {
     }
 
     async #validateToken(token, options = {}) {
-        const request = createRequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+        const request = new RequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
 
         try {
             const url = "https://api.github.com/rate_limit";

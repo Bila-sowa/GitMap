@@ -1,4 +1,4 @@
-import createRequestControl from "@/js/api/gitHubClient/requestControl";
+import RequestControl from "@/js/api/gitHubClient/requestControl";
 import { TestConfig } from "../../tools/testTools";
 
 /**
@@ -10,8 +10,8 @@ import { TestConfig } from "../../tools/testTools";
  * #### Params:
  * - file: `requestControl.js`
  * - test: `test_4lmw4_Data`
- * - name: `createRequestControl`
- * - type: `function`
+ * - name: `RequestControl`
+ * - type: `class`
  *
  * @returns {Promise<TestFeedback>} Test feedback for cancellation, timeout, and cleanup behavior.
  */
@@ -20,8 +20,8 @@ export default function test_4lmw4_Data() {
         {
             file: "requestControl.js",
             test: "test_4lmw4_Data",
-            name: "createRequestControl",
-            type: "function",
+            name: "RequestControl",
+            type: "class",
         },
         {
             externalAbortPropagated: true,
@@ -34,20 +34,20 @@ export default function test_4lmw4_Data() {
 
     return config.run(async () => {
         const externalController = new AbortController();
-        const externalRequest = createRequestControl(externalController.signal, 1000);
+        const externalRequest = new RequestControl(externalController.signal, 1000);
         externalController.abort();
 
         const externalAbortPropagated = externalRequest.signal.aborted;
         const externalAbortIsNotTimeout = !externalRequest.didTimeout();
         externalRequest.cleanup();
 
-        const timeoutRequest = createRequestControl(undefined, 10);
+        const timeoutRequest = new RequestControl(undefined, 10);
         await new Promise((resolve) => setTimeout(resolve, 20));
         const timeoutAbortTriggered = timeoutRequest.signal.aborted;
         const timeoutStateRecorded = timeoutRequest.didTimeout();
         timeoutRequest.cleanup();
 
-        const completedRequest = createRequestControl(undefined, 10);
+        const completedRequest = new RequestControl(undefined, 10);
         completedRequest.cleanup();
         await new Promise((resolve) => setTimeout(resolve, 20));
         const cleanupPreventsTimeout = !completedRequest.signal.aborted;
