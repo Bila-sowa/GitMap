@@ -95,7 +95,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
                             <code class="${styles["modal-file-path"]} text-small">${file.name}</code>
                             <div class="${styles["modal-file-changes"]}">
                                 ${
-                                    file.status === "R"
+                                    file.fullStatus === "removed"
                                         ? `<span class="text-small" style="color: ${statusColors[`${theme}`][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>`
                                         : `
                                     <code class="${styles["modal-file-changes-additions"]} text-small">+${file.additions}</code>
