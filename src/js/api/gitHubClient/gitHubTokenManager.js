@@ -10,11 +10,11 @@ class GitHubTokenManager {
     #fetch;
     #tokenOperationId = 0;
 
-    constructor(headers, httpApi, storageInstance = storage, fetcher = globalThis.fetch) {
+    constructor(headers, httpApi, storageInstance = storage, fetcher) {
         this.#headers = headers;
         this.#httpApi = httpApi;
         this.#storage = storageInstance;
-        this.#fetch = fetcher;
+        this.#fetch = fetcher || ((...args) => globalThis.fetch(...args));
     }
 
     #getSafeHeaders(url, authorization = this.#headers.Authorization) {
