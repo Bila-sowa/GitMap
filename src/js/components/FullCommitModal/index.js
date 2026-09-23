@@ -2,6 +2,7 @@ import { copyValueToClipboard } from "@/js/utils/utils.js";
 import { sanitizeMarkdown } from "@/js/utils/sanitizeMarkdown.js";
 import styles from "./styles.module.scss";
 import gitHubLogoSrc from "@/assets/github-logo.webp";
+import gitHubAvatarFallbackSrc from "@/assets/gitHubAvatarFallback.png";
 
 const getTheme = () => {
     return document.body.classList.contains("dark-theme") ? "dark" : "light";
@@ -63,14 +64,14 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
         </div>
         <p>Description:</p>
         <div class="${styles["modal-description"]}">
-            ${parsedDescription ? parsedDescription : ""}
+            ${parsedDescription ? parsedDescription : "The description was not added"}
         </div>
         <div class="${styles["modal-data"]}">
-            <a class="${styles["modal-item"]} rounded-normal" href="${authorUrl}" target="_blank" rel="noopener noreferrer" title="Email: ${authorEmail}">
+            <a class="${styles["modal-item"]} rounded-normal" href="${authorUrl ? authorUrl : ""}" target="_blank" rel="noopener noreferrer" title="Email: ${authorEmail ? authorEmail : ""}">
                 <span>Author: </span>
                 <div class="flex-align-center">
                     ${authorName}
-                    <img class="avatar rounded-full" src="${authorAvatar}" alt="${authorName}'s Avatar">
+                    <img class="avatar rounded-full" src="${authorAvatar ? authorAvatar : gitHubAvatarFallbackSrc}" alt="${authorName}'s Avatar">
                 </div>
             </a>
             <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${hash}" aria-label="Copy commit hash to clipboard">

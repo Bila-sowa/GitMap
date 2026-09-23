@@ -1,5 +1,6 @@
 import { stopModalPositioning, truncateTitle } from "@/js/utils/utils";
 import styles from "./styles.module.scss";
+import gitHubAvatarFallbackSrc from "@/assets/gitHubAvatarFallback.png";
 
 const closeHoverCommitModals = () => {
     [...document.querySelectorAll(".hover-commit-modal")].forEach((modal) => {
@@ -38,7 +39,7 @@ const generateHoverCommitModalHTML = (commitData) => {
                         <span>Author: </span>
                         <div class="flex-align-center">
                             <span>${authorName}</span>
-                            <img class="avatar rounded-full" src="${authorAvatar}" alt="${authorName} avatar">
+                            <img class="avatar rounded-full" src="${authorAvatar ? authorAvatar : gitHubAvatarFallbackSrc}" alt="${authorName}'s avatar">
                         </div>
                     </div>
                     <div class="${styles["modal-item"]} rounded-normal">
