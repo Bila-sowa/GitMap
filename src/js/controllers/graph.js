@@ -228,6 +228,19 @@ class GraphController {
         if (this.#eventsController) this.#eventsController.abort();
         this.#eventsController = new AbortController();
         const { signal } = this.#eventsController;
+        let hoverCloseTimeout = null;
+
+        const cancelHoverClose = () => {
+            clearTimeout(hoverCloseTimeout);
+            hoverCloseTimeout = null;
+        };
+
+        const scheduleHoverClose = () => {
+            cancelHoverClose();
+            hoverCloseTimeout = setTimeout(() => closeHoverCommitModals(), 150);
+        };
+
+        signal.addEventListener("abort", cancelHoverClose, { once: true });
 
         this.#graph.addEventListener(
             "click",
@@ -269,8 +282,10 @@ class GraphController {
         this.#graph.addEventListener(
             "mouseover",
             (e) => {
+                cancelHoverClose();
                 const commitButton = e.target.closest("[data-id]");
                 if (!commitButton) return;
+                if (commitButton.contains(e.relatedTarget)) return;
 
                 const { sha } = commitButton.dataset;
                 const commit = this.#data?.commitsDetails.find((item) => item.sha === sha);
@@ -285,12 +300,14 @@ class GraphController {
 
                 if (modal) {
                     positionModalNearElement(modalDOM, commitButton);
+                    modalDOM.addEventListener("mouseenter", cancelHoverClose, { signal });
+                    modalDOM.addEventListener("mouseleave", scheduleHoverClose, { signal });
                 }
             },
             { signal },
         );
 
-        this.#graph.addEventListener("mouseout", () => closeHoverCommitModals(), { signal });
+        this.#graph.addEventListener("mouseout", scheduleHoverClose, { signal });
     }
 }
 

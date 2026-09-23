@@ -1,8 +1,11 @@
-import { truncateTitle } from "@/js/utils/utils";
+import { stopModalPositioning, truncateTitle } from "@/js/utils/utils";
 import styles from "./styles.module.scss";
 
 const closeHoverCommitModals = () => {
-    [...document.querySelectorAll(".hover-commit-modal")]?.forEach((modal) => modal.remove());
+    [...document.querySelectorAll(".hover-commit-modal")].forEach((modal) => {
+        stopModalPositioning(modal);
+        modal.remove();
+    });
 };
 
 const generateHoverCommitModalHTML = (commitData) => {
