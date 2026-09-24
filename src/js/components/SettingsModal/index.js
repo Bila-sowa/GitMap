@@ -166,7 +166,7 @@ function getSettingsModal() {
     return document.querySelector("#settings-content")?.closest(".overlay");
 }
 
-function bindSettingsModalEvents(modal = getSettingsModal()) {
+function bindSettingsModalEvents(modal = getSettingsModal(), onClose) {
     const modalContent = modal?.querySelector("#settings-content");
 
     if (!modal || !modalContent) return;
@@ -202,8 +202,11 @@ function bindSettingsModalEvents(modal = getSettingsModal()) {
     }
 
     function closeModal() {
+        if (signal.aborted) return;
+
         controller.abort();
         modal.remove();
+        onClose?.();
     }
 
     function handleOutsideClick(e) {
