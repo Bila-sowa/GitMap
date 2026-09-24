@@ -33,6 +33,18 @@ function escapeHTML(str) {
         .replace(/'/g, "&#39;");
 }
 
+function isRecord(value) {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isNonEmptyString(value) {
+    return typeof value === "string" && value.trim().length > 0;
+}
+
+function isValidDate(value) {
+    return isNonEmptyString(value) && !Number.isNaN(Date.parse(value));
+}
+
 function positionModalNearElement(modal, trigger, offset = 16) {
     if (!modal || !trigger) return;
 
@@ -98,6 +110,9 @@ export {
     copyValueToClipboard,
     getRandomID,
     escapeHTML,
+    isRecord,
+    isNonEmptyString,
+    isValidDate,
     positionModalNearElement,
     stopModalPositioning,
     truncateTitle,
