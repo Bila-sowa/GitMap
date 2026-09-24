@@ -8,11 +8,14 @@ import {
 } from "../components/SettingsModal/index.js";
 import storage from "../data/storage.js";
 import notifications from "../utils/notificationManager.js";
-import { appendHTML } from "../utils/utils.js";
 import * as DOM from "./dom.js";
 
 class SettingsController {
     #button;
+
+    #isOpening = false;
+
+    #modal = null;
 
     constructor(button) {
         this.#button = button;
@@ -24,6 +27,9 @@ class SettingsController {
     }
 
     async #openSettings() {
+        if (this.#isOpening || this.#modal?.isConnected) return;
+
+        this.#isOpening = true;
         const loader = generateLoader();
 
         try {
@@ -36,12 +42,22 @@ class SettingsController {
 
             if (!modalHTML) return;
 
-            appendHTML(modalHTML);
-            bindSettingsModalEvents();
+            const template = document.createElement("template");
+            template.innerHTML = modalHTML.trim();
+            const modal = template.content.firstElementChild;
+
+            if (!modal) return;
+
+            document.body.append(modal);
+            this.#modal = modal;
+            bindSettingsModalEvents(modal, () => {
+                if (this.#modal === modal) this.#modal = null;
+            });
         } catch (error) {
             notifications.notify("Failed to open settings", "error");
             console.error("Failed to open settings:", error);
         } finally {
+            this.#isOpening = false;
             removeLoader(loader);
         }
     }
