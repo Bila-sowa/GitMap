@@ -1,8 +1,15 @@
 import * as DOM from "./dom.js";
 
+const PAN_THRESHOLD = 5;
+
 class CanvasController {
     #abortController = null;
     #isPanning = false;
+    #isPanPending = false;
+    #hasDragged = false;
+    #panTarget = null;
+    #suppressClickTarget = null;
+    #suppressClickTimeout = null;
     #startX = 0;
     #startY = 0;
     #lastOffsetX = 0;
@@ -36,6 +43,7 @@ class CanvasController {
         this.viewport.addEventListener("mousedown", this.#onMouseDown, { signal });
         window.addEventListener("mousemove", this.#onMouseMove, { signal });
         window.addEventListener("mouseup", this.#onMouseUp, { signal });
+        this.viewport.addEventListener("click", this.#onClick, { capture: true, signal });
         this.viewport.addEventListener("wheel", this.#onWheel, { passive: false, signal });
         this.viewport.addEventListener("touchstart", this.#onTouchStart, { passive: false, signal });
         this.viewport.addEventListener("touchmove", this.#onTouchMove, { passive: false, signal });
@@ -48,24 +56,49 @@ class CanvasController {
         return Math.min(Math.max(value, min), max);
     }
 
-    #startPan(x, y) {
-        this.#isPanning = true;
+    #startPan(x, y, target) {
+        this.#isPanning = false;
+        this.#isPanPending = true;
+        this.#hasDragged = false;
+        this.#panTarget = typeof target?.closest === "function" ? target.closest("[data-id]") : null;
         this.#startX = x;
         this.#startY = y;
         this.#lastOffsetX = this.offsetX;
         this.#lastOffsetY = this.offsetY;
-        this.viewport.classList.add("is-panning");
     }
 
     #movePan(x, y) {
-        if (!this.#isPanning) return;
+        if (!this.#isPanPending) return;
+
+        const deltaX = x - this.#startX;
+        const deltaY = y - this.#startY;
+
+        if (!this.#isPanning && Math.hypot(deltaX, deltaY) < PAN_THRESHOLD) return;
+
+        this.#isPanning = true;
+        this.#hasDragged = true;
+        this.viewport.classList.add("is-panning");
         this.offsetX = this.#lastOffsetX + (x - this.#startX);
         this.offsetY = this.#lastOffsetY + (y - this.#startY);
         this.#applyTransform();
     }
 
     #endPan() {
+        if (this.#hasDragged && this.#panTarget) {
+            const draggedTarget = this.#panTarget;
+            this.#suppressClickTarget = draggedTarget;
+            clearTimeout(this.#suppressClickTimeout);
+            this.#suppressClickTimeout = setTimeout(() => {
+                if (this.#suppressClickTarget === draggedTarget) {
+                    this.#suppressClickTarget = null;
+                }
+            }, 0);
+        }
+
         this.#isPanning = false;
+        this.#isPanPending = false;
+        this.#hasDragged = false;
+        this.#panTarget = null;
         this.viewport.classList.remove("is-panning");
     }
 
@@ -97,7 +130,7 @@ class CanvasController {
         if (e.target !== this.viewport && e.target !== this.canvas && !this.canvas.contains(e.target)) {
             return;
         }
-        this.#startPan(e.clientX, e.clientY);
+        this.#startPan(e.clientX, e.clientY, e.target);
     };
 
     #onMouseMove = (e) => {
@@ -106,6 +139,17 @@ class CanvasController {
 
     #onMouseUp = () => {
         this.#endPan();
+    };
+
+    #onClick = (e) => {
+        const commitButton = typeof e.target?.closest === "function" ? e.target.closest("[data-id]") : null;
+
+        if (commitButton !== this.#suppressClickTarget) return;
+
+        clearTimeout(this.#suppressClickTimeout);
+        this.#suppressClickTarget = null;
+        e.preventDefault();
+        e.stopPropagation();
     };
 
     #onWheel = (e) => {
@@ -127,7 +171,7 @@ class CanvasController {
     #onTouchStart = (e) => {
         if (e.touches.length === 1) {
             this.#endPinch();
-            this.#startPan(e.touches[0].clientX, e.touches[0].clientY);
+            this.#startPan(e.touches[0].clientX, e.touches[0].clientY, e.target);
             return;
         }
 
@@ -139,7 +183,7 @@ class CanvasController {
     #onTouchMove = (e) => {
         e.preventDefault();
 
-        if (e.touches.length === 1 && this.#isPanning) {
+        if (e.touches.length === 1 && this.#isPanPending) {
             this.#movePan(e.touches[0].clientX, e.touches[0].clientY);
             return;
         }
@@ -165,7 +209,7 @@ class CanvasController {
     #onTouchEnd = (e) => {
         if (e.touches.length === 1) {
             this.#endPinch();
-            this.#startPan(e.touches[0].clientX, e.touches[0].clientY);
+            this.#startPan(e.touches[0].clientX, e.touches[0].clientY, e.target);
             return;
         }
 
@@ -244,6 +288,8 @@ class CanvasController {
             this.#abortController.abort();
             this.#abortController = null;
         }
+        clearTimeout(this.#suppressClickTimeout);
+        this.#suppressClickTarget = null;
         this.#endTouchGesture();
     }
 }
