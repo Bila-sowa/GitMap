@@ -73,6 +73,11 @@
         transform: translate(calc(60px - 25px - 2px - 2px), -50%);
     }
 
+    &-toggle-input:focus-visible + &-toggle-button {
+        outline: 2px solid var(--border-color-1);
+        outline-offset: 2px;
+    }
+
     &-rest-api-limit-progress {
         position: relative;
         width: 200px;

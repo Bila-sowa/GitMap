@@ -2,9 +2,10 @@
     position: fixed;
     top: 50%;
     left: calc(100% + 18px);
-    min-width: 350px;
+    min-width: min(350px, calc(100vw - 32px));
     width: fit-content;
     min-height: 190px;
+    max-height: calc(100vh - 32px);
     background: var(--color-3);
     border: 2px solid var(--border-color-1);
     border-radius: 10px;
@@ -17,6 +18,7 @@
     justify-content: center;
     gap: 18px;
     text-align: center;
+    overflow-y: auto;
     animation: appearance 0.15s steps(4, end);
 
     h3 {
@@ -50,8 +52,10 @@
         justify-content: space-between;
         align-items: center;
         background: var(--color-4);
-        min-width: 300px;
+        min-width: min(300px, 100%);
+        max-width: 100%;
         width: fit-content;
+        box-sizing: border-box;
         padding: 10px;
         min-height: 35px;
         max-height: fit-content;

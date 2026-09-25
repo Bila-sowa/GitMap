@@ -1,6 +1,8 @@
 import { copyValueToClipboard } from "@/js/utils/utils.js";
+import { sanitizeMarkdown } from "@/js/utils/sanitizeMarkdown.js";
 import styles from "./styles.module.scss";
 import gitHubLogoSrc from "@/assets/github-logo.webp";
+import gitHubAvatarFallbackSrc from "@/assets/gitHubAvatarFallback.png";
 
 const getTheme = () => {
     return document.body.classList.contains("dark-theme") ? "dark" : "light";
@@ -51,8 +53,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
 
     closeFullCommitModals();
 
-    const parsedDescription =
-        typeof globalThis.marked?.parse === "function" ? globalThis.marked.parse(description) : description;
+    const parsedDescription = sanitizeMarkdown(description);
     const theme = getTheme();
 
     return `
@@ -63,14 +64,14 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
         </div>
         <p>Description:</p>
         <div class="${styles["modal-description"]}">
-            ${parsedDescription ? parsedDescription : ""} 
+            ${parsedDescription ? parsedDescription : "The description was not added"}
         </div>
         <div class="${styles["modal-data"]}">
-            <a class="${styles["modal-item"]} rounded-normal" href="${authorUrl}" target="_blank" rel="noopener noreferrer" title="Email: ${authorEmail}">
+            <a class="${styles["modal-item"]} rounded-normal" href="${authorUrl ? authorUrl : ""}" target="_blank" rel="noopener noreferrer" title="Email: ${authorEmail ? authorEmail : ""}">
                 <span>Author: </span>
                 <div class="flex-align-center">
                     ${authorName}
-                    <img class="avatar rounded-full" src="${authorAvatar}" alt="${authorName}'s Avatar">
+                    <img class="avatar rounded-full" src="${authorAvatar ? authorAvatar : gitHubAvatarFallbackSrc}" alt="${authorName}'s Avatar">
                 </div>
             </a>
             <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${hash}" aria-label="Copy commit hash to clipboard">
@@ -95,7 +96,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
                             <code class="${styles["modal-file-path"]} text-small">${file.name}</code>
                             <div class="${styles["modal-file-changes"]}">
                                 ${
-                                    file.status === "R"
+                                    file.fullStatus === "removed"
                                         ? `<span class="text-small" style="color: ${statusColors[`${theme}`][file.fullStatus]}" title="${file.fullStatus}">${file.status}</span>`
                                         : `
                                     <code class="${styles["modal-file-changes-additions"]} text-small">+${file.additions}</code>
@@ -139,15 +140,15 @@ function bindFullComitEvents(trigger) {
     const copyableItems = [...modal.querySelectorAll(".copyable")];
     const theme = getTheme();
 
+    const setDefaultIcon = (e) => {
+        const icon = e.currentTarget;
+
+        icon.removeEventListener("error", setDefaultIcon);
+        icon.src = `https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/file.svg`;
+    };
+
     icons.forEach((icon) => {
-        icon.addEventListener(
-            "error",
-            () => {
-                icon.onerror = null;
-                icon.src = `https://raw.githubusercontent.com/Bila-sowa/file-extension-icons/main/icons-${theme}/file.svg`;
-            },
-            { signal },
-        );
+        icon.addEventListener("error", setDefaultIcon, { signal });
     });
 
     copyableItems.forEach((item) => {

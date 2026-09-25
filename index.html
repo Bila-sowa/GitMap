@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
-        content="style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+        content="default-src 'self'; script-src 'self'; connect-src 'self' https://api.github.com ws://localhost:* ws://127.0.0.1:*; img-src 'self' https://avatars.githubusercontent.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'self';">
     <meta name="description"
         content="GitMap - a simple website to load your graph from a repo with a drag & drop canvas, letting you explore branches and commit history visually.">
     <meta name="robots" content="index, follow">
@@ -22,8 +22,6 @@
     <title>GitMap</title>
     <link rel="icon" href="/favicon.png">
     <script src="./src/js/index.js" type="module" defer></script>
-    <script src="./tests/tests.js" type="module" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body class="dark-theme">
