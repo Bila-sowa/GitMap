@@ -92,10 +92,11 @@ function stopModalPositioning(modal) {
 }
 
 const truncateTitle = (title, wordCount = 5) => {
-    if (!title) return;
+    if (typeof title !== "string" || !title.trim()) return "";
 
+    const validWordCount = Number.isInteger(wordCount) && wordCount > 0 ? wordCount : 5;
     const words = title.trim().split(/\s+/);
-    return words.length > wordCount ? words.slice(0, 3).join(" ") + "..." : title;
+    return words.length > validWordCount ? words.slice(0, validWordCount).join(" ") + "..." : title;
 };
 
 function appendHTML(HTML) {
