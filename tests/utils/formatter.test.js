@@ -44,7 +44,7 @@ export default function test_gj781_Data() {
         return {
             title: formatter.getFormattedTitle(name),
             description: formatter.getFormattedDescription(name),
-            dateInLocalString: formatter.getDateInLocaleString(date),
+            dateInLocalString: formatter.getDateInLocaleString(date, "uk-UA", { timeZone: "Europe/Kyiv" }),
             shortHash: formatter.getShortHash(hash),
             formatedExtension: formatter.getFormattedExtension(extension),
             shorStatus: formatter.getShortStatus(status),
