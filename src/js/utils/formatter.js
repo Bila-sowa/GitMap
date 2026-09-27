@@ -20,7 +20,14 @@ class Formatter {
     }
 
     getFormattedExtension(fileName) {
-        return fileName?.slice(fileName.lastIndexOf(".") + 1);
+        if (typeof fileName !== "string" || !fileName) return "file";
+
+        const baseName = fileName.split(/[\\/]/).pop().toLowerCase();
+        const extensionSeparator = baseName.lastIndexOf(".");
+
+        if (extensionSeparator <= 0 || extensionSeparator === baseName.length - 1) return "file";
+
+        return baseName.slice(extensionSeparator + 1).toLowerCase();
     }
 
     getShortStatus(fileStatus) {
