@@ -11,8 +11,8 @@ class Formatter {
         return commitName?.split("\n").slice(1).join("\n");
     }
 
-    getDateInLocaleString(date) {
-        return new Date(date)?.toLocaleString();
+    getDateInLocaleString(date, locales, options) {
+        return new Date(date).toLocaleString(locales, options);
     }
 
     getShortHash(hash) {
