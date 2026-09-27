@@ -27,7 +27,7 @@ const generateHoverCommitModalHTML = (commitData) => {
 
     const {
         title,
-        author: { email: authorEmail, name: authorName, avatar: authorAvatar, date: authorDate },
+        author: { name: authorName, avatar: authorAvatar, date: authorDate },
         hash,
     } = commitData;
 
@@ -53,7 +53,6 @@ const generateHoverCommitModalHTML = (commitData) => {
                             <span>Author: ${authorName}</span>
                             <img class="avatar rounded-full" src="${authorAvatar ? authorAvatar : gitHubAvatarFallbackSrc}" alt="${authorName}'s avatar">
                         </div>
-                        <span>Email: ${authorEmail}</span>
                     </div>
                     <div class="${styles["modal-item"]} rounded-normal">
                         <span>Hash: </span>
