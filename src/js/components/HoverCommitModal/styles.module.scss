@@ -63,6 +63,16 @@
     }
 }
 
+.author-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+
+    > span {
+        overflow-wrap: anywhere;
+    }
+}
+
 @keyframes appearance {
     from {
         opacity: 0%;

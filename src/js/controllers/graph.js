@@ -229,18 +229,78 @@ class GraphController {
         this.#eventsController = new AbortController();
         const { signal } = this.#eventsController;
         let hoverCloseTimeout = null;
+        let activeHoverTrigger = null;
 
         const cancelHoverClose = () => {
             clearTimeout(hoverCloseTimeout);
             hoverCloseTimeout = null;
         };
 
-        const scheduleHoverClose = () => {
+        const isHoverTarget = (target) => {
+            if (!(target instanceof Node)) return false;
+
+            const tooltip = this.#body.querySelector(".hover-commit-modal");
+
+            return Boolean(activeHoverTrigger?.contains(target) || tooltip?.contains(target));
+        };
+
+        const scheduleHoverClose = (event) => {
+            if (isHoverTarget(event?.relatedTarget)) {
+                cancelHoverClose();
+                return;
+            }
+
             cancelHoverClose();
-            hoverCloseTimeout = setTimeout(() => closeHoverCommitModals(), 150);
+            hoverCloseTimeout = setTimeout(() => {
+                hoverCloseTimeout = null;
+
+                const tooltip = this.#body.querySelector(".hover-commit-modal");
+                const triggerIsFocused = activeHoverTrigger === document.activeElement;
+                const triggerIsHovered = activeHoverTrigger?.matches(":hover");
+                const tooltipIsHovered = tooltip?.matches(":hover");
+
+                if (triggerIsFocused || triggerIsHovered || tooltipIsHovered) return;
+
+                closeHoverCommitModals();
+                activeHoverTrigger = null;
+            }, 150);
         };
 
         signal.addEventListener("abort", cancelHoverClose, { once: true });
+
+        const showHoverTooltip = (commitButton) => {
+            cancelHoverClose();
+
+            if (activeHoverTrigger === commitButton && this.#body.querySelector(".hover-commit-modal")) return;
+
+            const commit = this.#data?.commitsDetails.find((item) => item.sha === commitButton.dataset.sha);
+            const tooltip = generateHoverCommitModalHTML(commit);
+
+            if (!tooltip) return;
+
+            appendHTML(tooltip);
+
+            const tooltipDOM = this.#body.querySelector("#hover-commit-modal");
+            if (!tooltipDOM) return;
+
+            activeHoverTrigger = commitButton;
+            commitButton.setAttribute("aria-describedby", tooltipDOM.id);
+            positionModalNearElement(tooltipDOM, commitButton);
+            tooltipDOM.addEventListener("mouseenter", cancelHoverClose, { signal });
+            tooltipDOM.addEventListener("mouseleave", scheduleHoverClose, { signal });
+        };
+
+        document.addEventListener(
+            "keydown",
+            (event) => {
+                if (event.key !== "Escape" || !this.#body.querySelector(".hover-commit-modal")) return;
+
+                cancelHoverClose();
+                closeHoverCommitModals();
+                activeHoverTrigger = null;
+            },
+            { signal },
+        );
 
         this.#graph.addEventListener(
             "click",
@@ -282,32 +342,39 @@ class GraphController {
         this.#graph.addEventListener(
             "mouseover",
             (e) => {
-                cancelHoverClose();
                 const commitButton = e.target.closest("[data-id]");
                 if (!commitButton) return;
                 if (commitButton.contains(e.relatedTarget)) return;
 
-                const { sha } = commitButton.dataset;
-                const commit = this.#data?.commitsDetails.find((item) => item.sha === sha);
-
-                const modal = generateHoverCommitModalHTML(commit);
-
-                if (!modal) return;
-
-                appendHTML(modal);
-
-                const modalDOM = this.#body.querySelector("#hover-commit-modal");
-
-                if (modal) {
-                    positionModalNearElement(modalDOM, commitButton);
-                    modalDOM.addEventListener("mouseenter", cancelHoverClose, { signal });
-                    modalDOM.addEventListener("mouseleave", scheduleHoverClose, { signal });
-                }
+                showHoverTooltip(commitButton);
             },
             { signal },
         );
 
-        this.#graph.addEventListener("mouseout", scheduleHoverClose, { signal });
+        this.#graph.addEventListener(
+            "focusin",
+            (e) => {
+                const commitButton = e.target.closest("[data-id]");
+                if (commitButton) showHoverTooltip(commitButton);
+            },
+            { signal },
+        );
+
+        this.#graph.addEventListener(
+            "mouseout",
+            (e) => {
+                if (e.target.closest("[data-id]")) scheduleHoverClose(e);
+            },
+            { signal },
+        );
+
+        this.#graph.addEventListener(
+            "focusout",
+            (e) => {
+                if (e.target.closest("[data-id]")) scheduleHoverClose(e);
+            },
+            { signal },
+        );
     }
 }
 
