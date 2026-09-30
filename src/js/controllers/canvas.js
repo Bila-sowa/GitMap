@@ -1,18 +1,24 @@
 import * as DOM from "./dom.js";
 
+const PAN_THRESHOLD = 5;
+
 class CanvasController {
     #abortController = null;
     #isPanning = false;
+    #isPanPending = false;
+    #hasDragged = false;
+    #panTarget = null;
+    #suppressClickTarget = null;
+    #suppressClickTimeout = null;
     #startX = 0;
     #startY = 0;
     #lastOffsetX = 0;
     #lastOffsetY = 0;
     #lastPinchDist = 0;
-    #pinchMidX = 0;
-    #pinchMidY = 0;
+    #isPinching = false;
+    #pinchWorldX = 0;
+    #pinchWorldY = 0;
     #pinchStartScale = 1;
-    #pinchStartOffsetX = 0;
-    #pinchStartOffsetY = 0;
 
     constructor(viewport, canvasElement) {
         this.viewport = viewport;
@@ -37,36 +43,80 @@ class CanvasController {
         this.viewport.addEventListener("mousedown", this.#onMouseDown, { signal });
         window.addEventListener("mousemove", this.#onMouseMove, { signal });
         window.addEventListener("mouseup", this.#onMouseUp, { signal });
+        this.viewport.addEventListener("click", this.#onClick, { capture: true, signal });
         this.viewport.addEventListener("wheel", this.#onWheel, { passive: false, signal });
         this.viewport.addEventListener("touchstart", this.#onTouchStart, { passive: false, signal });
         this.viewport.addEventListener("touchmove", this.#onTouchMove, { passive: false, signal });
         this.viewport.addEventListener("touchend", this.#onTouchEnd, { signal });
+        this.viewport.addEventListener("touchcancel", this.#onTouchCancel, { signal });
+        window.addEventListener("blur", this.#endTouchGesture, { signal });
     }
 
     #clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
     }
 
-    #startPan(x, y) {
-        this.#isPanning = true;
+    #startPan(x, y, target) {
+        this.#isPanning = false;
+        this.#isPanPending = true;
+        this.#hasDragged = false;
+        this.#panTarget = typeof target?.closest === "function" ? target.closest("[data-id]") : null;
         this.#startX = x;
         this.#startY = y;
         this.#lastOffsetX = this.offsetX;
         this.#lastOffsetY = this.offsetY;
-        this.viewport.classList.add("is-panning");
     }
 
     #movePan(x, y) {
-        if (!this.#isPanning) return;
+        if (!this.#isPanPending) return;
+
+        const deltaX = x - this.#startX;
+        const deltaY = y - this.#startY;
+
+        if (!this.#isPanning && Math.hypot(deltaX, deltaY) < PAN_THRESHOLD) return;
+
+        this.#isPanning = true;
+        this.#hasDragged = true;
+        this.viewport.classList.add("is-panning");
         this.offsetX = this.#lastOffsetX + (x - this.#startX);
         this.offsetY = this.#lastOffsetY + (y - this.#startY);
         this.#applyTransform();
     }
 
     #endPan() {
-        if (!this.#isPanning) return;
+        if (this.#hasDragged && this.#panTarget) {
+            const draggedTarget = this.#panTarget;
+            this.#suppressClickTarget = draggedTarget;
+            clearTimeout(this.#suppressClickTimeout);
+            this.#suppressClickTimeout = setTimeout(() => {
+                if (this.#suppressClickTarget === draggedTarget) {
+                    this.#suppressClickTarget = null;
+                }
+            }, 0);
+        }
+
         this.#isPanning = false;
+        this.#isPanPending = false;
+        this.#hasDragged = false;
+        this.#panTarget = null;
         this.viewport.classList.remove("is-panning");
+    }
+
+    #startPinch(touches) {
+        const rect = this.viewport.getBoundingClientRect();
+        const midX = (touches[0].clientX + touches[1].clientX) / 2 - rect.left;
+        const midY = (touches[0].clientY + touches[1].clientY) / 2 - rect.top;
+
+        this.#endPan();
+        this.#isPinching = true;
+        this.#lastPinchDist = this.#getPinchDistance(touches);
+        this.#pinchStartScale = this.scale;
+        this.#pinchWorldX = (midX - this.offsetX) / this.scale;
+        this.#pinchWorldY = (midY - this.offsetY) / this.scale;
+    }
+
+    #endPinch() {
+        this.#isPinching = false;
     }
 
     #getPinchDistance(touches) {
@@ -80,7 +130,7 @@ class CanvasController {
         if (e.target !== this.viewport && e.target !== this.canvas && !this.canvas.contains(e.target)) {
             return;
         }
-        this.#startPan(e.clientX, e.clientY);
+        this.#startPan(e.clientX, e.clientY, e.target);
     };
 
     #onMouseMove = (e) => {
@@ -89,6 +139,17 @@ class CanvasController {
 
     #onMouseUp = () => {
         this.#endPan();
+    };
+
+    #onClick = (e) => {
+        const commitButton = typeof e.target?.closest === "function" ? e.target.closest("[data-id]") : null;
+
+        if (commitButton !== this.#suppressClickTarget) return;
+
+        clearTimeout(this.#suppressClickTimeout);
+        this.#suppressClickTarget = null;
+        e.preventDefault();
+        e.stopPropagation();
     };
 
     #onWheel = (e) => {
@@ -109,51 +170,59 @@ class CanvasController {
 
     #onTouchStart = (e) => {
         if (e.touches.length === 1) {
-            this.#startPan(e.touches[0].clientX, e.touches[0].clientY);
+            this.#endPinch();
+            this.#startPan(e.touches[0].clientX, e.touches[0].clientY, e.target);
             return;
         }
 
         if (e.touches.length === 2) {
-            this.#isPanning = false;
-            this.#lastPinchDist = this.#getPinchDistance(e.touches);
-            this.#pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            this.#pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            this.#pinchStartScale = this.scale;
-            this.#pinchStartOffsetX = this.offsetX;
-            this.#pinchStartOffsetY = this.offsetY;
+            this.#startPinch(e.touches);
         }
     };
 
     #onTouchMove = (e) => {
         e.preventDefault();
 
-        if (e.touches.length === 1 && this.#isPanning) {
+        if (e.touches.length === 1 && this.#isPanPending) {
             this.#movePan(e.touches[0].clientX, e.touches[0].clientY);
             return;
         }
 
         if (e.touches.length === 2) {
+            if (!this.#isPinching) this.#startPinch(e.touches);
+
             const dist = this.#getPinchDistance(e.touches);
+            if (this.#lastPinchDist === 0) return;
+
             const scaleRatio = dist / this.#lastPinchDist;
             const rect = this.viewport.getBoundingClientRect();
             const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
             const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
 
             this.scale = this.#clamp(this.#pinchStartScale * scaleRatio, this.minScale, this.maxScale);
-            this.offsetX =
-                midX -
-                (this.#pinchMidX - rect.left - this.#pinchStartOffsetX) * (this.scale / this.#pinchStartScale) -
-                (midX - (this.#pinchMidX - rect.left));
-            this.offsetY =
-                midY -
-                (this.#pinchMidY - rect.top - this.#pinchStartOffsetY) * (this.scale / this.#pinchStartScale) -
-                (midY - (this.#pinchMidY - rect.top));
+            this.offsetX = midX - this.#pinchWorldX * this.scale;
+            this.offsetY = midY - this.#pinchWorldY * this.scale;
             this.#applyTransform();
         }
     };
 
-    #onTouchEnd = () => {
+    #onTouchEnd = (e) => {
+        if (e.touches.length === 1) {
+            this.#endPinch();
+            this.#startPan(e.touches[0].clientX, e.touches[0].clientY, e.target);
+            return;
+        }
+
+        if (e.touches.length === 0) this.#endTouchGesture();
+    };
+
+    #onTouchCancel = () => {
+        this.#endTouchGesture();
+    };
+
+    #endTouchGesture = () => {
         this.#endPan();
+        this.#endPinch();
     };
 
     #applyTransform() {
@@ -219,7 +288,9 @@ class CanvasController {
             this.#abortController.abort();
             this.#abortController = null;
         }
-        this.viewport.classList.remove("is-panning");
+        clearTimeout(this.#suppressClickTimeout);
+        this.#suppressClickTarget = null;
+        this.#endTouchGesture();
     }
 }
 

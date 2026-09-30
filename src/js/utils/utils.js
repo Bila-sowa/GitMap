@@ -1,5 +1,7 @@
 import notifications from "./notificationManager";
 
+const modalPositioning = new WeakMap();
+
 const copyValueToClipboard = async (element) => {
     const COOLDOWN_MS = 3500;
     const value = element.dataset.copyValue;
@@ -31,26 +33,70 @@ function escapeHTML(str) {
         .replace(/'/g, "&#39;");
 }
 
+function isRecord(value) {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isNonEmptyString(value) {
+    return typeof value === "string" && value.trim().length > 0;
+}
+
+function isValidDate(value) {
+    return isNonEmptyString(value) && !Number.isNaN(Date.parse(value));
+}
+
 function positionModalNearElement(modal, trigger, offset = 16) {
     if (!modal || !trigger) return;
 
-    const triggerRect = trigger.getBoundingClientRect();
-    const modalRect = modal.getBoundingClientRect();
+    modalPositioning.get(modal)?.abort();
+    const controller = new AbortController();
+    modalPositioning.set(modal, controller);
 
     modal.style.position = "fixed";
+    modal.style.maxWidth = `calc(100vw - ${offset * 2}px)`;
 
-    const maxTop = window.innerHeight - modalRect.height - offset;
-    const clampedTop = Math.min(Math.max(triggerRect.top, offset), Math.max(maxTop, offset));
+    const position = () => {
+        if (!modal.isConnected || !trigger.isConnected) return;
 
-    modal.style.top = `${clampedTop}px`;
-    modal.style.left = `${triggerRect.right + offset}px`;
+        const triggerRect = trigger.getBoundingClientRect();
+        const modalRect = modal.getBoundingClientRect();
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+        const maxLeft = Math.max(offset, viewportWidth - modalRect.width - offset);
+        const right = triggerRect.right + offset;
+        const left = triggerRect.left - modalRect.width - offset;
+        const preferredLeft = right + modalRect.width <= viewportWidth - offset ? right : left >= offset ? left : right;
+        const maxTop = Math.max(offset, viewportHeight - modalRect.height - offset);
+        const clampedLeft = Math.min(Math.max(preferredLeft, offset), maxLeft);
+        const clampedTop = Math.min(Math.max(triggerRect.top, offset), maxTop);
+
+        modal.style.top = `${clampedTop}px`;
+        modal.style.left = `${clampedLeft}px`;
+    };
+
+    position();
+    window.addEventListener("resize", position, { signal: controller.signal });
+    window.addEventListener("scroll", position, { capture: true, signal: controller.signal });
+
+    if (typeof ResizeObserver === "function") {
+        const observer = new ResizeObserver(position);
+        observer.observe(modal);
+        observer.observe(trigger);
+        controller.signal.addEventListener("abort", () => observer.disconnect(), { once: true });
+    }
+}
+
+function stopModalPositioning(modal) {
+    modalPositioning.get(modal)?.abort();
+    modalPositioning.delete(modal);
 }
 
 const truncateTitle = (title, wordCount = 5) => {
-    if (!title) return;
+    if (typeof title !== "string" || !title.trim()) return "";
 
+    const validWordCount = Number.isInteger(wordCount) && wordCount > 0 ? wordCount : 5;
     const words = title.trim().split(/\s+/);
-    return words.length > wordCount ? words.slice(0, 3).join(" ") + "..." : title;
+    return words.length > validWordCount ? words.slice(0, validWordCount).join(" ") + "..." : title;
 };
 
 function appendHTML(HTML) {
@@ -61,4 +107,15 @@ function appendHTML(HTML) {
     body.insertAdjacentHTML("beforeend", HTML);
 }
 
-export { copyValueToClipboard, getRandomID, escapeHTML, positionModalNearElement, truncateTitle, appendHTML };
+export {
+    copyValueToClipboard,
+    getRandomID,
+    escapeHTML,
+    isRecord,
+    isNonEmptyString,
+    isValidDate,
+    positionModalNearElement,
+    stopModalPositioning,
+    truncateTitle,
+    appendHTML,
+};

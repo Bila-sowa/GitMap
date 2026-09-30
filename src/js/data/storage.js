@@ -36,7 +36,7 @@ class Storage {
     }
 
     get localStorage() {
-        return this.#localStorage;
+        return { ...this.#localStorage };
     }
 
     set localStorage(options) {

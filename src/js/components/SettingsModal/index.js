@@ -3,18 +3,93 @@ import localStorage from "@/js/controllers/localStorage";
 import styles from "./styles.module.scss";
 import gitHubClient from "@/js/api/gitHubClient";
 
-const generateSettingsModalHTML = (limit, versionDetails) => {
-    const { usedPerNumber, limitPerNumber, usedPerPercent } = limit;
+const tokenStatusDetails = {
+    checking: {
+        label: "Checking",
+        title: "Checking whether the GitHub token is valid.",
+    },
+    valid: {
+        label: "Active",
+        title: "The token is active, now your limit is 5000 requests per hour.",
+    },
+    invalid: {
+        label: "Invalid",
+        title: "The token was rejected by GitHub.",
+    },
+    unavailable: {
+        label: "Unavailable",
+        title: "GitHub token status could not be checked.",
+    },
+    "no-token": {
+        label: "No token",
+        title: "No GitHub token is configured, so the limit is 60 requests per hour.",
+    },
+};
 
-    const tokenActiveMessage = "The token is active, now your limit is 5000 requests per hour.";
-    const tokenNonActiveMessage = "The token is not active, your limit is 60 requests per hour.";
+function getTokenStatusState(tokenResult, hasToken) {
+    if (!hasToken) return "no-token";
+    if (tokenResult?.success) return "valid";
+    if (tokenResult?.devError?.status === 401) return "invalid";
+
+    return "unavailable";
+}
+
+function getRateLimitData(rateLimitResponse) {
+    const rateLimit = rateLimitResponse?.data || {};
+    const limitPerNumber = Number.isFinite(rateLimit.limitPerNumber) ? rateLimit.limitPerNumber : 0;
+    const usedPerNumber = Number.isFinite(rateLimit.usedPerNumber) ? rateLimit.usedPerNumber : 0;
+    const usedPerPercent = Number.isFinite(rateLimit.usedPerPercent)
+        ? Math.min(Math.max(rateLimit.usedPerPercent, 0), 100)
+        : 0;
+
+    return { limitPerNumber, usedPerNumber, usedPerPercent };
+}
+
+function renderTokenStatus(modal, tokenState) {
+    const status = modal.querySelector("#token-status");
+    const details = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable;
+
+    if (!status) return;
+
+    status.textContent = details.label;
+    status.title = details.title;
+    status.classList.toggle("active-color", tokenState === "valid");
+    status.classList.toggle("non-active-color", tokenState !== "valid");
+    status.setAttribute("aria-busy", String(tokenState === "checking"));
+}
+
+function renderRateLimitProgressBar(modal, rateLimitResponse) {
+    const progress = modal.querySelector("#settings-rest-api-limit-progress");
+    const bar = modal.querySelector("#settings-rest-api-limit-bar");
+
+    if (!progress || !bar) return;
+
+    if (!rateLimitResponse?.success) {
+        const title = "Rate limit data is unavailable.";
+
+        bar.style.width = "0%";
+        progress.title = title;
+        progress.setAttribute("aria-label", title);
+        progress.removeAttribute("aria-valuenow");
+        return;
+    }
+
+    const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse);
+    const title = `Used: ${usedPerNumber} / ${limitPerNumber}`;
+
+    bar.style.width = `${usedPerPercent}%`;
+    progress.title = title;
+    progress.setAttribute("aria-label", title);
+    progress.setAttribute("aria-valuenow", String(usedPerPercent));
+}
+
+const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails) => {
+    const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse);
+    const tokenStatus = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable;
+    const rateLimitAvailable = rateLimitResponse?.success;
+
     const notStableMessage =
         "This version provides no guarantees regarding your security and the program's operability.";
-
-    let authenticated = false;
-
-    // Basic token limit with authorization.
-    if (limitPerNumber >= 5000) authenticated = true;
 
     const { version, versionIsStable } = versionDetails;
 
@@ -34,37 +109,45 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>GitHub Rest api token status:</span>
-                            <span class="
-                                ${authenticated ? "active-color" : "non-active-color"}
+                            <span id="token-status" class="
+                                ${tokenState === "valid" ? "active-color" : "non-active-color"}
                                 ${styles["settings-token-status"]} rounded-full"
-                                title="${authenticated ? tokenActiveMessage : tokenNonActiveMessage}"
+                                title="${tokenStatus.title}"
+                                aria-live="polite"
+                                aria-busy="${tokenState === "checking"}"
                             >
-                                ${authenticated ? "Active" : "Non-active"}
+                                ${tokenStatus.label}
                             </span>
                         </div>
                     </div>
                     <div class="${styles["settings-section"]}">
                         <h3>LocalStorage</h3>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
-                            <span for="save-link">Save current repo in page</span>
-                            <input class="hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-link">
-                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-link" aria-label="toggle save link option"></label>
+                            <span id="save-link-label">Save current repo in page</span>
+                            <input class="visually-hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-link" aria-labelledby="save-link-label">
+                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-link"></label>
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
-                            <span>Save current token in page</span>
-                            <input class="hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-token">
-                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-token" aria-label="toggle save token option"></label>
+                            <span id="save-token-label">Save current token in page</span>
+                            <input class="visually-hidden ${styles["settings-toggle-input"]}" type="checkbox" id="save-token" aria-labelledby="save-token-label">
+                            <label class="${styles["settings-toggle-button"]} rounded-full" for="save-token"></label>
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>Rest API Limit:</span>
                             <div
+                                id="settings-rest-api-limit-progress"
                                 class="${styles["settings-rest-api-limit-progress"]}
                                 rounded-full border-normal"
-                                title="Used: ${usedPerNumber} / ${limitPerNumber}"
+                                title="${rateLimitAvailable ? `Used: ${usedPerNumber} / ${limitPerNumber}` : "Rate limit data is unavailable."}"
+                                role="progressbar"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                ${rateLimitAvailable ? `aria-valuenow="${usedPerPercent}"` : ""}
+                                aria-label="${rateLimitAvailable ? `Used: ${usedPerNumber} / ${limitPerNumber}` : "Rate limit data is unavailable."}"
                             >
-                                <span
+                                <span id="settings-rest-api-limit-bar"
                                     class="${styles["settings-rest-api-limit-bar"]}"
-                                    style="width: ${usedPerPercent}%"></span>
+                                    style="width: ${rateLimitAvailable ? usedPerPercent : 0}%"></span>
                             </div>
                         </div>
                     </div>
@@ -79,9 +162,12 @@ const generateSettingsModalHTML = (limit, versionDetails) => {
     `;
 };
 
-function bindSettingsModalEvents() {
-    const modal = document.querySelector(".overlay");
-    const modalContent = document.querySelector("#settings-content");
+function getSettingsModal() {
+    return document.querySelector("#settings-content")?.closest(".overlay");
+}
+
+function bindSettingsModalEvents(modal = getSettingsModal(), onClose) {
+    const modalContent = modal?.querySelector("#settings-content");
 
     if (!modal || !modalContent) return;
 
@@ -90,18 +176,37 @@ function bindSettingsModalEvents() {
 
     const closeButton = modal.querySelector("#close-settings-button");
     const tokenInput = modal.querySelector("#token-input");
-    const saveLinkToggle = document.querySelector("#save-link");
-    const saveTokenToggle = document.querySelector("#save-token");
-    function saveToken() {
-        gitHubClient.setToken(tokenInput.value.trim());
-        if (storage.saveToken) {
+    const saveLinkToggle = modal.querySelector("#save-link");
+    const saveTokenToggle = modal.querySelector("#save-token");
+    async function saveToken() {
+        const token = tokenInput.value.trim();
+
+        renderTokenStatus(modal, "checking");
+
+        const result = await gitHubClient.setToken(token);
+
+        if (signal.aborted || result.cancelled) return;
+
+        const tokenState = getTokenStatusState(result, Boolean(token));
+        renderTokenStatus(modal, tokenState);
+
+        if (result.success && storage.saveToken) {
             localStorage.save();
+        }
+
+        const rateLimitResponse = await gitHubClient.getRateLimitData({ signal });
+
+        if (!signal.aborted && !rateLimitResponse.cancelled) {
+            renderRateLimitProgressBar(modal, rateLimitResponse);
         }
     }
 
     function closeModal() {
+        if (signal.aborted) return;
+
         controller.abort();
         modal.remove();
+        onClose?.();
     }
 
     function handleOutsideClick(e) {
@@ -138,4 +243,4 @@ function bindSettingsModalEvents() {
     saveTokenToggle.addEventListener("change", toggleSaveToken, { signal });
 }
 
-export { generateSettingsModalHTML, bindSettingsModalEvents };
+export { generateSettingsModalHTML, bindSettingsModalEvents, getTokenStatusState, renderRateLimitProgressBar };
