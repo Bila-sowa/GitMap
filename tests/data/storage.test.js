@@ -31,6 +31,7 @@ export default function test_8je0j_Data() {
                 saveLink: false,
                 saveToken: false,
             },
+            getterReturnsSnapshot: true,
         },
         {
             link: "   https://github.com/Bila-sowa/GitMap    ",
@@ -48,7 +49,12 @@ export default function test_8je0j_Data() {
         storageInstance.theme = theme;
         storageInstance.token = token;
         storageInstance.setData({ localStorage });
+        const exposedSettings = storageInstance.localStorage;
+        exposedSettings.saveToken = "invalid";
 
-        return storageInstance.getData();
+        return {
+            ...storageInstance.getData(),
+            getterReturnsSnapshot: storageInstance.saveToken === false,
+        };
     });
 }
