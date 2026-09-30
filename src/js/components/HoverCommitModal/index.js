@@ -1,4 +1,5 @@
 import { stopModalPositioning, truncateTitle } from "@/js/utils/utils";
+import formatter from "@/js/utils/formatter";
 import styles from "./styles.module.scss";
 import gitHubAvatarFallbackSrc from "@/assets/gitHubAvatarFallback.png";
 
@@ -33,12 +34,7 @@ const generateHoverCommitModalHTML = (commitData) => {
 
     closeHoverCommitModals();
 
-    const shortDate = authorDate
-        .split(",")[0]
-        .trim()
-        .split(".")
-        .map((part, i) => (i === 2 ? part.slice(-2) : part))
-        .join(".");
+    const shortDate = formatter.getFormattedDate(authorDate, undefined, { dateStyle: "short" });
 
     const formattedTitle = truncateTitle(title, 12);
 

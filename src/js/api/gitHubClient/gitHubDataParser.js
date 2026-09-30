@@ -58,7 +58,6 @@ class GitHubDataParser {
 
             const formattedTitle = formatter.getFormattedTitle(commitData.message);
             const formattedDescription = formatter.getFormattedDescription(commitData.message);
-            const formattedDate = formatter.getDateInLocaleString(author.date);
             const shortHash = formatter.getShortHash(commit.sha);
 
             const details = {
@@ -67,7 +66,7 @@ class GitHubDataParser {
                     email: escapeHTML(author.email),
                     avatar: typeof commit.author?.avatar_url === "string" ? commit.author.avatar_url : "",
                     url: typeof commit.author?.html_url === "string" ? commit.author.html_url : "",
-                    date: formattedDate,
+                    date: author.date,
                 },
                 title: escapeHTML(formattedTitle),
                 description: formattedDescription ? escapeHTML(formattedDescription) : "",
