@@ -15,6 +15,10 @@ class Formatter {
         return new Date(date).toLocaleString(locales, options);
     }
 
+    getFormattedDate(date, locales, options) {
+        return new Intl.DateTimeFormat(locales, options).format(new Date(date));
+    }
+
     getShortHash(hash) {
         return hash?.slice(0, 7);
     }

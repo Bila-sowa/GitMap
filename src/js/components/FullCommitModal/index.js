@@ -1,5 +1,6 @@
-import { copyValueToClipboard } from "@/js/utils/utils.js";
+import { copyValueToClipboard, escapeHTML } from "@/js/utils/utils.js";
 import { sanitizeMarkdown } from "@/js/utils/sanitizeMarkdown.js";
+import formatter from "@/js/utils/formatter";
 import styles from "./styles.module.scss";
 import gitHubLogoSrc from "@/assets/github-logo.webp";
 import gitHubAvatarFallbackSrc from "@/assets/gitHubAvatarFallback.png";
@@ -54,6 +55,8 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
     closeFullCommitModals();
 
     const parsedDescription = sanitizeMarkdown(description);
+    const formattedAuthorDate = formatter.getDateInLocaleString(authorDate);
+    const safeAuthorDate = escapeHTML(authorDate);
     const theme = getTheme();
 
     return `
@@ -78,9 +81,9 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
                 <span>Hash: </span>
                 <span>#${hash}</span>
             </button>
-            <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${authorDate}" aria-label="Copy commit date to clipboard">
+            <button class="${styles["modal-item"]} rounded-normal copyable" data-copy-value="${safeAuthorDate}" aria-label="Copy commit date to clipboard">
                 <span>Date: </span>
-                <span>${authorDate}</span>
+                <span>${formattedAuthorDate}</span>
             </button>
         </div>
         <div class="${styles["modal-changes"]}">
