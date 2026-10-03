@@ -5,39 +5,26 @@ import GitHubDataParser from "./gitHubDataParser";
 import parseGitHubUrl from "./gitHubUrlParser";
 import notifications from "@/js/utils/notificationManager";
 import storage from "@/js/data/storage";
-import { config } from "@/js/api/config";
-import RequestControl from "./requestControl";
+import GitHubTransport from "./gitHubTransport";
 
 class GitHubClient extends GitHubHttpApi {
     #headers = { Accept: "application/vnd.github+json" };
     #tokenManager;
     #rateLimiter;
     #parser;
+    #transport;
 
     constructor() {
         super();
-        this.#tokenManager = new GitHubTokenManager(this.#headers, this);
-        this.#rateLimiter = new GitHubRateLimiter(this.#headers, this);
+        this.#rateLimiter = new GitHubRateLimiter();
+        this.#transport = new GitHubTransport(this.#headers, this, {
+            onResponse: (response) => this.#rateLimiter.updateFromHeaders(response.headers),
+        });
+        this.#rateLimiter.setTransport(this.#transport);
+        this.#tokenManager = new GitHubTokenManager(this.#headers, this, storage, undefined, this.#transport);
         this.#parser = new GitHubDataParser();
 
         if (storage.token) this.setToken(storage.token);
-    }
-
-    #getSafeHeaders(url) {
-        const headers = { Accept: this.#headers.Accept };
-        let hostname = "";
-
-        try {
-            hostname = new URL(url).hostname;
-        } catch (error) {
-            console.warn(`getSafeHeaders: invalid URL "${url}", Authorization header omitted.`, error);
-        }
-
-        if (hostname === "api.github.com" && this.#headers.Authorization) {
-            headers.Authorization = this.#headers.Authorization;
-        }
-
-        return headers;
     }
 
     async #getRawData(url, options = {}) {
@@ -45,69 +32,27 @@ class GitHubClient extends GitHubHttpApi {
 
         if (!formatted.success) return formatted;
 
-        const request = new RequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+        const requestOptions = {
+            signal: options.signal,
+            error: "Failed to fetch repository data",
+            context: "#getRawData",
+        };
+        const [repository, branches, commits] = await Promise.all([
+            this.#transport.getJson(formatted.repositoryLink, requestOptions),
+            this.#transport.getJson(formatted.branchLink, { ...requestOptions, paginate: true }),
+            this.#transport.getJson(formatted.commitsLink, requestOptions),
+        ]);
 
-        try {
-            const [repositoryRes, branchesRes, commitsRes] = await Promise.all([
-                fetch(formatted.repositoryLink, {
-                    headers: this.#getSafeHeaders(formatted.repositoryLink),
-                    signal: request.signal,
-                }),
-                fetch(formatted.branchLink, {
-                    headers: this.#getSafeHeaders(formatted.branchLink),
-                    signal: request.signal,
-                }),
-                fetch(formatted.commitsLink, {
-                    headers: this.#getSafeHeaders(formatted.commitsLink),
-                    signal: request.signal,
-                }),
-            ]);
-
-            if (!repositoryRes.ok) {
-                const httpError = await this.createHttpError(repositoryRes, formatted.repositoryLink);
-                return { success: false, ...httpError };
-            }
-
-            if (!branchesRes.ok) {
-                const httpError = await this.createHttpError(branchesRes, formatted.branchLink);
-                return { success: false, ...httpError };
-            }
-
-            if (!commitsRes.ok) {
-                const httpError = await this.createHttpError(commitsRes, formatted.commitsLink);
-                return { success: false, ...httpError };
-            }
-
-            const repository = await repositoryRes.json();
-            const branches = await branchesRes.json();
-            const commits = await commitsRes.json();
-
-            return {
-                success: true,
-                defaultBranch: repository.default_branch,
-                branches,
-                commits,
-            };
-        } catch (err) {
-            if (request.didTimeout()) {
-                return { success: false, timedOut: true, error: "GitHub request timed out" };
-            }
-
-            if (err.name === "AbortError") {
-                return { success: false, cancelled: true };
-            }
-
-            return {
-                success: false,
-                error: "Failed to fetch repository data",
-                devError: {
-                    message: `Network or fetch exception in #getRawData: ${err.message}`,
-                    stack: err.stack,
-                },
-            };
-        } finally {
-            request.cleanup();
+        for (const result of [repository, branches, commits]) {
+            if (!result.success) return result;
         }
+
+        return {
+            success: true,
+            defaultBranch: repository.data?.default_branch,
+            branches: branches.data,
+            commits: commits.data,
+        };
     }
 
     async getData(url, options = {}) {
@@ -117,8 +62,6 @@ class GitHubClient extends GitHubHttpApi {
             if (!data.cancelled) notifications.notify(data.error, "error");
             return data;
         }
-
-        await this.getRateLimitData(options);
 
         const parsed = this.#parser.parseRepoData(data);
 
@@ -147,51 +90,21 @@ class GitHubClient extends GitHubHttpApi {
             return formatted;
         }
 
-        const request = new RequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+        const commitsUrl = `${formatted.commitsLink}?sha=${encodeURIComponent(branchName)}`;
+        const result = await this.#transport.getJson(commitsUrl, {
+            signal: options.signal,
+            error: "Failed to fetch branch commits",
+            context: "getDataByBranch",
+        });
 
-        try {
-            const commitsUrl = `${formatted.commitsLink}?sha=${encodeURIComponent(branchName)}`;
-            const commitsRes = await fetch(commitsUrl, {
-                headers: this.#getSafeHeaders(commitsUrl),
-                signal: request.signal,
-            });
-
-            if (!commitsRes.ok) {
-                const httpError = await this.createHttpError(commitsRes, commitsUrl);
-                notifications.notify(httpError.error, "error");
-                return { success: false, ...httpError };
-            }
-
-            const commits = await commitsRes.json();
-            const parsed = this.#parser.parseCommitsData(commits);
-
-            if (!parsed.success) {
-                notifications.notify(parsed.error, "error");
-            }
-
-            this.getRateLimitData(options);
-            return parsed;
-        } catch (err) {
-            if (request.didTimeout()) {
-                const error = "GitHub request timed out";
-                notifications.notify(error, "error");
-                return { success: false, timedOut: true, error };
-            }
-
-            if (err.name === "AbortError") {
-                return { success: false, cancelled: true };
-            }
-
-            const error = "Failed to fetch branch commits";
-            const devError = {
-                message: `Network or fetch exception in getDataByBranch: ${err.message}`,
-                stack: err.stack,
-            };
-            notifications.notify(error, "error");
-            return { success: false, error, devError };
-        } finally {
-            request.cleanup();
+        if (!result.success) {
+            if (!result.cancelled) notifications.notify(result.error, "error");
+            return result;
         }
+
+        const parsed = this.#parser.parseCommitsData(result.data);
+        if (!parsed.success) notifications.notify(parsed.error, "error");
+        return parsed;
     }
 
     async getCommitFiles(url, sha, options = {}) {
@@ -209,47 +122,19 @@ class GitHubClient extends GitHubHttpApi {
             return { success: false, error, devError };
         }
 
-        const rateLimit = await this.getRateLimitData(options);
-        if (rateLimit.cancelled || options.signal?.aborted) return { success: false, cancelled: true };
+        const commitUrl = `${formatted.commitsLink}/${sha}`;
+        const result = await this.#transport.getJson(commitUrl, {
+            signal: options.signal,
+            error: "Failed to fetch commit files",
+            context: "getCommitFiles",
+        });
 
-        const request = new RequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
-
-        try {
-            const commitUrl = `${formatted.commitsLink}/${sha}`;
-            const fileRes = await fetch(commitUrl, {
-                headers: this.#getSafeHeaders(commitUrl),
-                signal: request.signal,
-            });
-
-            if (!fileRes.ok) {
-                const httpError = await this.createHttpError(fileRes, commitUrl);
-                notifications.notify(httpError.error, "error");
-                return { success: false, ...httpError };
-            }
-
-            const data = await fileRes.json();
-            return this.#parser.parseCommitFilesData(data);
-        } catch (err) {
-            if (request.didTimeout()) {
-                const error = "GitHub request timed out";
-                notifications.notify(error, "error");
-                return { success: false, timedOut: true, error };
-            }
-
-            if (err.name === "AbortError") {
-                return { success: false, cancelled: true };
-            }
-
-            const error = "Failed to fetch commit files";
-            const devError = {
-                message: `Network or fetch exception in getCommitFiles: ${err.message}`,
-                stack: err.stack,
-            };
-            notifications.notify(error, "error");
-            return { success: false, error, devError };
-        } finally {
-            request.cleanup();
+        if (!result.success) {
+            if (!result.cancelled) notifications.notify(result.error, "error");
+            return result;
         }
+
+        return this.#parser.parseCommitFilesData(result.data);
     }
 
     async setToken(token, options = {}) {
