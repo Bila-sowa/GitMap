@@ -9,6 +9,7 @@ import test_vt6mk_Data from "./gitHubClient/getDataByBranch.test";
 import test_anl95_Data from "./config/mergeConfigs.test";
 import test_4lmw4_Data from "./gitHubClient/requestControl.test";
 import test_n7rjx_Data from "./gitHubClient/dataParserValidation.test";
+import test_p2t4f_Data from "./gitHubClient/gitHubTransport.test";
 
 export {
     test_nd2u3_Data,
@@ -22,4 +23,5 @@ export {
     test_anl95_Data,
     test_4lmw4_Data,
     test_n7rjx_Data,
+    test_p2t4f_Data,
 };

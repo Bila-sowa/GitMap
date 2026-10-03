@@ -1,31 +1,45 @@
 import notifications from "@/js/utils/notificationManager";
-import { config } from "@/js/api/config";
-import RequestControl from "./requestControl";
 
 class GitHubRateLimiter {
-    #headers;
-    #httpApi;
+    #transport;
+    #latestResponse;
 
-    constructor(headers, httpApi) {
-        this.#headers = headers;
-        this.#httpApi = httpApi;
+    constructor() {
+        this.#latestResponse = null;
     }
 
-    #getSafeHeaders(url) {
-        const headers = { Accept: this.#headers.Accept };
-        let hostname = "";
+    setTransport(transport) {
+        this.#transport = transport;
+    }
 
-        try {
-            hostname = new URL(url).hostname;
-        } catch (error) {
-            console.warn(`getSafeHeaders: invalid URL "${url}", Authorization header omitted.`, error);
-        }
+    updateFromHeaders(headers) {
+        const limitHeader = headers?.get?.("X-RateLimit-Limit") ?? null;
+        const remainingHeader = headers?.get?.("X-RateLimit-Remaining") ?? null;
+        const usedHeader = headers?.get?.("X-RateLimit-Used") ?? null;
+        if (limitHeader === null) return;
+        if (usedHeader === null && remainingHeader === null) return;
 
-        if (hostname === "api.github.com" && this.#headers.Authorization) {
-            headers.Authorization = this.#headers.Authorization;
-        }
+        const limit = Number(limitHeader);
+        const used = usedHeader === null ? limit - Number(remainingHeader) : Number(usedHeader);
 
-        return headers;
+        if (!Number.isFinite(limit) || limit <= 0 || !Number.isFinite(used) || used < 0) return;
+
+        const response = {
+            success: true,
+            data: {
+                limitPerNumber: limit,
+                usedPerNumber: used,
+                usedPerPercent: Number(((used / limit) * 100).toFixed(2)),
+            },
+        };
+
+        const wasHigh = this.#latestResponse?.data.usedPerPercent >= 70;
+        this.#latestResponse = response;
+        if (!wasHigh) this.checkIsRateLimitHigh(response);
+    }
+
+    getCachedRateLimitData() {
+        return this.#latestResponse;
     }
 
     checkIsRateLimitHigh(response, percent = 70) {
@@ -45,92 +59,47 @@ class GitHubRateLimiter {
     }
 
     async getRateLimitData(options = {}) {
-        const request = new RequestControl(options.signal, config.gitHub.REQUEST_TIMEOUT_MS);
+        const result = await this.#transport.getJson("https://api.github.com/rate_limit", {
+            signal: options.signal,
+            error: "Failed to fetch rate limit data",
+            context: "getRateLimitData",
+        });
+        const emptyData = { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 };
 
-        try {
-            const url = "https://api.github.com/rate_limit";
-            const res = await fetch(url, {
-                headers: this.#getSafeHeaders(url),
-                signal: request.signal,
-            });
+        if (!result.success) {
+            if (!result.cancelled) notifications.notify(result.error, "error");
+            return { ...result, data: emptyData };
+        }
 
-            if (!res.ok) {
-                const httpError = await this.#httpApi.createHttpError(res, url);
-                notifications.notify(httpError.error, "error");
-                return {
-                    success: false,
-                    ...httpError,
-                    data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 },
-                };
-            }
-
-            const data = await res.json();
-
-            if (!data?.resources?.core) {
-                const error = "Invalid rate limit response format";
-                const devError = {
-                    message: "Missing data.resources.core in GitHub rate_limit response",
-                    rawResponse: data,
-                };
-                notifications.notify(error, "error");
-                return {
-                    success: false,
-                    error,
-                    devError,
-                    data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 },
-                };
-            }
-
-            const { limit, remaining, used } = data.resources.core;
-            const usedCount = used !== undefined ? used : limit - remaining;
-            const formattedPercent = limit > 0 ? Number(((usedCount / limit) * 100).toFixed(2)) : 0;
-
-            const response = {
-                success: true,
-                data: {
-                    limitPerNumber: limit,
-                    usedPerNumber: usedCount,
-                    usedPerPercent: formattedPercent,
-                },
-            };
-
-            this.checkIsRateLimitHigh(response);
-            return response;
-        } catch (err) {
-            if (request.didTimeout()) {
-                const error = "GitHub request timed out";
-                notifications.notify(error, "error");
-                return {
-                    success: false,
-                    timedOut: true,
-                    error,
-                    data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 },
-                };
-            }
-
-            if (err.name === "AbortError") {
-                return {
-                    success: false,
-                    cancelled: true,
-                    data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 },
-                };
-            }
-
-            const error = "Failed to fetch rate limit data";
-            const devError = {
-                message: `Network or fetch exception in getRateLimitData: ${err.message}`,
-                stack: err.stack,
-            };
+        const core = result.data?.resources?.core;
+        if (!core) {
+            const error = "Invalid rate limit response format";
             notifications.notify(error, "error");
             return {
                 success: false,
                 error,
-                devError,
-                data: { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 },
+                devError: {
+                    message: "Missing data.resources.core in GitHub rate_limit response",
+                    rawResponse: result.data,
+                },
+                data: emptyData,
             };
-        } finally {
-            request.cleanup();
         }
+
+        const { limit, remaining, used } = core;
+        const usedCount = used !== undefined ? used : limit - remaining;
+        const response = {
+            success: true,
+            data: {
+                limitPerNumber: limit,
+                usedPerNumber: usedCount,
+                usedPerPercent: limit > 0 ? Number(((usedCount / limit) * 100).toFixed(2)) : 0,
+            },
+        };
+
+        this.#latestResponse = response;
+        this.checkIsRateLimitHigh(response);
+        return response;
     }
 }
 
