@@ -1,5 +1,5 @@
 import { config } from "../api/config";
-import { getRandomID } from "./utils";
+import getRandomID from "./randomId";
 
 class NotificationManager {
     #queue = [];

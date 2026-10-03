@@ -1,7 +1,4 @@
-import storage from "@/js/data/storage";
-import localStorage from "@/js/controllers/localStorage";
 import styles from "./styles.module.scss";
-import gitHubClient from "@/js/api/gitHubClient";
 
 const tokenStatusDetails = {
     checking: {
@@ -83,7 +80,7 @@ function renderRateLimitProgressBar(modal, rateLimitResponse) {
     progress.setAttribute("aria-valuenow", String(usedPerPercent));
 }
 
-const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails) => {
+const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails, token = "") => {
     const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse);
     const tokenStatus = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable;
     const rateLimitAvailable = rateLimitResponse?.success;
@@ -105,7 +102,7 @@ const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails
                         <h3>GitHub</h3>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <label for="token-input">GitHub rest api token</label>
-                            <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${storage.token || ""}" placeholder="gpy_">
+                            <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${token}" placeholder="gpy_">
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>GitHub Rest api token status:</span>
@@ -166,7 +163,7 @@ function getSettingsModal() {
     return document.querySelector("#settings-content")?.closest(".overlay");
 }
 
-function bindSettingsModalEvents(modal = getSettingsModal(), onClose) {
+function bindSettingsModalEvents(modal = getSettingsModal(), onClose, { storage, localStorage, gitHubClient } = {}) {
     const modalContent = modal?.querySelector("#settings-content");
 
     if (!modal || !modalContent) return;
@@ -241,6 +238,8 @@ function bindSettingsModalEvents(modal = getSettingsModal(), onClose) {
 
     saveTokenToggle.checked = storage.saveToken;
     saveTokenToggle.addEventListener("change", toggleSaveToken, { signal });
+
+    return closeModal;
 }
 
 export { generateSettingsModalHTML, bindSettingsModalEvents, getTokenStatusState, renderRateLimitProgressBar };

@@ -1,4 +1,3 @@
-import gitHubClient from "../api/gitHubClient";
 import { config } from "../api/config";
 import {
     bindFullComitEvents,
@@ -7,16 +6,16 @@ import {
 } from "../components/FullCommitModal/index";
 import { closeHoverCommitModals, generateHoverCommitModalHTML } from "../components/HoverCommitModal/index";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
-import storage from "../data/storage.js";
 import { buildCommitGraphLayout } from "../utils/commitGraph.js";
 import notifications from "../utils/notificationManager.js";
 import { appendHTML, positionModalNearElement, truncateTitle } from "../utils/utils.js";
-import * as DOM from "./dom.js";
-import dropDown from "./dropDown";
 
 class GraphController {
-    #body = document.querySelector("body");
+    #body;
     #graph = null;
+    #storage;
+    #gitHubClient;
+    #dropDown;
     #link = null;
     #data = null;
     #eventsController = null;
@@ -25,12 +24,32 @@ class GraphController {
     #requestId = 0;
     #currentBranch = null;
 
-    constructor(graphElement) {
+    constructor(graphElement, body, storage, gitHubClient, dropDown) {
         this.#graph = graphElement;
+        this.#body = body;
+        this.#storage = storage;
+        this.#gitHubClient = gitHubClient;
+        this.#dropDown = dropDown;
+    }
+
+    init() {
+        return this;
+    }
+
+    destroy() {
+        this.#requestId += 1;
+        this.#eventsController?.abort();
+        this.#requestController?.abort();
+        this.#detailsRequestController?.abort();
+        this.#eventsController = null;
+        this.#requestController = null;
+        this.#detailsRequestController = null;
+        closeFullCommitModals();
+        closeHoverCommitModals();
     }
 
     async render() {
-        const link = storage.link;
+        const link = this.#storage.link;
         if (!link) return { success: false, error: "Missing repository URL" };
 
         const request = this.#startRequest();
@@ -38,7 +57,7 @@ class GraphController {
         const loader = generateLoader();
 
         try {
-            const data = await gitHubClient.getData(link, { signal: request.signal });
+            const data = await this.#gitHubClient.getData(link, { signal: request.signal });
 
             if (!this.#isCurrentRequest(request.id, link)) {
                 return { success: false, cancelled: true };
@@ -51,7 +70,7 @@ class GraphController {
             this.#currentBranch = data.defaultBranch || data.branchesDetails[0] || null;
 
             this.#generateGraph(data.commitsDetails, this.#currentBranch);
-            dropDown.render(data.branchesDetails, this.#currentBranch);
+            this.#dropDown.render(data.branchesDetails, this.#currentBranch);
             this.#bindEvents();
 
             return { success: true, currentBranch: this.#currentBranch };
@@ -65,7 +84,7 @@ class GraphController {
 
     async renderByBranch(branch) {
         const branchName = typeof branch === "string" ? branch.trim() : "";
-        const link = storage.link;
+        const link = this.#storage.link;
 
         if (!link || !branchName || !this.#data?.success || this.#link !== link) {
             return { success: false, error: "Repository data or branch name is missing" };
@@ -76,7 +95,7 @@ class GraphController {
         const loader = generateLoader();
 
         try {
-            const commits = await gitHubClient.getDataByBranch(branchName, link, { signal: request.signal });
+            const commits = await this.#gitHubClient.getDataByBranch(branchName, link, { signal: request.signal });
 
             if (!this.#isCurrentRequest(request.id, link)) {
                 return { success: false, cancelled: true };
@@ -91,7 +110,7 @@ class GraphController {
             this.#currentBranch = branchName;
 
             this.#generateGraph(this.#data.commitsDetails, branchName);
-            dropDown.setSelectedBranch(branchName);
+            this.#dropDown.setSelectedBranch(branchName);
             this.#bindEvents();
 
             return { success: true, currentBranch: branchName };
@@ -104,7 +123,7 @@ class GraphController {
     }
 
     refresh() {
-        if (this.#currentBranch && this.#link === storage.link) {
+        if (this.#currentBranch && this.#link === this.#storage.link) {
             return this.renderByBranch(this.#currentBranch);
         }
 
@@ -123,13 +142,13 @@ class GraphController {
     }
 
     #isCurrentRequest(requestId, link) {
-        return requestId === this.#requestId && link === storage.link;
+        return requestId === this.#requestId && link === this.#storage.link;
     }
 
     #getFilesData = async (sha, options = {}) => {
         if (!this.#link || !sha) return;
 
-        const filesData = await gitHubClient.getCommitFiles(this.#link, sha, options);
+        const filesData = await this.#gitHubClient.getCommitFiles(this.#link, sha, options);
 
         return filesData;
     };
@@ -152,7 +171,7 @@ class GraphController {
         closeFullCommitModals();
         closeHoverCommitModals();
         this.#graph.replaceChildren();
-        this.#graph.dataset.repoUrl = storage.link;
+        this.#graph.dataset.repoUrl = this.#storage.link;
         this.#graph.style.width = `${graphWidth}px`;
         this.#graph.style.height = `${graphHeight}px`;
 
@@ -378,12 +397,4 @@ class GraphController {
     }
 }
 
-const graph = new GraphController(DOM.graph);
-dropDown.setOnSelect((branch) => graph.renderByBranch(branch));
-
-if (storage.link) {
-    graph.render();
-}
-
 export { GraphController };
-export default graph;

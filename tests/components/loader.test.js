@@ -33,31 +33,45 @@ export default function test_vyk8w_Data() {
     );
 
     return config.run(async () => {
-        const firstLoader = generateLoader(1000);
-        const secondLoader = generateLoader(1000);
-        const replacedOldLoader = !firstLoader.isConnected && secondLoader.isConnected;
+        const container = document.createElement("div");
+        document.body.append(container);
+        const options = { showLoader: true, container };
+        const createdLoaders = [];
 
-        removeLoader(firstLoader);
-        const oldCleanupPreservesNewLoader = secondLoader.isConnected;
+        try {
+            const firstLoader = generateLoader(1000, options);
+            createdLoaders.push(firstLoader);
+            const secondLoader = generateLoader(1000, options);
+            createdLoaders.push(secondLoader);
+            const replacedOldLoader = !firstLoader.isConnected && secondLoader.isConnected;
 
-        removeLoader(secondLoader);
-        const manualCleanup = !secondLoader.isConnected;
+            removeLoader(firstLoader);
+            const oldCleanupPreservesNewLoader = secondLoader.isConnected;
 
-        const configuredTimeoutLoader = generateLoader();
-        await new Promise((resolve) => setTimeout(resolve, 20));
-        const configuredTimeoutPersists = configuredTimeoutLoader.isConnected;
-        removeLoader(configuredTimeoutLoader);
+            removeLoader(secondLoader);
+            const manualCleanup = !secondLoader.isConnected;
 
-        const timeoutLoader = generateLoader(10);
-        await new Promise((resolve) => setTimeout(resolve, 20));
-        const timeoutCleanup = !timeoutLoader.isConnected;
+            const configuredTimeoutLoader = generateLoader(undefined, options);
+            createdLoaders.push(configuredTimeoutLoader);
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            const configuredTimeoutPersists = configuredTimeoutLoader.isConnected;
+            removeLoader(configuredTimeoutLoader);
 
-        return {
-            replacedOldLoader,
-            oldCleanupPreservesNewLoader,
-            manualCleanup,
-            configuredTimeoutPersists,
-            timeoutCleanup,
-        };
+            const timeoutLoader = generateLoader(10, options);
+            createdLoaders.push(timeoutLoader);
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            const timeoutCleanup = !timeoutLoader.isConnected;
+
+            return {
+                replacedOldLoader,
+                oldCleanupPreservesNewLoader,
+                manualCleanup,
+                configuredTimeoutPersists,
+                timeoutCleanup,
+            };
+        } finally {
+            createdLoaders.filter(Boolean).forEach(removeLoader);
+            container.remove();
+        }
     });
 }

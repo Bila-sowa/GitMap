@@ -1,5 +1,3 @@
-import * as DOM from "./dom";
-
 class DropDown {
     #trigger;
     #list;
@@ -12,7 +10,11 @@ class DropDown {
         this.#trigger = trigger;
         this.#list = list;
         this.#label = label;
+    }
+
+    init() {
         this.#bindEvents();
+        return this;
     }
 
     #bindEvents() {
@@ -166,7 +168,4 @@ class DropDown {
     }
 }
 
-const dropDown = new DropDown(DOM.dropDownTrigger, DOM.dropDownList, DOM.dropDownLabel);
-
 export { DropDown };
-export default dropDown;

@@ -1,5 +1,3 @@
-import * as DOM from "./dom.js";
-
 const PAN_THRESHOLD = 5;
 
 class CanvasController {
@@ -30,9 +28,13 @@ class CanvasController {
         this.maxScale = 5;
         this.zoomSensitivity = 0.001;
         this.onChange = null;
+    }
+
+    init() {
         this.canvas.style.transformOrigin = "0 0";
         this.#bindEvents();
         this.#applyTransform();
+        return this;
     }
 
     #bindEvents() {
@@ -294,7 +296,4 @@ class CanvasController {
     }
 }
 
-const canvas = new CanvasController(DOM.viewport, DOM.canvas);
-
 export { CanvasController };
-export default canvas;

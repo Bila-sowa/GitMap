@@ -104,6 +104,26 @@ const getConfigData = async (url = `${import.meta.env.BASE_URL}config.json`) => 
     }
 };
 
-const config = await getConfigData();
+const config = getDefaultConfig();
+let configPromise = null;
 
-export { config, getConfigData, getDefaultConfig, mergeConfigs };
+function loadConfig() {
+    if (!configPromise) {
+        configPromise = getConfigData().then((data) => {
+            Object.assign(config, data);
+            return config;
+        });
+    }
+
+    return configPromise;
+}
+
+async function refreshConfig() {
+    if (configPromise) await configPromise;
+    const data = await getConfigData();
+    Object.assign(config, data);
+    configPromise = Promise.resolve(config);
+    return config;
+}
+
+export { config, getConfigData, getDefaultConfig, mergeConfigs, loadConfig, refreshConfig };

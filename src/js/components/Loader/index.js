@@ -3,10 +3,11 @@ import styles from "./styles.module.scss";
 
 const loaderTimeouts = new WeakMap();
 
-function generateLoader(timeout = config.loader.CLEANUP_TIMEOUT_MS) {
-    if (!config.loader.showLoader) return;
+function generateLoader(timeout = config.loader.CLEANUP_TIMEOUT_MS, options = {}) {
+    const { showLoader = config.loader.showLoader, container = document.body } = options;
+    if (!showLoader) return;
 
-    removeLoader();
+    removeLoader(undefined, container);
 
     const loader = document.createElement("div");
     loader.className = "overlay loader";
@@ -20,7 +21,7 @@ function generateLoader(timeout = config.loader.CLEANUP_TIMEOUT_MS) {
         </div>
     `;
 
-    document.body.append(loader);
+    container.append(loader);
     loaderTimeouts.set(
         loader,
         setTimeout(() => removeLoader(loader), timeout),
@@ -29,8 +30,8 @@ function generateLoader(timeout = config.loader.CLEANUP_TIMEOUT_MS) {
     return loader;
 }
 
-function removeLoader(loader) {
-    const loaders = loader ? [loader] : [...document.querySelectorAll(".loader")];
+function removeLoader(loader, container) {
+    const loaders = loader ? [loader] : [...(container || document.body).querySelectorAll(".loader")];
 
     loaders.forEach((loaderElement) => {
         const timeout = loaderTimeouts.get(loaderElement);

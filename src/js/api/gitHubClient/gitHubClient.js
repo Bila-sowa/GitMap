@@ -23,8 +23,6 @@ class GitHubClient extends GitHubHttpApi {
         this.#rateLimiter.setTransport(this.#transport);
         this.#tokenManager = new GitHubTokenManager(this.#headers, this, storage, undefined, this.#transport);
         this.#parser = new GitHubDataParser();
-
-        if (storage.token) this.setToken(storage.token);
     }
 
     async #getRawData(url, options = {}) {

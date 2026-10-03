@@ -1,4 +1,5 @@
 import notifications from "./notificationManager";
+import getRandomID from "./randomId";
 
 const modalPositioning = new WeakMap();
 
@@ -19,10 +20,6 @@ const copyValueToClipboard = async (element) => {
         );
     }
 };
-
-function getRandomID(prefix) {
-    return `${prefix ? prefix + "-" : ""}${Math.random().toString(16).slice(2)}`;
-}
 
 function escapeHTML(str) {
     return String(str)

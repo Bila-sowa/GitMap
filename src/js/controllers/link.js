@@ -1,39 +1,57 @@
-import storage from "../data/storage.js";
-import * as DOM from "./dom.js";
-import graph from "./graph.js";
-import localStorage from "./localStorage.js";
-
 class LinkController {
     #input;
     #graph;
+    #storage;
+    #localStorage;
+    #abortController = null;
 
-    constructor(input, graph) {
+    constructor(input, graph, storage, localStorage) {
         this.#input = input;
         this.#graph = graph;
-        this.#input.value = storage.link || "";
+        this.#storage = storage;
+        this.#localStorage = localStorage;
+    }
+
+    init() {
+        this.#input.value = this.#storage.link || "";
         this.#bindEvents();
+        return this;
     }
 
     #bindEvents() {
-        this.#input.addEventListener("keydown", (e) => {
-            const value = this.#input.value.trim();
-            if (e.code === "Enter") this.#setLink(value);
-        });
+        this.#abortController?.abort();
+        this.#abortController = new AbortController();
+        const { signal } = this.#abortController;
 
-        this.#input.addEventListener("blur", () => {
-            const value = this.#input.value.trim();
-            if (this.#input.value.trim()) this.#setLink(value);
-        });
+        this.#input.addEventListener(
+            "keydown",
+            (e) => {
+                const value = this.#input.value.trim();
+                if (e.code === "Enter") this.#setLink(value);
+            },
+            { signal },
+        );
+
+        this.#input.addEventListener(
+            "blur",
+            () => {
+                const value = this.#input.value.trim();
+                if (this.#input.value.trim()) this.#setLink(value);
+            },
+            { signal },
+        );
     }
 
     #setLink(value) {
-        storage.link = value;
-        if (storage.saveLink) localStorage.save();
+        this.#storage.link = value;
+        if (this.#storage.saveLink) this.#localStorage.save();
         this.#graph.render();
+    }
+
+    destroy() {
+        this.#abortController?.abort();
+        this.#abortController = null;
     }
 }
 
-const linkInput = new LinkController(DOM.linkInput, graph);
-
 export { LinkController };
-export default linkInput;
