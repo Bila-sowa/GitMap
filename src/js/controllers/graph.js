@@ -170,11 +170,11 @@ class GraphController {
 
         closeFullCommitModals();
         closeHoverCommitModals();
-        this.#graph.replaceChildren();
         this.#graph.dataset.repoUrl = this.#storage.link;
         this.#graph.style.width = `${graphWidth}px`;
         this.#graph.style.height = `${graphHeight}px`;
 
+        const graphFragment = document.createDocumentFragment();
         const svgNamespace = "http://www.w3.org/2000/svg";
         const edgesSvg = document.createElementNS(svgNamespace, "svg");
         edgesSvg.setAttribute("aria-hidden", "true");
@@ -206,7 +206,7 @@ class GraphController {
             }
         });
 
-        this.#graph.append(edgesSvg);
+        graphFragment.append(edgesSvg);
 
         layout.nodes.forEach(({ commit, lane, row }, index) => {
             const formattedTitle = truncateTitle(commit.title, 5);
@@ -223,13 +223,13 @@ class GraphController {
             commitButton.setAttribute("aria-branch", branchName);
             commitButton.style.setProperty("--commit-lane", lane);
             commitButton.style.setProperty("--commit-row", row);
-            this.#graph.append(commitButton);
+            graphFragment.append(commitButton);
 
             if (isFirst) {
                 const connector = document.createElement("div");
                 connector.className = "triangular-connector";
                 connector.style.setProperty("--commit-lane", lane);
-                this.#graph.append(connector);
+                graphFragment.append(connector);
             }
         });
 
@@ -238,7 +238,8 @@ class GraphController {
         limitDescription.textContent = layout.hasHiddenCommits
             ? `Showing ${layout.nodes.length} of ${array.length} loaded commits for this branch.`
             : `Showing all ${layout.nodes.length} loaded commits for this branch.`;
-        this.#graph.append(limitDescription);
+        graphFragment.append(limitDescription);
+        this.#graph.replaceChildren(graphFragment);
 
         notifications.notify("The graph has been successfully generated", "success");
     }
