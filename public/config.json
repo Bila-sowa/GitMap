@@ -2,9 +2,9 @@
     "name": "GitMap",
     "debug": true,
     "versionDetails": {
-        "version": "2.11.21",
-        "versionType": "alpha",
-        "versionIsStable": false
+        "version": "2.11.22",
+        "versionType": "beta",
+        "versionIsStable": true
     },
     "graph": {
         "renderLimit": 30
