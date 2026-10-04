@@ -150,7 +150,7 @@ const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails
                     </div>
                     <div class="${styles["settings-version-text-container"]}">
                         <span class="text-small">Version: </span>
-                        <a class="text-small link is-disabled" href="#" target="_blank" title="View in changelog" class="text-small" aria-disabled="true">${version}</a>
+                        <a class="text-small link is-disabled" href="#" target="_blank" title="View in changelog" aria-disabled="true">${version}</a>
                         ${versionIsStable ? "" : `<span title="${notStableMessage}" class="text-small cursor-help">${versionIsStable ? "" : "(not stable)"}</span>`}
                     </div>
                 </div>

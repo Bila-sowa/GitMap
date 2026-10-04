@@ -220,7 +220,7 @@ class GraphController {
             commitButton.setAttribute("name", formattedTitle);
             commitButton.setAttribute("aria-expanded", "false");
             commitButton.setAttribute("aria-label", `Open commit: ${commit.title}`);
-            commitButton.setAttribute("aria-branch", branchName);
+            commitButton.dataset.branch = branchName;
             commitButton.style.setProperty("--commit-lane", lane);
             commitButton.style.setProperty("--commit-row", row);
             graphFragment.append(commitButton);

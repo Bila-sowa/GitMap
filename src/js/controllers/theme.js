@@ -3,6 +3,7 @@ class ThemeController {
     #body;
     #storage;
     #localStorage;
+    #themeColorMeta;
     #abortController = null;
 
     constructor(button, body, storage, localStorage) {
@@ -10,6 +11,7 @@ class ThemeController {
         this.#body = body;
         this.#storage = storage;
         this.#localStorage = localStorage;
+        this.#themeColorMeta = document.querySelector("#theme-color");
     }
 
     init() {
@@ -30,6 +32,11 @@ class ThemeController {
         this.#body.classList.remove("dark-theme", "light-theme");
         this.#body.classList.add(validTheme);
         this.#storage.theme = validTheme;
+
+        if (this.#themeColorMeta) {
+            const themeColor = getComputedStyle(this.#body).getPropertyValue("--color-1").trim();
+            if (themeColor) this.#themeColorMeta.content = themeColor;
+        }
 
         this.#localStorage.save();
     }
