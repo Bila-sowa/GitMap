@@ -1,37 +1,55 @@
-import storage from "../data/storage.js";
-import * as DOM from "./dom.js";
-import localStorage from "./localStorage.js";
-
 class ThemeController {
     #button;
+    #body;
+    #storage;
+    #localStorage;
+    #themeColorMeta;
+    #abortController = null;
 
-    constructor(button) {
+    constructor(button, body, storage, localStorage) {
         this.#button = button;
-        this.#setTheme(storage.theme || "dark-theme");
+        this.#body = body;
+        this.#storage = storage;
+        this.#localStorage = localStorage;
+        this.#themeColorMeta = document.querySelector("#theme-color");
+    }
+
+    init() {
+        this.#setTheme(this.#storage.theme || "dark-theme");
         this.#bindEvents();
+        return this;
     }
 
     #bindEvents() {
-        this.#button.addEventListener("click", () => this.#changeTheme());
+        this.#abortController?.abort();
+        this.#abortController = new AbortController();
+        this.#button.addEventListener("click", () => this.#changeTheme(), { signal: this.#abortController.signal });
     }
 
     #setTheme(theme) {
         const validTheme = theme === "light-theme" || theme === "dark-theme" ? theme : "dark-theme";
 
-        document.body.classList.remove("dark-theme", "light-theme");
-        document.body.classList.add(validTheme);
-        storage.theme = validTheme;
+        this.#body.classList.remove("dark-theme", "light-theme");
+        this.#body.classList.add(validTheme);
+        this.#storage.theme = validTheme;
 
-        localStorage.save();
+        if (this.#themeColorMeta) {
+            const themeColor = getComputedStyle(this.#body).getPropertyValue("--color-1").trim();
+            if (themeColor) this.#themeColorMeta.content = themeColor;
+        }
+
+        this.#localStorage.save();
     }
 
     #changeTheme() {
-        const theme = storage.theme === "dark-theme" ? "light-theme" : "dark-theme";
+        const theme = this.#storage.theme === "dark-theme" ? "light-theme" : "dark-theme";
         this.#setTheme(theme);
+    }
+
+    destroy() {
+        this.#abortController?.abort();
+        this.#abortController = null;
     }
 }
 
-const theme = new ThemeController(DOM.themeButton);
-
 export { ThemeController };
-export default theme;

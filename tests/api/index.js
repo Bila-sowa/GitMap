@@ -6,6 +6,10 @@ import test_rz8ou_Data from "./gitHubClient/parseCommitFilesData.test";
 import test_05yau_Data from "./gitHubClient/setToken.test";
 import test_3j3f8_Data from "./gitHubClient/getRateLimitData.test";
 import test_vt6mk_Data from "./gitHubClient/getDataByBranch.test";
+import test_anl95_Data from "./config/mergeConfigs.test";
+import test_4lmw4_Data from "./gitHubClient/requestControl.test";
+import test_n7rjx_Data from "./gitHubClient/dataParserValidation.test";
+import test_p2t4f_Data from "./gitHubClient/gitHubTransport.test";
 
 export {
     test_nd2u3_Data,
@@ -16,4 +20,8 @@ export {
     test_05yau_Data,
     test_3j3f8_Data,
     test_vt6mk_Data,
+    test_anl95_Data,
+    test_4lmw4_Data,
+    test_n7rjx_Data,
+    test_p2t4f_Data,
 };

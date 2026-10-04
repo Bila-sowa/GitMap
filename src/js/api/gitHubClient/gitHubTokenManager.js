@@ -1,75 +1,51 @@
 import notifications from "@/js/utils/notificationManager";
 import storage from "@/js/data/storage";
+import GitHubTransport from "./gitHubTransport";
 
 class GitHubTokenManager {
     #headers;
-    #httpApi;
+    #storage;
+    #transport;
+    #tokenOperationId = 0;
 
-    constructor(headers, httpApi) {
+    constructor(headers, httpApi, storageInstance = storage, fetcher, transport) {
         this.#headers = headers;
-        this.#httpApi = httpApi;
+        this.#storage = storageInstance;
+        this.#transport = transport || new GitHubTransport(headers, httpApi, { fetcher });
     }
 
-    #getSafeHeaders(url) {
-        const headers = { Accept: this.#headers.Accept };
-        let hostname = "";
-
-        try {
-            hostname = new URL(url).hostname;
-        } catch (error) {
-            console.warn(`getSafeHeaders: invalid URL "${url}", Authorization header omitted.`, error);
-        }
-
-        if (hostname === "api.github.com" && this.#headers.Authorization) {
-            headers.Authorization = this.#headers.Authorization;
-        }
-
-        return headers;
+    async #validateToken(token, options = {}) {
+        return this.#transport.getJson("https://api.github.com/rate_limit", {
+            signal: options.signal,
+            authorization: `Bearer ${token}`,
+            parseJson: false,
+            error: "Failed to validate GitHub token",
+            context: "#validateToken",
+        });
     }
 
-    async #validateToken() {
-        try {
-            const url = "https://api.github.com/rate_limit";
-            const res = await fetch(url, {
-                headers: this.#getSafeHeaders(url),
-            });
+    async setToken(token, options = {}) {
+        const operationId = ++this.#tokenOperationId;
 
-            if (!res.ok) {
-                const httpError = await this.#httpApi.createHttpError(res, url);
-                return { success: false, ...httpError };
-            }
-
-            return { success: true };
-        } catch (err) {
-            return {
-                success: false,
-                error: "Failed to validate GitHub token",
-                devError: {
-                    message: `Network or fetch exception in #validateToken: ${err.message}`,
-                    stack: err.stack,
-                },
-            };
-        }
-    }
-
-    async setToken(token) {
         if (!token) {
             delete this.#headers.Authorization;
-            delete storage.token;
+            this.#storage.token = "";
             return { success: true };
         }
 
-        storage.token = token;
-        this.#headers.Authorization = `Bearer ${token}`;
-        const validation = await this.#validateToken();
+        const validation = await this.#validateToken(token, options);
+
+        if (operationId !== this.#tokenOperationId) {
+            return { success: false, cancelled: true };
+        }
 
         if (!validation.success) {
-            delete this.#headers.Authorization;
-            delete storage.token;
             notifications.notify(validation.error, "error");
             return validation;
         }
 
+        this.#storage.token = token;
+        this.#headers.Authorization = `Bearer ${token}`;
         notifications.notify("The token has been successfully set", "success");
         return { success: true };
     }

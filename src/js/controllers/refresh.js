@@ -1,22 +1,28 @@
-import * as DOM from "./dom.js";
-import graph from "./graph.js";
-
 class RefreshButtonController {
     #button;
     #graph;
+    #abortController = null;
 
     constructor(button, graph) {
         this.#button = button;
         this.#graph = graph;
+    }
+
+    init() {
         this.#bindEvents();
+        return this;
     }
 
     #bindEvents() {
-        this.#button.addEventListener("click", () => this.#graph.refresh());
+        this.#abortController?.abort();
+        this.#abortController = new AbortController();
+        this.#button.addEventListener("click", () => this.#graph.refresh(), { signal: this.#abortController.signal });
+    }
+
+    destroy() {
+        this.#abortController?.abort();
+        this.#abortController = null;
     }
 }
 
-const refresh = new RefreshButtonController(DOM.refreshButton, graph);
-
 export { RefreshButtonController };
-export default refresh;

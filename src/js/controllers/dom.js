@@ -1,39 +1,20 @@
-const body = document.querySelector("body");
-const viewport = document.querySelector("#viewport");
-const canvas = document.querySelector("#canvas");
-const linkInput = document.querySelector("#linkInput");
-const refreshButton = document.querySelector("#refresh");
-const themeButton = document.querySelector("#theme");
-const settingsButton = document.querySelector("#settings");
-const graph = document.querySelector("#graph");
-const scaleIncreaseButton = document.querySelector("#scale-increase");
-const scaleDisplay = document.querySelector("#scale-display");
-const scaleDecreaseButton = document.querySelector("#scale-decrese");
-const dropDownTrigger = document.querySelector("#branch-dropdown-trigger");
-const dropDownList = document.querySelector("#branch-dropdown-list");
-const dropDownLabel = document.querySelector("#branch-dropdown-label");
-let pageFocusElements = [];
+function getDomElements(root = document) {
+    return {
+        body: root.querySelector("body"),
+        viewport: root.querySelector("#viewport"),
+        canvas: root.querySelector("#canvas"),
+        linkInput: root.querySelector("#linkInput"),
+        refreshButton: root.querySelector("#refresh"),
+        themeButton: root.querySelector("#theme"),
+        settingsButton: root.querySelector("#settings"),
+        graph: root.querySelector("#graph"),
+        scaleIncreaseButton: root.querySelector("#scale-increase"),
+        scaleDisplay: root.querySelector("#scale-display"),
+        scaleDecreaseButton: root.querySelector("#scale-decrese"),
+        dropDownTrigger: root.querySelector("#branch-dropdown-trigger"),
+        dropDownList: root.querySelector("#branch-dropdown-list"),
+        dropDownLabel: root.querySelector("#branch-dropdown-label"),
+    };
+}
 
-const updateElements = () => {
-    pageFocusElements = [...body.querySelectorAll("a"), ...body.querySelectorAll("button")];
-};
-
-export {
-    body,
-    pageFocusElements,
-    canvas,
-    viewport,
-    linkInput,
-    refreshButton,
-    themeButton,
-    settingsButton,
-    graph,
-    updateElements,
-    scaleIncreaseButton,
-    scaleDisplay,
-    scaleDecreaseButton,
-    dropDownTrigger,
-    dropDownList,
-    dropDownLabel,
-};
-
+export { getDomElements };

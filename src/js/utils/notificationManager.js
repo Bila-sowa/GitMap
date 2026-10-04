@@ -1,5 +1,5 @@
-import getConfigData from "../api/getConfigData";
-import { getRandomID } from "./utils";
+import { config } from "../api/config";
+import getRandomID from "./randomId";
 
 class NotificationManager {
     #queue = [];
@@ -13,7 +13,6 @@ class NotificationManager {
     };
 
     async notify(message, type) {
-        const config = await getConfigData();
         const { showNotifications, COOLDOWN_MS } = config?.notifications;
 
         if (!message || !type || !showNotifications) return;

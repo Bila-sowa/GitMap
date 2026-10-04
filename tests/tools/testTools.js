@@ -150,12 +150,11 @@ class TestConfig {
     }
 }
 
-const validateTestData = (object, expected) => {
-    if (!object) return true;
-
+const validateTestData = (object, ...expectedValues) => {
+    const expected = expectedValues[0];
     findAndThrowError(object, expected);
 
-    if (!expected) return true;
+    if (!expectedValues.length) return true;
 
     return equalKeysAndValidValues(object, expected);
 };

@@ -1,45 +1,95 @@
-import gitHubClient from "../api/gitHubClient";
-import getConfigData from "../api/getConfigData.js";
+import { config } from "../api/config";
 import { generateLoader, removeLoader } from "../components/Loader/index.js";
-import { bindSettingsModalEvents, generateSettingsModalHTML } from "../components/SettingsModal/index.js";
-import storage from "../data/storage.js";
-import { appendHTML } from "../utils/utils.js";
-import * as DOM from "./dom.js";
+import {
+    bindSettingsModalEvents,
+    generateSettingsModalHTML,
+    getTokenStatusState,
+} from "../components/SettingsModal/index.js";
+import notifications from "../utils/notificationManager.js";
 
 class SettingsController {
     #button;
+    #gitHubClient;
+    #storage;
+    #localStorage;
+    #abortController = null;
+    #closeModal = null;
 
-    constructor(button) {
+    #isOpening = false;
+
+    #modal = null;
+
+    constructor(button, gitHubClient, storage, localStorage) {
         this.#button = button;
+        this.#gitHubClient = gitHubClient;
+        this.#storage = storage;
+        this.#localStorage = localStorage;
+    }
+
+    init() {
         this.#bindEvents();
+        return this;
     }
 
     #bindEvents() {
-        this.#button.addEventListener("click", () => this.#openSettings());
+        this.#abortController?.abort();
+        this.#abortController = new AbortController();
+        this.#button.addEventListener("click", () => this.#openSettings(), { signal: this.#abortController.signal });
     }
 
     async #openSettings() {
-        storage.token ? await gitHubClient.setToken(storage.token) : "";
+        if (this.#isOpening || this.#modal?.isConnected) return;
 
-        generateLoader();
+        this.#isOpening = true;
+        const { signal } = this.#abortController;
+        const loader = generateLoader();
 
-        const rateLimitRes = await gitHubClient.getRateLimitData();
-        const limit = rateLimitRes.data;
-        const config = await getConfigData();
-        const versionDetails = config.versionDetails;
+        try {
+            const token = this.#storage.token;
+            const tokenResult = token ? await this.#gitHubClient.setToken(token, { signal }) : { success: true };
+            if (signal.aborted) return;
+            const tokenState = getTokenStatusState(tokenResult, Boolean(token));
 
-        removeLoader();
+            const rateLimitRes = await this.#gitHubClient.getRateLimitData({ signal });
+            if (signal.aborted) return;
+            const modalHTML = generateSettingsModalHTML(rateLimitRes, tokenState, config.versionDetails, token);
 
-        const modal = generateSettingsModalHTML(limit, versionDetails);
+            if (!modalHTML) return;
 
-        if (!modal) return;
+            const template = document.createElement("template");
+            template.innerHTML = modalHTML.trim();
+            const modal = template.content.firstElementChild;
 
-        appendHTML(modal);
-        bindSettingsModalEvents();
+            if (!modal) return;
+
+            document.body.append(modal);
+            this.#modal = modal;
+            this.#closeModal = bindSettingsModalEvents(
+                modal,
+                () => {
+                    if (this.#modal === modal) this.#modal = null;
+                    this.#closeModal = null;
+                },
+                {
+                    storage: this.#storage,
+                    localStorage: this.#localStorage,
+                    gitHubClient: this.#gitHubClient,
+                },
+            );
+        } catch (error) {
+            notifications.notify("Failed to open settings", "error");
+            console.error("Failed to open settings:", error);
+        } finally {
+            this.#isOpening = false;
+            removeLoader(loader);
+        }
+    }
+
+    destroy() {
+        this.#abortController?.abort();
+        this.#abortController = null;
+        this.#closeModal?.();
     }
 }
 
-const settings = new SettingsController(DOM.settingsButton);
-
 export { SettingsController };
-export default settings;

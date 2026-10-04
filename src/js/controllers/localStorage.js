@@ -1,21 +1,32 @@
-import storage from "../data/storage.js";
-import notifications from "../utils/notificationManager.js";
-
 class LocalStorageController {
+    #storage;
+    #notifications;
+
+    constructor(storage, notifications) {
+        this.#storage = storage;
+        this.#notifications = notifications;
+    }
+
+    init() {
+        return this.load();
+    }
+
+    destroy() {}
+
     save() {
-        const currentData = storage.getData();
+        const currentData = this.#storage.getData();
         const dataToSave = {
             ...currentData,
             localStorage: { ...currentData.localStorage },
-            link: storage.saveLink ? storage.link : "",
-            token: storage.saveToken ? storage.token : "",
+            link: this.#storage.saveLink ? this.#storage.link : "",
+            token: this.#storage.saveToken ? this.#storage.token : "",
         };
 
         try {
             globalThis.localStorage.setItem("GitMap", JSON.stringify(dataToSave));
             return { success: true };
         } catch (err) {
-            notifications.notify("Unable to save data in local storage.", "error");
+            this.#notifications.notify("Unable to save data in local storage.", "error");
             return { error: err.name, success: false };
         }
     }
@@ -33,7 +44,7 @@ class LocalStorageController {
 
             return { data: parse, success: true };
         } catch (err) {
-            notifications.notify(
+            this.#notifications.notify(
                 "Invalid local storage parse. Please check your data in the local storage or delete its data.",
                 "error",
             );
@@ -50,27 +61,23 @@ class LocalStorageController {
         const data = result.data;
 
         if (data.theme) {
-            storage.theme = data.theme;
+            this.#storage.theme = data.theme;
         }
 
         if (data.localStorage) {
-            storage.localStorage = data.localStorage;
+            this.#storage.localStorage = data.localStorage;
         }
 
-        if (storage.saveLink && data.link) {
-            storage.link = data.link;
+        if (this.#storage.saveLink && data.link) {
+            this.#storage.link = data.link;
         }
 
-        if (storage.saveToken && data.token) {
-            storage.token = data.token;
+        if (this.#storage.saveToken && data.token) {
+            this.#storage.token = data.token;
         }
 
-        return { success: true, data: storage.getData() };
+        return { success: true, data: this.#storage.getData() };
     }
 }
 
-const localStorage = new LocalStorageController();
-localStorage.load();
-
 export { LocalStorageController };
-export default localStorage;

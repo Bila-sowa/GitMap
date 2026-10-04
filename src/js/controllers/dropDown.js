@@ -1,5 +1,3 @@
-import * as DOM from "./dom";
-
 class DropDown {
     #trigger;
     #list;
@@ -12,7 +10,11 @@ class DropDown {
         this.#trigger = trigger;
         this.#list = list;
         this.#label = label;
+    }
+
+    init() {
         this.#bindEvents();
+        return this;
     }
 
     #bindEvents() {
@@ -50,7 +52,7 @@ class DropDown {
     }
 
     async #selectItem(item) {
-        const branch = item.textContent;
+        const branch = item.dataset.branch;
         const selectionId = ++this.#selectionId;
         this.#close();
         this.#trigger.setAttribute("aria-busy", "true");
@@ -155,6 +157,7 @@ class DropDown {
             item.setAttribute("aria-selected", String(isSelected));
             item.tabIndex = isSelected ? 0 : -1;
             item.textContent = branch;
+            item.dataset.branch = branch;
             fragment.append(item);
         });
 
@@ -165,7 +168,4 @@ class DropDown {
     }
 }
 
-const dropDown = new DropDown(DOM.dropDownTrigger, DOM.dropDownList, DOM.dropDownLabel);
-
 export { DropDown };
-export default dropDown;

@@ -5,12 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
-        content="style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+        content="default-src 'self'; script-src 'self'; connect-src 'self' https://api.github.com ws://localhost:* ws://127.0.0.1:*; img-src 'self' https://avatars.githubusercontent.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'self';">
     <meta name="description"
         content="GitMap - a simple website to load your graph from a repo with a drag & drop canvas, letting you explore branches and commit history visually.">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#010409">
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#ffffff">
+    <meta name="theme-color" id="theme-color" content="#010409">
     <meta property="og:type" content="website">
     <meta property="og:title" content="GitMap">
     <meta property="og:description"
@@ -22,8 +21,6 @@
     <title>GitMap</title>
     <link rel="icon" href="/favicon.png">
     <script src="./src/js/index.js" type="module" defer></script>
-    <script src="./tests/tests.js" type="module" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body class="dark-theme">
@@ -31,13 +28,13 @@
         <div class="logo">
             <img class="logo-image" width="60" src="/logo.png" alt>
             <div class="logo-title">
-                <h1>Git<label>Map</label></h1>
+                <h1>Git<span>Map</span></h1>
             </div>
         </div>
         <nav class="nav">
             <div class="nav-link-input-container">
-                <input class="rounded-normal" type="text" placeholder="Enter a link to the repository" id="linkInput">
-                <a class="rounded-full" href="https://github.com" target="_blank">
+                <input class="rounded-normal" type="text" placeholder="Enter a link to the repository" id="linkInput" aria-label="GitHub repository URL">
+                <a class="rounded-full" href="https://github.com" target="_blank" aria-label="GitHub">
                     <img width="32" src="/src/assets/github-logo.webp" alt>
                 </a>
             </div>
@@ -85,7 +82,7 @@
                             <span>Add a link to the repository to get the graph.</span>
                             <span>Example link: https://github.com/owner/repo</span>
                         </div>
-                        <img class="banner-image" src="/logo.png">
+                        <img class="banner-image" src="/logo.png" alt="GitMap logo">
                         <span>Author’s GitHub:
                             https://github.com/Bila-sowa</span>
                     </div>
@@ -114,7 +111,6 @@
             <button class="scale-menu-button rounded-small" id="scale-increase" aria-label="Increase scale">+</button>
             <span class="scale-menu-display" id="scale-display">100%</span>
             <button class="scale-menu-button rounded-small" id="scale-decrese" aria-label="Decrease scale">-</button>
-            </button>
         </div>
     </main>
 </body>

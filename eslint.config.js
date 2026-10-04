@@ -4,10 +4,12 @@ import { defineConfig } from "eslint/config";
 
 export default defineConfig([
     {
-        files: ["**/*.{js,mjs,cjs}"],
+        ignores: ["dist/**"],
+    },
+    {
+        files: ["**/*.{js,mjs,cjs}", ".stylelintrc.mjs"],
         plugins: { js },
         extends: ["js/recommended"],
-        languageOptions: { globals: globals.browser },
         rules: {
             "no-console": "off",
             "no-unused-vars": "error",
@@ -18,5 +20,14 @@ export default defineConfig([
             "no-duplicate-imports": "error",
             "no-unsafe-optional-chaining": "off",
         },
+    },
+    {
+        files: ["src/**/*.{js,mjs,cjs}", "tests/**/*.{js,mjs,cjs}"],
+        ignores: ["tests/tools/generateTestName.js"],
+        languageOptions: { globals: globals.browser },
+    },
+    {
+        files: ["eslint.config.js", "vite.config.js", ".stylelintrc.mjs", "tests/tools/generateTestName.js"],
+        languageOptions: { globals: globals.node },
     },
 ]);

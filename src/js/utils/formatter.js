@@ -11,8 +11,12 @@ class Formatter {
         return commitName?.split("\n").slice(1).join("\n");
     }
 
-    getDateInLocaleString(date) {
-        return new Date(date)?.toLocaleString();
+    getDateInLocaleString(date, locales, options) {
+        return new Date(date).toLocaleString(locales, options);
+    }
+
+    getFormattedDate(date, locales, options) {
+        return new Intl.DateTimeFormat(locales, options).format(new Date(date));
     }
 
     getShortHash(hash) {
@@ -20,7 +24,14 @@ class Formatter {
     }
 
     getFormattedExtension(fileName) {
-        return fileName?.slice(fileName.lastIndexOf(".") + 1);
+        if (typeof fileName !== "string" || !fileName) return "file";
+
+        const baseName = fileName.split(/[\\/]/).pop().toLowerCase();
+        const extensionSeparator = baseName.lastIndexOf(".");
+
+        if (extensionSeparator <= 0 || extensionSeparator === baseName.length - 1) return "file";
+
+        return baseName.slice(extensionSeparator + 1).toLowerCase();
     }
 
     getShortStatus(fileStatus) {
