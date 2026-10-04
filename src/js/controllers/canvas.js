@@ -2,6 +2,7 @@ const PAN_THRESHOLD = 5;
 
 class CanvasController {
     #abortController = null;
+    #transformFrame = null;
     #isPanning = false;
     #isPanPending = false;
     #hasDragged = false;
@@ -102,6 +103,7 @@ class CanvasController {
         this.#hasDragged = false;
         this.#panTarget = null;
         this.viewport.classList.remove("is-panning");
+        this.#flushTransform();
     }
 
     #startPinch(touches) {
@@ -228,8 +230,25 @@ class CanvasController {
     };
 
     #applyTransform() {
+        if (this.#transformFrame !== null) return;
+
+        this.#transformFrame = requestAnimationFrame(() => {
+            this.#transformFrame = null;
+            this.#renderTransform();
+        });
+    }
+
+    #renderTransform() {
         this.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
         this.onChange?.(this);
+    }
+
+    #flushTransform() {
+        if (this.#transformFrame === null) return;
+
+        cancelAnimationFrame(this.#transformFrame);
+        this.#transformFrame = null;
+        this.#renderTransform();
     }
 
     panBy(dx, dy) {

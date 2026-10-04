@@ -2,6 +2,7 @@ class ScaleController {
     #abortController = null;
     #previousOnChange = null;
     #canvas;
+    #lastObservedScale = null;
 
     constructor(increaseButton, display, decreaseButton, canvas) {
         this.increaseButton = increaseButton;
@@ -26,8 +27,13 @@ class ScaleController {
         this.decreaseButton.addEventListener("click", this.#onDecrease, { signal });
 
         this.#previousOnChange = this.#canvas.onChange;
+        this.#lastObservedScale = this.#canvas.scale;
         this.#canvas.onChange = (instance) => {
             this.#previousOnChange?.(instance);
+
+            if (instance.scale === this.#lastObservedScale) return;
+
+            this.#lastObservedScale = instance.scale;
             this.render();
         };
     }
@@ -41,7 +47,10 @@ class ScaleController {
     };
 
     render() {
-        this.display.textContent = `${Math.round(this.#canvas.scale * 100)}%`;
+        const scaleLabel = `${Math.round(this.#canvas.scale * 100)}%`;
+        if (this.display.textContent === scaleLabel) return;
+
+        this.display.textContent = scaleLabel;
     }
 
     destroy() {
@@ -53,6 +62,7 @@ class ScaleController {
             this.#canvas.onChange = this.#previousOnChange;
             this.#previousOnChange = null;
         }
+        this.#lastObservedScale = null;
     }
 }
 
