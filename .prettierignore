@@ -1,5 +1,6 @@
 dist/
 dev/
+*.md
 
 # Important!
 # Excluding this ignore can become critical for the application, because Prettier sorts imports according to its own rules.
