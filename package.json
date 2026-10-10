@@ -1,6 +1,6 @@
 {
     "name": "gitmap",
-    "version": "2.11.23",
+    "version": "2.11.24",
     "private": true,
     "type": "module",
     "scripts": {
@@ -9,6 +9,9 @@
         "preview": "vite preview",
         "compile": "sass src/styles.scss src/styles.css",
         "deploy": "gh-pages -d dist",
+        "test": "vitest run --project local --passWithNoTests",
+        "test:local": "vitest run --project local --passWithNoTests",
+        "test:e2e": "vitest run --project e2e --passWithNoTests",
         "test-name": "node tests/tools/generateTestName.js",
         "ES-check": "npx eslint src tests eslint.config.js vite.config.js .stylelintrc.mjs",
         "ES-fix": "npx eslint src tests eslint.config.js vite.config.js .stylelintrc.mjs --fix",
