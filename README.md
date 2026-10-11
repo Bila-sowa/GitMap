@@ -1,15 +1,15 @@
 <div align="center">
-    <img width="600" src="./public/banner.png" alt="GitMap banner">
-    <h1 align="center">GitMap</h1>
-    <p><strong>GitMap is a browser application for exploring a GitHub repository's commit history.</strong></p>
-    <p align="center">
-        <a href="#features">Features</a> &middot;
-        <a href="#quick-start">Quick start</a> &middot;
-        <a href="#how-to-use">How to use</a> &middot;
-        <a href="#development-commands">Development</a> &middot;
-        <a href="#contributing">Contributing</a> &middot;
-        <a href="#license">License</a>
-    </p>
+  <img width="600" src="./public/banner.png" alt="GitMap banner">
+  <h1 align="center">GitMap</h1>
+  <p><strong>GitMap is a browser application for exploring a GitHub repository's commit history.</strong></p>
+  <p align="center">
+    <a href="#features">Features</a> &middot;
+    <a href="#quick-start">Quick start</a> &middot;
+    <a href="#how-to-use">How to use</a> &middot;
+    <a href="#development-commands">Development</a> &middot;
+    <a href="#contributing">Contributing</a> &middot;
+    <a href="#license">License</a>
+  </p>
 </div>
 
 ## Features
