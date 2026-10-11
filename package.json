@@ -12,13 +12,13 @@
         "test": "vitest run --project local --passWithNoTests",
         "test:local": "vitest run --project local --passWithNoTests",
         "test:e2e": "vitest run --project e2e --passWithNoTests",
-        "ES-check": "npx eslint src tests eslint.config.js vite.config.js .stylelintrc.mjs",
-        "ES-fix": "npx eslint src tests eslint.config.js vite.config.js .stylelintrc.mjs --fix",
-        "Style-check": "stylelint \"**/*.scss\"",
-        "Style-fix": "stylelint \"**/*.scss\" --fix",
+        "ES:check": "npx eslint src tests eslint.config.js vite.config.js .stylelintrc.mjs",
+        "ES:fix": "npx eslint src tests eslint.config.js vite.config.js .stylelintrc.mjs --fix",
+        "style:check": "stylelint \"**/*.scss\"",
+        "style:fix": "stylelint \"**/*.scss\" --fix",
         "prettier": "prettier src/ --write",
-        "check-all": "npm-run-all --continue-on-error ES-check Style-check",
-        "fix-all": "npm-run-all --continue-on-error ES-fix Style-fix prettier"
+        "check:all": "npm-run-all --continue-on-error ES:check style:check",
+        "fix:all": "npm-run-all --continue-on-error ES:fix style:fix prettier"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
