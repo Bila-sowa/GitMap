@@ -33,7 +33,7 @@
 5. Use `node` first for pure logic and `jsdom` for DOM tests. Add real Chromium through Vitest Browser Mode only for behavior that DOM emulation cannot reproduce correctly, such as real events, focus, styling, or layout.
 6. Store the function result in a separate variable in every test: `const result = functionUnderTest(...)`, followed by `expect(result)...`. For asynchronous calls, use `const result = await ...`. For `toThrow`, the result is a wrapper function: `const result = () => functionUnderTest(); expect(result).toThrow(SyntaxError)`. Pass only the error class to `toThrow`.
 7. Instead of `toBeTypeOf`, write, for example, `expect(typeof result).toBe("string")`. Instead of `toBeTruthy`, use `toBe(true)` for a Boolean expression. Prefer precise `toEqual`/`toStrictEqual` assertions for meaningful fields over checking only that a value exists.
-8. Isolate state between tests: restore `fetch` and other mocks, timers, `document.body`, storage, and other modified globals. Import `describe`, `it`, `expect`, `vi`, and hooks explicitly from `vitest`.
+8. Isolate state between tests: restore `fetch` and other mocks, timers, `document.body`, storage, and other modified globals. Import `describe`, `test`, `expect`, `vi`, and required hooks explicitly from `vitest`. Declare every new or migrated test with `test`, never `it`; use `test` variants such as `test.each`, `test.skip`, or `test.only` when applicable, and do not commit focused tests.
 9. Use only the `.test.js` suffix for all new and migrated test files, never `.spec.js`. The `*.e2e.test.js` pattern is suitable for live API tests.
 
 A small batch is complete when the new assertions cover every scenario from the corresponding legacy tests, the targeted Vitest project and full local suite pass, and the remaining legacy tests stay registered.
@@ -74,7 +74,7 @@ There are only two test sets: `local` and `e2e`. `npm test` runs `local`, so E2E
 
 ### 1.3. First validation pass
 
-- Verify that Vitest discovers only the first migrated files; legacy files without `it()` must not produce a `No test suite found` error.
+- Verify that Vitest discovers only the first migrated files; legacy files without `test()` must not produce a `No test suite found` error.
 - Verify that a deliberately failing assertion makes the command fail, then restore the passing test.
 
 <a id="phase-2"></a>
@@ -151,7 +151,7 @@ For each of the four methods, migrate the current test to `local` with a mocked 
 
 | Risk | Mitigation |
 | --- | --- |
-| Vitest automatically discovers legacy `.test.js` files that do not contain `it()` | List migrated files explicitly in each project; expand the list only after a successful migration |
+| Vitest automatically discovers legacy `.test.js` files that do not contain `test()` | List migrated files explicitly in each project; expand the list only after a successful migration |
 | The legacy `TestConfig` returns `success: false` instead of throwing | Replace it with direct `expect` assertions; do not treat `await legacyTest()` alone as a sufficient test |
 | Tests depend on shared globals, time, or execution order | Isolate state, restore mocks and timers, and avoid dependencies on test order |
 | `jsdom` does not reproduce every browser feature | Use Browser Mode and Chromium for the specific incompatible scenario |
