@@ -23,11 +23,10 @@ export default defineConfig([
     },
     {
         files: ["src/**/*.{js,mjs,cjs}", "tests/**/*.{js,mjs,cjs}"],
-        ignores: ["tests/tools/generateTestName.js"],
         languageOptions: { globals: globals.browser },
     },
     {
-        files: ["eslint.config.js", "vite.config.js", ".stylelintrc.mjs", "tests/tools/generateTestName.js"],
+        files: ["eslint.config.js", "vite.config.js", ".stylelintrc.mjs"],
         languageOptions: { globals: globals.node },
     },
 ]);

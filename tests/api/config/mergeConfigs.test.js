@@ -1,5 +1,5 @@
 import { getDefaultConfig, mergeConfigs } from "@/js/api/config";
-import { TestConfig } from "../../tools/testTools";
+import { describe, expect, it } from "vitest";
 
 /**
  * #### Description:
@@ -13,40 +13,26 @@ import { TestConfig } from "../../tools/testTools";
  * - name: `mergeConfigs`
  * - type: `function`
  *
- * @returns {Promise<TestFeedback>} Test feedback for partial and malformed configuration objects.
+ * Direct Vitest assertions cover partial, malformed, and non-object configuration values.
  */
-export default function test_anl95_Data() {
-    const defaultConfig = getDefaultConfig();
-    const config = new TestConfig(
-        {
-            file: "config.js",
-            test: "test_anl95_Data",
-            name: "mergeConfigs",
-            type: "function",
-        },
-        {
-            partialConfig: {
-                ...defaultConfig,
-                name: "Custom GitMap",
-                graph: { renderLimit: 50 },
-            },
-            malformedConfig: {
-                ...defaultConfig,
-                versionDetails: {
-                    ...defaultConfig.versionDetails,
-                    versionType: "beta",
-                },
-            },
-            nonObjectConfig: defaultConfig,
-        },
-    );
-
-    return config.run(() => ({
-        partialConfig: mergeConfigs({
+describe("mergeConfigs", () => {
+    it("preserves valid partial values and fills missing fields with defaults", () => {
+        const defaultConfig = getDefaultConfig();
+        const result = mergeConfigs({
             name: "Custom GitMap",
             graph: { renderLimit: 50 },
-        }),
-        malformedConfig: mergeConfigs({
+        });
+
+        expect(result).toStrictEqual({
+            ...defaultConfig,
+            name: "Custom GitMap",
+            graph: { renderLimit: 50 },
+        });
+    });
+
+    it("replaces malformed values with defaults while preserving a valid version type", () => {
+        const defaultConfig = getDefaultConfig();
+        const result = mergeConfigs({
             name: "",
             debug: "true",
             versionDetails: {
@@ -64,7 +50,21 @@ export default function test_anl95_Data() {
                 showLoader: 1,
                 CLEANUP_TIMEOUT_MS: -1,
             },
-        }),
-        nonObjectConfig: mergeConfigs(null),
-    }));
-}
+        });
+
+        expect(result).toStrictEqual({
+            ...defaultConfig,
+            versionDetails: {
+                ...defaultConfig.versionDetails,
+                versionType: "beta",
+            },
+        });
+    });
+
+    it("returns the full default config for null", () => {
+        const defaultConfig = getDefaultConfig();
+        const result = mergeConfigs(null);
+
+        expect(result).toStrictEqual(defaultConfig);
+    });
+});

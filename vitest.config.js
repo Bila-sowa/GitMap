@@ -10,7 +10,7 @@ export default mergeConfig(
                     test: {
                         name: "local",
                         environment: "node",
-                        include: [],
+                        include: ["tests/api/config/mergeConfigs.test.js"],
                         setupFiles: ["./tests/vitest/setupLocal.js"],
                     },
                 },

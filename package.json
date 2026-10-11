@@ -12,7 +12,6 @@
         "test": "vitest run --project local --passWithNoTests",
         "test:local": "vitest run --project local --passWithNoTests",
         "test:e2e": "vitest run --project e2e --passWithNoTests",
-        "test-name": "node tests/tools/generateTestName.js",
         "ES-check": "npx eslint src tests eslint.config.js vite.config.js .stylelintrc.mjs",
         "ES-fix": "npx eslint src tests eslint.config.js vite.config.js .stylelintrc.mjs --fix",
         "Style-check": "stylelint \"**/*.scss\"",

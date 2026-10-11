@@ -1,7 +1,6 @@
 import * as apiTests from "./api";
 import * as utilsTests from "./utils";
 import * as appDataTests from "./data";
-import * as toolsTests from "./tools/tests/index";
 import * as componentsTests from "./components";
 import test_c7p2m_Data from "./controllers/lifecycle.test";
 
@@ -14,7 +13,6 @@ const dataTests = [
     apiTests.test_rz8ou_Data,
     apiTests.test_05yau_Data,
     apiTests.test_vt6mk_Data,
-    apiTests.test_anl95_Data,
     apiTests.test_4lmw4_Data,
     apiTests.test_n7rjx_Data,
     apiTests.test_p2t4f_Data,
@@ -23,7 +21,6 @@ const dataTests = [
     utilsTests.test_d4x9p_Data,
     utilsTests.test_7w1cf_Data,
     appDataTests.test_8je0j_Data,
-    toolsTests.test_p8lz0_Data,
     componentsTests.test_vyk8w_Data,
     test_c7p2m_Data,
 ];
