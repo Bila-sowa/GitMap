@@ -15,26 +15,26 @@ import { TestConfig } from "../../tools/testTools";
  * @returns TestFeedback
  */
 export default async function test_483nq_Data() {
-    const httpController = new GitHubHttpApi();
-    const config = new TestConfig(
-        {
-            file: "httpController.js",
-            test: "test_483nq_Data",
-            name: "httpController",
-            type: "method",
-        },
-        [
-            "Bad Request (400): Unable to process request.",
-            "Unprocessable Entity (422): Validation failed or resource is locked.",
-            "Gateway Timeout (504): GitHub timed out waiting for upstream server.",
-            "GitHub API error (HTTP 402).",
-        ],
-        [400, 422, 504, 402],
-    );
+  const httpController = new GitHubHttpApi();
+  const config = new TestConfig(
+    {
+      file: "httpController.js",
+      test: "test_483nq_Data",
+      name: "httpController",
+      type: "method",
+    },
+    [
+      "Bad Request (400): Unable to process request.",
+      "Unprocessable Entity (422): Validation failed or resource is locked.",
+      "Gateway Timeout (504): GitHub timed out waiting for upstream server.",
+      "GitHub API error (HTTP 402).",
+    ],
+    [400, 422, 504, 402],
+  );
 
-    return config.run(async (testData) => {
-        let result = [];
-        testData.map((error) => result.push(httpController.getHttpErrorMessage(error)));
-        return result;
-    });
+  return config.run(async (testData) => {
+    let result = [];
+    testData.map((error) => result.push(httpController.getHttpErrorMessage(error)));
+    return result;
+  });
 }
