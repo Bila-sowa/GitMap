@@ -1,8 +1,8 @@
+import { describe, test, expect } from "vitest";
 import { getDefaultConfig, mergeConfigs } from "@/js/api/config";
-import { describe, expect, it } from "vitest";
 
 describe("mergeConfigs", () => {
-  it("preserves valid partial values and fills missing fields with defaults", () => {
+  test("preserves valid partial values and fills missing fields with defaults", () => {
     const defaultConfig = getDefaultConfig();
     const result = mergeConfigs({
       name: "Custom GitMap",
@@ -16,7 +16,7 @@ describe("mergeConfigs", () => {
     });
   });
 
-  it("replaces malformed values with defaults while preserving a valid version type", () => {
+  test("replaces malformed values with defaults while preserving a valid version type", () => {
     const defaultConfig = getDefaultConfig();
     const result = mergeConfigs({
       name: "",
@@ -47,7 +47,7 @@ describe("mergeConfigs", () => {
     });
   });
 
-  it("returns the full default config for null", () => {
+  test("returns the full default config for null", () => {
     const defaultConfig = getDefaultConfig();
     const result = mergeConfigs(null);
 

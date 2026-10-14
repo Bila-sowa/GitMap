@@ -84,7 +84,7 @@ Migrate only the listed files in each subphase and compare the legacy and new sc
 
 | Subphase | Existing files under `tests/` | Focus |
 | --- | --- | --- |
-| 2.1 | `tools/tests/validateTestData.test.js`, `api/config/mergeConfigs.test.js` | First small local batch |
+| 2.1 | `api/config/mergeConfigs.test.js` | First small local batch |
 | 2.2 | `utils/commitGraph.test.js`, `utils/formatter.test.js` | Preserve edge cases and the formatter's time zone |
 | 2.3 | `utils/escapeHTML.test.js`, `data/storage.test.js` | If testing the DOM branch of `escapeHTML`, select `jsdom` for that file |
 | 2.4 | `api/gitHubClient/getHttpErrorMessage.test.js`, `api/gitHubClient/createHttpError.test.js` | The second file was empty; add a meaningful scenario |
