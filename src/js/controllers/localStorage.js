@@ -18,8 +18,8 @@ class LocalStorageController {
     const dataToSave = {
       ...currentData,
       localStorage: { ...currentData.localStorage },
-      link: this.#storage.saveLink ? this.#storage.link : "",
-      token: this.#storage.saveToken ? this.#storage.token : "",
+      link: currentData.localStorage.saveLink ? currentData.link : "",
+      token: currentData.localStorage.saveToken ? currentData.token : "",
     };
 
     try {
@@ -59,21 +59,36 @@ class LocalStorageController {
     }
 
     const data = result.data;
+    const update = {};
 
-    if (data.theme) {
-      this.#storage.theme = data.theme;
+    if (data.theme) update.theme = data.theme;
+    if (data.localStorage) update.localStorage = data.localStorage;
+
+    if (Object.keys(update).length) {
+      try {
+        this.#storage.setData(update);
+      } catch {
+        // Invalid stored values (e.g. unknown theme) are silently ignored;
+        // setData applies what it can before throwing, so partial updates take effect.
+      }
     }
 
-    if (data.localStorage) {
-      this.#storage.localStorage = data.localStorage;
+    const { localStorage: ls } = this.#storage.getData();
+
+    if (ls.saveLink && data.link) {
+      try {
+        this.#storage.setData({ link: data.link });
+      } catch {
+        // Invalid stored link is ignored to prevent initialization failure
+      }
     }
 
-    if (this.#storage.saveLink && data.link) {
-      this.#storage.link = data.link;
-    }
-
-    if (this.#storage.saveToken && data.token) {
-      this.#storage.token = data.token;
+    if (ls.saveToken && data.token) {
+      try {
+        this.#storage.setData({ token: data.token });
+      } catch {
+        // Invalid stored token is ignored to prevent initialization failure
+      }
     }
 
     return { success: true, data: this.#storage.getData() };

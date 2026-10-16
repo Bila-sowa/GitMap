@@ -71,7 +71,7 @@ class GitHubClient extends GitHubHttpApi {
     return parsed;
   }
 
-  async getDataByBranch(name, url = storage.link, options = {}) {
+  async getDataByBranch(name, url = storage.getData().link, options = {}) {
     const branchName = typeof name === "string" ? name.trim() : "";
 
     if (!branchName) {

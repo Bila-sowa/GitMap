@@ -101,7 +101,7 @@ const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails
                         <h3>GitHub</h3>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <label for="token-input">GitHub rest api token</label>
-                            <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${token}" placeholder="gpy_">
+                            <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${token}" placeholder="ghp_ or github_pat_">
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>GitHub Rest api token status:</span>
@@ -186,7 +186,7 @@ function bindSettingsModalEvents(modal = getSettingsModal(), onClose, { storage,
     const tokenState = getTokenStatusState(result, Boolean(token));
     renderTokenStatus(modal, tokenState);
 
-    if (result.success && storage.saveToken) {
+    if (result.success && storage.getData().localStorage.saveToken) {
       localStorage.save();
     }
 
@@ -218,12 +218,12 @@ function bindSettingsModalEvents(modal = getSettingsModal(), onClose, { storage,
   }
 
   function toggleSaveLink() {
-    storage.saveLink = saveLinkToggle.checked;
+    storage.setData({ localStorage: { saveLink: saveLinkToggle.checked } });
     localStorage.save();
   }
 
   function toggleSaveToken() {
-    storage.saveToken = saveTokenToggle.checked;
+    storage.setData({ localStorage: { saveToken: saveTokenToggle.checked } });
     localStorage.save();
   }
 
@@ -232,10 +232,10 @@ function bindSettingsModalEvents(modal = getSettingsModal(), onClose, { storage,
   document.addEventListener("click", handleOutsideClick, { signal });
   document.addEventListener("keydown", handleEscapeKey, { signal });
 
-  saveLinkToggle.checked = storage.saveLink;
+  saveLinkToggle.checked = storage.getData().localStorage.saveLink;
   saveLinkToggle.addEventListener("change", toggleSaveLink, { signal });
 
-  saveTokenToggle.checked = storage.saveToken;
+  saveTokenToggle.checked = storage.getData().localStorage.saveToken;
   saveTokenToggle.addEventListener("change", toggleSaveToken, { signal });
 
   return closeModal;

@@ -45,7 +45,7 @@ class SettingsController {
     const loader = generateLoader();
 
     try {
-      const token = this.#storage.token;
+      const token = this.#storage.getData().token;
       const tokenResult = token ? await this.#gitHubClient.setToken(token, { signal }) : { success: true };
       if (signal.aborted) return;
       const tokenState = getTokenStatusState(tokenResult, Boolean(token));

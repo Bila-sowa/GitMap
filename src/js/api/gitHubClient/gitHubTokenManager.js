@@ -29,7 +29,7 @@ class GitHubTokenManager {
 
     if (!token) {
       delete this.#headers.Authorization;
-      this.#storage.token = "";
+      this.#storage.setData({ token: "" });
       return { success: true };
     }
 
@@ -44,7 +44,7 @@ class GitHubTokenManager {
       return validation;
     }
 
-    this.#storage.token = token;
+    this.#storage.setData({ token });
     this.#headers.Authorization = `Bearer ${token}`;
     notifications.notify("The token has been successfully set", "success");
     return { success: true };

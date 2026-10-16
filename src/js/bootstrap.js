@@ -25,7 +25,7 @@ async function bootstrap() {
     localStorage.init();
 
     const { default: gitHubClient } = await import("./api/gitHubClient");
-    const tokenResult = storage.token ? await gitHubClient.setToken(storage.token) : { success: true };
+    const tokenResult = storage.getData().token ? await gitHubClient.setToken(storage.getData().token) : { success: true };
     const canvas = new CanvasController(dom.viewport, dom.canvas);
     const scale = new ScaleController(dom.scaleIncreaseButton, dom.scaleDisplay, dom.scaleDecreaseButton, canvas);
     const dropDown = new DropDown(dom.dropDownTrigger, dom.dropDownList, dom.dropDownLabel);
@@ -61,7 +61,7 @@ async function bootstrap() {
     };
     application = app;
 
-    if (storage.link && tokenResult.success) graph.render();
+    if (storage.getData().link && tokenResult.success) graph.render();
 
     return application;
   })().catch((error) => {

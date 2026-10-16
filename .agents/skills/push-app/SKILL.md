@@ -50,6 +50,7 @@ description: Prepare GitMap commits, conditionally update the application versio
     Update GitHubClient
 
     <60–120-word description of the actual change>
+
     - added: src/js/api/checkRateLimit.js
     - changed: src/js/api/gitHubClient.js
     - deleted: tests/obsolete.test.js

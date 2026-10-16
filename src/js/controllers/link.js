@@ -13,7 +13,7 @@ class LinkController {
   }
 
   init() {
-    this.#input.value = this.#storage.link || "";
+    this.#input.value = this.#storage.getData().link || "";
     this.#bindEvents();
     return this;
   }
@@ -43,8 +43,8 @@ class LinkController {
   }
 
   #setLink(value) {
-    this.#storage.link = value;
-    if (this.#storage.saveLink) this.#localStorage.save();
+    this.#storage.setData({ link: value });
+    if (this.#storage.getData().localStorage.saveLink) this.#localStorage.save();
     this.#graph.render();
   }
 

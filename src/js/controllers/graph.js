@@ -49,7 +49,7 @@ class GraphController {
   }
 
   async render() {
-    const link = this.#storage.link;
+    const link = this.#storage.getData().link;
     if (!link) return { success: false, error: "Missing repository URL" };
 
     const request = this.#startRequest();
@@ -84,7 +84,7 @@ class GraphController {
 
   async renderByBranch(branch) {
     const branchName = typeof branch === "string" ? branch.trim() : "";
-    const link = this.#storage.link;
+    const link = this.#storage.getData().link;
 
     if (!link || !branchName || !this.#data?.success || this.#link !== link) {
       return { success: false, error: "Repository data or branch name is missing" };
@@ -123,7 +123,7 @@ class GraphController {
   }
 
   refresh() {
-    if (this.#currentBranch && this.#link === this.#storage.link) {
+    if (this.#currentBranch && this.#link === this.#storage.getData().link) {
       return this.renderByBranch(this.#currentBranch);
     }
 
@@ -142,7 +142,7 @@ class GraphController {
   }
 
   #isCurrentRequest(requestId, link) {
-    return requestId === this.#requestId && link === this.#storage.link;
+    return requestId === this.#requestId && link === this.#storage.getData().link;
   }
 
   #getFilesData = async (sha, options = {}) => {
@@ -170,7 +170,7 @@ class GraphController {
 
     closeFullCommitModals();
     closeHoverCommitModals();
-    this.#graph.dataset.repoUrl = this.#storage.link;
+    this.#graph.dataset.repoUrl = this.#storage.getData().link;
     this.#graph.style.width = `${graphWidth}px`;
     this.#graph.style.height = `${graphHeight}px`;
 

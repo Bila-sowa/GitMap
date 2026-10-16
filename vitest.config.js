@@ -14,6 +14,7 @@ export default mergeConfig(
               "tests/api/config/mergeConfigs.test.js",
               "tests/utils/commitGraph.test.js",
               "tests/utils/formatter.test.js",
+              "tests/data/storage.test.js",
             ],
             setupFiles: ["./tests/vitest/setupLocal.js"],
           },

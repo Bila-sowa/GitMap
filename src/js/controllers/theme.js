@@ -15,7 +15,7 @@ class ThemeController {
   }
 
   init() {
-    this.#setTheme(this.#storage.theme || "dark-theme");
+    this.#setTheme(this.#storage.getData().theme || "dark-theme");
     this.#bindEvents();
     return this;
   }
@@ -31,7 +31,7 @@ class ThemeController {
 
     this.#body.classList.remove("dark-theme", "light-theme");
     this.#body.classList.add(validTheme);
-    this.#storage.theme = validTheme;
+    this.#storage.setData({ theme: validTheme });
 
     if (this.#themeColorMeta) {
       const themeColor = getComputedStyle(this.#body).getPropertyValue("--color-1").trim();
@@ -42,7 +42,7 @@ class ThemeController {
   }
 
   #changeTheme() {
-    const theme = this.#storage.theme === "dark-theme" ? "light-theme" : "dark-theme";
+    const theme = this.#storage.getData().theme === "dark-theme" ? "light-theme" : "dark-theme";
     this.#setTheme(theme);
   }
 
