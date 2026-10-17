@@ -15,26 +15,26 @@ import { TestConfig, ANY_VALID } from "../../tools/testTools";
  * @returns TestFeedback
  */
 export default async function test_3j3f8_Data() {
-    const config = new TestConfig(
-        {
-            file: "getGitHubData.js",
-            test: "test_3j3f8_Data",
-            name: "getRateLimitData",
-            type: "method",
-        },
-        {
-            data: {
-                limitPerNumber: ANY_VALID,
-                usedPerNumber: ANY_VALID,
-                usedPerPercent: ANY_VALID,
-            },
-            success: true,
-        },
-    );
+  const config = new TestConfig(
+    {
+      file: "getGitHubData.js",
+      test: "test_3j3f8_Data",
+      name: "getRateLimitData",
+      type: "method",
+    },
+    {
+      data: {
+        limitPerNumber: ANY_VALID,
+        usedPerNumber: ANY_VALID,
+        usedPerPercent: ANY_VALID,
+      },
+      success: true,
+    },
+  );
 
-    const client = new GitHubClient();
+  const client = new GitHubClient();
 
-    return config.run(async () => {
-        return await client.getRateLimitData();
-    });
+  return config.run(async () => {
+    return await client.getRateLimitData();
+  });
 }

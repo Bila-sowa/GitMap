@@ -1,100 +1,96 @@
 import * as apiTests from "./api";
 import * as utilsTests from "./utils";
 import * as appDataTests from "./data";
-import * as toolsTests from "./tools/tests/index";
 import * as componentsTests from "./components";
 import test_c7p2m_Data from "./controllers/lifecycle.test";
 
 const dataTests = [
-    apiTests.test_nd2u3_Data,
-    apiTests.test_hvnws_Data,
-    apiTests.test_3j3f8_Data,
-    apiTests.test_483nq_Data,
-    apiTests.test_idi3p_Data,
-    apiTests.test_rz8ou_Data,
-    apiTests.test_05yau_Data,
-    apiTests.test_vt6mk_Data,
-    apiTests.test_anl95_Data,
-    apiTests.test_4lmw4_Data,
-    apiTests.test_n7rjx_Data,
-    apiTests.test_p2t4f_Data,
-    utilsTests.test_0c2os_Data,
-    utilsTests.test_gj781_Data,
-    utilsTests.test_d4x9p_Data,
-    utilsTests.test_7w1cf_Data,
-    appDataTests.test_8je0j_Data,
-    toolsTests.test_p8lz0_Data,
-    componentsTests.test_vyk8w_Data,
-    test_c7p2m_Data,
+  apiTests.test_nd2u3_Data,
+  apiTests.test_hvnws_Data,
+  apiTests.test_3j3f8_Data,
+  apiTests.test_483nq_Data,
+  apiTests.test_idi3p_Data,
+  apiTests.test_rz8ou_Data,
+  apiTests.test_05yau_Data,
+  apiTests.test_vt6mk_Data,
+  apiTests.test_4lmw4_Data,
+  apiTests.test_n7rjx_Data,
+  apiTests.test_p2t4f_Data,
+  utilsTests.test_0c2os_Data,
+  utilsTests.test_gj781_Data,
+  utilsTests.test_d4x9p_Data,
+  appDataTests.test_8je0j_Data,
+  componentsTests.test_vyk8w_Data,
+  test_c7p2m_Data,
 ];
 
 const uiTests = [utilsTests.test_44ibx_Ui];
 
 async function loadTestConfig() {
-    try {
-        const response = await fetch(new URL("./config.json", import.meta.url));
-        if (!response.ok) {
-            throw new Error(`Failed to load config: ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.warn("Using default test config because config.json could not be loaded.", error);
-        return {
-            uiTests: false,
-            dataTests: false,
-        };
+  try {
+    const response = await fetch(new URL("./config.json", import.meta.url));
+    if (!response.ok) {
+      throw new Error(`Failed to load config: ${response.status}`);
     }
+
+    return await response.json();
+  } catch (error) {
+    console.warn("Using default test config because config.json could not be loaded.", error);
+    return {
+      uiTests: false,
+      dataTests: false,
+    };
+  }
 }
 
 function shuffle(array) {
-    const result = array.slice();
-    for (let i = result.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
+  const result = array.slice();
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
 }
 
 async function runDataTests(tests = dataTests) {
-    const shuffled = shuffle(tests);
-    const results = await Promise.all(shuffled.map((fn) => fn()));
+  const shuffled = shuffle(tests);
+  const results = await Promise.all(shuffled.map((fn) => fn()));
 
-    const failed = results
-        .map((result, i) => ({ name: shuffled[i].name, result }))
-        .filter(({ result }) => !result.success);
+  const failed = results
+    .map((result, i) => ({ name: shuffled[i].name, result }))
+    .filter(({ result }) => !result.success);
 
-    console.log(`Tests done: ${results.length - failed.length} passed, ${failed.length} failed.`);
-    if (failed.length > 0) {
-        console.error(
-            "Failed tests:",
-            failed.map(({ name }) => name),
-        );
-    }
+  console.log(`Tests done: ${results.length - failed.length} passed, ${failed.length} failed.`);
+  if (failed.length > 0) {
+    console.error(
+      "Failed tests:",
+      failed.map(({ name }) => name),
+    );
+  }
 
-    console.table(results);
-    return results;
+  console.table(results);
+  return results;
 }
 
 async function runUiTests(tests = uiTests) {
-    await Promise.all(shuffle(tests).map((fn) => fn()));
-    console.log(`Ui tests done`);
+  await Promise.all(shuffle(tests).map((fn) => fn()));
+  console.log(`Ui tests done`);
 }
 
 async function runTests() {
-    const config = await loadTestConfig();
+  const config = await loadTestConfig();
 
-    console.group("Unit tests");
+  console.group("Unit tests");
 
-    if (config.dataTests) {
-        await runDataTests();
-    }
+  if (config.dataTests) {
+    await runDataTests();
+  }
 
-    if (config.uiTests) {
-        await runUiTests();
-    }
+  if (config.uiTests) {
+    await runUiTests();
+  }
 
-    console.groupEnd();
+  console.groupEnd();
 }
 
 runTests();

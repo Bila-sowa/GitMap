@@ -1,96 +1,95 @@
 import styles from "./styles.module.scss";
 
 const tokenStatusDetails = {
-    checking: {
-        label: "Checking",
-        title: "Checking whether the GitHub token is valid.",
-    },
-    valid: {
-        label: "Active",
-        title: "The token is active, now your limit is 5000 requests per hour.",
-    },
-    invalid: {
-        label: "Invalid",
-        title: "The token was rejected by GitHub.",
-    },
-    unavailable: {
-        label: "Unavailable",
-        title: "GitHub token status could not be checked.",
-    },
-    "no-token": {
-        label: "No token",
-        title: "No GitHub token is configured, so the limit is 60 requests per hour.",
-    },
+  checking: {
+    label: "Checking",
+    title: "Checking whether the GitHub token is valid.",
+  },
+  valid: {
+    label: "Active",
+    title: "The token is active, now your limit is 5000 requests per hour.",
+  },
+  invalid: {
+    label: "Invalid",
+    title: "The token was rejected by GitHub.",
+  },
+  unavailable: {
+    label: "Unavailable",
+    title: "GitHub token status could not be checked.",
+  },
+  "no-token": {
+    label: "No token",
+    title: "No GitHub token is configured, so the limit is 60 requests per hour.",
+  },
 };
 
 function getTokenStatusState(tokenResult, hasToken) {
-    if (!hasToken) return "no-token";
-    if (tokenResult?.success) return "valid";
-    if (tokenResult?.devError?.status === 401) return "invalid";
+  if (!hasToken) return "no-token";
+  if (tokenResult?.success) return "valid";
+  if (tokenResult?.devError?.status === 401) return "invalid";
 
-    return "unavailable";
+  return "unavailable";
 }
 
 function getRateLimitData(rateLimitResponse) {
-    const rateLimit = rateLimitResponse?.data || {};
-    const limitPerNumber = Number.isFinite(rateLimit.limitPerNumber) ? rateLimit.limitPerNumber : 0;
-    const usedPerNumber = Number.isFinite(rateLimit.usedPerNumber) ? rateLimit.usedPerNumber : 0;
-    const usedPerPercent = Number.isFinite(rateLimit.usedPerPercent)
-        ? Math.min(Math.max(rateLimit.usedPerPercent, 0), 100)
-        : 0;
+  const rateLimit = rateLimitResponse?.data || {};
+  const limitPerNumber = Number.isFinite(rateLimit.limitPerNumber) ? rateLimit.limitPerNumber : 0;
+  const usedPerNumber = Number.isFinite(rateLimit.usedPerNumber) ? rateLimit.usedPerNumber : 0;
+  const usedPerPercent = Number.isFinite(rateLimit.usedPerPercent)
+    ? Math.min(Math.max(rateLimit.usedPerPercent, 0), 100)
+    : 0;
 
-    return { limitPerNumber, usedPerNumber, usedPerPercent };
+  return { limitPerNumber, usedPerNumber, usedPerPercent };
 }
 
 function renderTokenStatus(modal, tokenState) {
-    const status = modal.querySelector("#token-status");
-    const details = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable;
+  const status = modal.querySelector("#token-status");
+  const details = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable;
 
-    if (!status) return;
+  if (!status) return;
 
-    status.textContent = details.label;
-    status.title = details.title;
-    status.classList.toggle("active-color", tokenState === "valid");
-    status.classList.toggle("non-active-color", tokenState !== "valid");
-    status.setAttribute("aria-busy", String(tokenState === "checking"));
+  status.textContent = details.label;
+  status.title = details.title;
+  status.classList.toggle("active-color", tokenState === "valid");
+  status.classList.toggle("non-active-color", tokenState !== "valid");
+  status.setAttribute("aria-busy", String(tokenState === "checking"));
 }
 
 function renderRateLimitProgressBar(modal, rateLimitResponse) {
-    const progress = modal.querySelector("#settings-rest-api-limit-progress");
-    const bar = modal.querySelector("#settings-rest-api-limit-bar");
+  const progress = modal.querySelector("#settings-rest-api-limit-progress");
+  const bar = modal.querySelector("#settings-rest-api-limit-bar");
 
-    if (!progress || !bar) return;
+  if (!progress || !bar) return;
 
-    if (!rateLimitResponse?.success) {
-        const title = "Rate limit data is unavailable.";
+  if (!rateLimitResponse?.success) {
+    const title = "Rate limit data is unavailable.";
 
-        bar.style.width = "0%";
-        progress.title = title;
-        progress.setAttribute("aria-label", title);
-        progress.removeAttribute("aria-valuenow");
-        return;
-    }
-
-    const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse);
-    const title = `Used: ${usedPerNumber} / ${limitPerNumber}`;
-
-    bar.style.width = `${usedPerPercent}%`;
+    bar.style.width = "0%";
     progress.title = title;
     progress.setAttribute("aria-label", title);
-    progress.setAttribute("aria-valuenow", String(usedPerPercent));
+    progress.removeAttribute("aria-valuenow");
+    return;
+  }
+
+  const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse);
+  const title = `Used: ${usedPerNumber} / ${limitPerNumber}`;
+
+  bar.style.width = `${usedPerPercent}%`;
+  progress.title = title;
+  progress.setAttribute("aria-label", title);
+  progress.setAttribute("aria-valuenow", String(usedPerPercent));
 }
 
 const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails, token = "") => {
-    const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse);
-    const tokenStatus = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable;
-    const rateLimitAvailable = rateLimitResponse?.success;
+  const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse);
+  const tokenStatus = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable;
+  const rateLimitAvailable = rateLimitResponse?.success;
 
-    const notStableMessage =
-        "This version provides no guarantees regarding your security and the program's operability.";
+  const notStableMessage = "This version provides no guarantees regarding your security and the program's operability.";
 
-    const { version, versionIsStable } = versionDetails;
+  const { version, versionIsStable } = versionDetails;
 
-    return `
+  return `
         <div class="overlay">
             <div class="${styles.settings}" id="settings-content" role="dialog">
                 <div class="${styles["settings-header"]}">
@@ -102,7 +101,7 @@ const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails
                         <h3>GitHub</h3>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <label for="token-input">GitHub rest api token</label>
-                            <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${token}" placeholder="gpy_">
+                            <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${token}" placeholder="ghp_ or github_pat_">
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>GitHub Rest api token status:</span>
@@ -160,86 +159,86 @@ const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails
 };
 
 function getSettingsModal() {
-    return document.querySelector("#settings-content")?.closest(".overlay");
+  return document.querySelector("#settings-content")?.closest(".overlay");
 }
 
 function bindSettingsModalEvents(modal = getSettingsModal(), onClose, { storage, localStorage, gitHubClient } = {}) {
-    const modalContent = modal?.querySelector("#settings-content");
+  const modalContent = modal?.querySelector("#settings-content");
 
-    if (!modal || !modalContent) return;
+  if (!modal || !modalContent) return;
 
-    const controller = new AbortController();
-    const { signal } = controller;
+  const controller = new AbortController();
+  const { signal } = controller;
 
-    const closeButton = modal.querySelector("#close-settings-button");
-    const tokenInput = modal.querySelector("#token-input");
-    const saveLinkToggle = modal.querySelector("#save-link");
-    const saveTokenToggle = modal.querySelector("#save-token");
-    async function saveToken() {
-        const token = tokenInput.value.trim();
+  const closeButton = modal.querySelector("#close-settings-button");
+  const tokenInput = modal.querySelector("#token-input");
+  const saveLinkToggle = modal.querySelector("#save-link");
+  const saveTokenToggle = modal.querySelector("#save-token");
+  async function saveToken() {
+    const token = tokenInput.value.trim();
 
-        renderTokenStatus(modal, "checking");
+    renderTokenStatus(modal, "checking");
 
-        const result = await gitHubClient.setToken(token);
+    const result = await gitHubClient.setToken(token);
 
-        if (signal.aborted || result.cancelled) return;
+    if (signal.aborted || result.cancelled) return;
 
-        const tokenState = getTokenStatusState(result, Boolean(token));
-        renderTokenStatus(modal, tokenState);
+    const tokenState = getTokenStatusState(result, Boolean(token));
+    renderTokenStatus(modal, tokenState);
 
-        if (result.success && storage.saveToken) {
-            localStorage.save();
-        }
-
-        const rateLimitResponse = await gitHubClient.getRateLimitData({ signal });
-
-        if (!signal.aborted && !rateLimitResponse.cancelled) {
-            renderRateLimitProgressBar(modal, rateLimitResponse);
-        }
+    if (result.success && storage.getData().localStorage.saveToken) {
+      localStorage.save();
     }
 
-    function closeModal() {
-        if (signal.aborted) return;
+    const rateLimitResponse = await gitHubClient.getRateLimitData({ signal });
 
-        controller.abort();
-        modal.remove();
-        onClose?.();
+    if (!signal.aborted && !rateLimitResponse.cancelled) {
+      renderRateLimitProgressBar(modal, rateLimitResponse);
     }
+  }
 
-    function handleOutsideClick(e) {
-        if (e.target === modal) {
-            closeModal();
-        }
+  function closeModal() {
+    if (signal.aborted) return;
+
+    controller.abort();
+    modal.remove();
+    onClose?.();
+  }
+
+  function handleOutsideClick(e) {
+    if (e.target === modal) {
+      closeModal();
     }
+  }
 
-    function handleEscapeKey(e) {
-        if (e.code === "Escape") {
-            closeModal();
-        }
+  function handleEscapeKey(e) {
+    if (e.code === "Escape") {
+      closeModal();
     }
+  }
 
-    function toggleSaveLink() {
-        storage.saveLink = saveLinkToggle.checked;
-        localStorage.save();
-    }
+  function toggleSaveLink() {
+    storage.setData({ localStorage: { saveLink: saveLinkToggle.checked } });
+    localStorage.save();
+  }
 
-    function toggleSaveToken() {
-        storage.saveToken = saveTokenToggle.checked;
-        localStorage.save();
-    }
+  function toggleSaveToken() {
+    storage.setData({ localStorage: { saveToken: saveTokenToggle.checked } });
+    localStorage.save();
+  }
 
-    tokenInput.addEventListener("blur", saveToken, { signal });
-    closeButton.addEventListener("click", closeModal, { signal });
-    document.addEventListener("click", handleOutsideClick, { signal });
-    document.addEventListener("keydown", handleEscapeKey, { signal });
+  tokenInput.addEventListener("blur", saveToken, { signal });
+  closeButton.addEventListener("click", closeModal, { signal });
+  document.addEventListener("click", handleOutsideClick, { signal });
+  document.addEventListener("keydown", handleEscapeKey, { signal });
 
-    saveLinkToggle.checked = storage.saveLink;
-    saveLinkToggle.addEventListener("change", toggleSaveLink, { signal });
+  saveLinkToggle.checked = storage.getData().localStorage.saveLink;
+  saveLinkToggle.addEventListener("change", toggleSaveLink, { signal });
 
-    saveTokenToggle.checked = storage.saveToken;
-    saveTokenToggle.addEventListener("change", toggleSaveToken, { signal });
+  saveTokenToggle.checked = storage.getData().localStorage.saveToken;
+  saveTokenToggle.addEventListener("change", toggleSaveToken, { signal });
 
-    return closeModal;
+  return closeModal;
 }
 
 export { generateSettingsModalHTML, bindSettingsModalEvents, getTokenStatusState, renderRateLimitProgressBar };

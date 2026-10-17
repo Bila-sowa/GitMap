@@ -1,43 +1,43 @@
 :root {
-    --font-monospace:
-        "Mona Sans Mono VF", ui-monospace, sfmono-regular, "SF Mono", menlo, consolas, "Liberation Mono", monospace;
-    --font-sans-serif:
-        "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji";
-    --font-sans-serif-display:
-        "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji";
-    --font-system:
-        "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji";
-    --accent-color-1: #4f7c77;
-    --shadow-color-1: #4f7c77;
-    --info-color: #58a6ff;
-    --warning-color: #d29922;
-    --error-color: #f85149;
-    --success-color: #3fb950;
-    --additions-color: #3b82f6;
-    --deletions-color: #cc5049;
+  --font-monospace:
+    "Mona Sans Mono VF", ui-monospace, sfmono-regular, "SF Mono", menlo, consolas, "Liberation Mono", monospace;
+  --font-sans-serif:
+    "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --font-sans-serif-display:
+    "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --font-system:
+    "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --accent-color-1: #4f7c77;
+  --shadow-color-1: #4f7c77;
+  --info-color: #58a6ff;
+  --warning-color: #d29922;
+  --error-color: #f85149;
+  --success-color: #3fb950;
+  --additions-color: #3b82f6;
+  --deletions-color: #cc5049;
 }
 
 .dark-theme {
-    --color-1: #010409;
-    --color-2: #0d1117;
-    --color-3: #14181f;
-    --color-4: #212830;
-    --border-color-1: #3d4d40;
-    --hover-color-1: #373e4a;
-    --text-color-1: #e6edf3;
-    --text-color-2: #727478;
+  --color-1: #010409;
+  --color-2: #0d1117;
+  --color-3: #14181f;
+  --color-4: #212830;
+  --border-color-1: #3d4d40;
+  --hover-color-1: #373e4a;
+  --text-color-1: #e6edf3;
+  --text-color-2: #727478;
 }
 
 .light-theme {
-    --color-1: #fff;
-    --color-2: #f6f8fa;
-    --color-3: #eaeef2;
-    --color-4: #d0d7de;
-    --border-color-1: #d0d7de;
-    --hover-color-1: #dde3e8;
-    --text-color-1: #1f2328;
-    --text-color-2: #59636e;
+  --color-1: #fff;
+  --color-2: #f6f8fa;
+  --color-3: #eaeef2;
+  --color-4: #d0d7de;
+  --border-color-1: #d0d7de;
+  --hover-color-1: #dde3e8;
+  --text-color-1: #1f2328;
+  --text-color-2: #59636e;
 }
