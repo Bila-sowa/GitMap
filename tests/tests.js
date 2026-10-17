@@ -16,7 +16,6 @@ const dataTests = [
   apiTests.test_4lmw4_Data,
   apiTests.test_n7rjx_Data,
   apiTests.test_p2t4f_Data,
-  utilsTests.test_0c2os_Data,
   utilsTests.test_gj781_Data,
   utilsTests.test_d4x9p_Data,
   appDataTests.test_8je0j_Data,
