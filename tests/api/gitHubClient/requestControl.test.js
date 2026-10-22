@@ -1,63 +1,64 @@
+import { describe, test, expect, vi, afterEach } from "vitest";
 import RequestControl from "@/js/api/gitHubClient/requestControl";
-import { TestConfig } from "../../tools/testTools";
 
-/**
- * #### Description:
- *
- * Verifies that GitHub request control propagates an external abort, creates
- * an independent timeout abort, and cancels its timer during cleanup.
- *
- * #### Params:
- * - file: `requestControl.js`
- * - test: `test_4lmw4_Data`
- * - name: `RequestControl`
- * - type: `class`
- *
- * @returns {Promise<TestFeedback>} Test feedback for cancellation, timeout, and cleanup behavior.
- */
-export default function test_4lmw4_Data() {
-  const config = new TestConfig(
-    {
-      file: "requestControl.js",
-      test: "test_4lmw4_Data",
-      name: "RequestControl",
-      type: "class",
-    },
-    {
-      externalAbortPropagated: true,
-      externalAbortIsNotTimeout: true,
-      timeoutAbortTriggered: true,
-      timeoutStateRecorded: true,
-      cleanupPreventsTimeout: true,
-    },
-  );
+describe("RequestControl", () => {
+  const controls = [];
 
-  return config.run(async () => {
-    const externalController = new AbortController();
-    const externalRequest = new RequestControl(externalController.signal, 1000);
-    externalController.abort();
+  const createControl = (externalSignal, timeout) => {
+    const control = new RequestControl(externalSignal, timeout);
+    controls.push(control);
+    return control;
+  };
 
-    const externalAbortPropagated = externalRequest.signal.aborted;
-    const externalAbortIsNotTimeout = !externalRequest.didTimeout();
-    externalRequest.cleanup();
-
-    const timeoutRequest = new RequestControl(undefined, 10);
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    const timeoutAbortTriggered = timeoutRequest.signal.aborted;
-    const timeoutStateRecorded = timeoutRequest.didTimeout();
-    timeoutRequest.cleanup();
-
-    const completedRequest = new RequestControl(undefined, 10);
-    completedRequest.cleanup();
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    const cleanupPreventsTimeout = !completedRequest.signal.aborted;
-
-    return {
-      externalAbortPropagated,
-      externalAbortIsNotTimeout,
-      timeoutAbortTriggered,
-      timeoutStateRecorded,
-      cleanupPreventsTimeout,
-    };
+  afterEach(() => {
+    controls.splice(0).forEach((control) => control.cleanup());
+    vi.useRealTimers();
   });
-}
+
+  test("propagates an external abort without recording a timeout", () => {
+    const reason = new Error("Cancelled by caller");
+    const externalController = new AbortController();
+    const request = createControl(externalController.signal, 1000);
+
+    externalController.abort(reason);
+
+    const result = {
+      aborted: request.signal.aborted,
+      didTimeout: request.didTimeout(),
+      reason: request.signal.reason,
+    };
+    expect(result.aborted).toBe(true);
+    expect(result.didTimeout).toBe(false);
+    expect(result.reason).toBe(reason);
+  });
+
+  test("aborts and records a timeout after the timeout elapses", () => {
+    vi.useFakeTimers();
+    const request = createControl(undefined, 10);
+
+    vi.advanceTimersByTime(10);
+
+    const result = {
+      aborted: request.signal.aborted,
+      didTimeout: request.didTimeout(),
+      reasonName: request.signal.reason?.name,
+    };
+    expect(result.aborted).toBe(true);
+    expect(result.didTimeout).toBe(true);
+    expect(result.reasonName).toBe("TimeoutError");
+  });
+
+  test("cleanup prevents a pending timeout from aborting the signal", () => {
+    vi.useFakeTimers();
+    const request = createControl(undefined, 10);
+
+    request.cleanup();
+    vi.advanceTimersByTime(20);
+
+    const result = {
+      aborted: request.signal.aborted,
+      didTimeout: request.didTimeout(),
+    };
+    expect(result).toEqual({ aborted: false, didTimeout: false });
+  });
+});
