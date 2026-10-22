@@ -1,40 +1,31 @@
+import { describe, test, expect } from "vitest";
 import GitHubHttpApi from "@/js/api/gitHubClient/gitHubHttpApi";
-import { TestConfig } from "../../tools/testTools";
 
-/**
- * #### Description
- *
- * The test returns an array of HTTP errors for the user based on the specified patterns.
- *
- * #### Params
- * - file: `gitHubHttpApi.js`
- * - test: `test_483nq_Data`
- * - name: `getHttpErrorMessage`
- * - type: `method`
- *
- * @returns TestFeedback
- */
-export default async function test_483nq_Data() {
-  const httpController = new GitHubHttpApi();
-  const config = new TestConfig(
-    {
-      file: "httpController.js",
-      test: "test_483nq_Data",
-      name: "httpController",
-      type: "method",
-    },
-    [
-      "Bad Request (400): Unable to process request.",
-      "Unprocessable Entity (422): Validation failed or resource is locked.",
-      "Gateway Timeout (504): GitHub timed out waiting for upstream server.",
-      "GitHub API error (HTTP 402).",
-    ],
-    [400, 422, 504, 402],
-  );
+describe("getHttpErrorMessage", () => {
+  const gitHubHttpApi = new GitHubHttpApi();
 
-  return config.run(async (testData) => {
-    let result = [];
-    testData.map((error) => result.push(httpController.getHttpErrorMessage(error)));
-    return result;
+  test("handles the empty http code", () => {
+    const result = gitHubHttpApi.getHttpErrorMessage("");
+    expect(result).toBe(null);
   });
-}
+
+  test.each([
+    { code: 96, expected: null },
+    { code: 691, expected: null },
+    { code: "404", expected: null },
+    { code: 201.2, expected: null },
+  ])("handles uncorrect http code: ${code}", ({ code, expected }) => {
+    const result = gitHubHttpApi.getHttpErrorMessage(code);
+    expect(result).toBe(expected);
+  });
+
+  test("returns the user message for http status: 404", () => {
+    const result = gitHubHttpApi.getHttpErrorMessage(404);
+    expect(result).toBe("Not Found (404): Repository or resource not found.");
+  });
+
+  test("falls back to a generic message for an unmapped http status: 402", () => {
+    const result = gitHubHttpApi.getHttpErrorMessage(402);
+    expect(result).toBe("GitHub API error (HTTP 402).");
+  });
+});

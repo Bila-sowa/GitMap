@@ -26,7 +26,7 @@ class GitHubHttpApi {
       case 504:
         return "Gateway Timeout (504): GitHub timed out waiting for upstream server.";
       default:
-        return `GitHub API error (HTTP ${status}).`;
+        return Number.isInteger(status) && status >= 100 && status <= 599 ? `GitHub API error (HTTP ${status}).` : null;
     }
   }
 
@@ -47,7 +47,7 @@ class GitHubHttpApi {
     if (apiMessage) devDetails.push(`API Message: "${apiMessage}"`);
     if (url) devDetails.push(`URL: ${url}`);
 
-    const devMessage = devDetails.length ? `${userError} [${devDetails.join(", ")}]` : userError;
+    const devMessage = userError && devDetails.length ? `${userError} [${devDetails.join(", ")}]` : userError;
 
     return {
       error: userError,

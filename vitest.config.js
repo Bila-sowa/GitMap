@@ -16,6 +16,8 @@ export default mergeConfig(
               "tests/utils/formatter.test.js",
               "tests/data/storage.test.js",
               "tests/utils/escapeHTML.test.js",
+              "tests/api/gitHubClient/getHttpErrorMessage.test.js",
+              "tests/api/gitHubClient/createHttpError.test.js",
             ],
             setupFiles: ["./tests/vitest/setupLocal.js"],
           },
