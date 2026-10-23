@@ -1,7 +1,6 @@
 import * as apiTests from "./api";
 import * as utilsTests from "./utils";
 import * as appDataTests from "./data";
-import * as componentsTests from "./components";
 
 const dataTests = [
   apiTests.test_nd2u3_Data,
@@ -9,12 +8,10 @@ const dataTests = [
   apiTests.test_3j3f8_Data,
   apiTests.test_vt6mk_Data,
   utilsTests.test_gj781_Data,
-  utilsTests.test_d4x9p_Data,
   appDataTests.test_8je0j_Data,
-  componentsTests.test_vyk8w_Data,
 ];
 
-const uiTests = [utilsTests.test_44ibx_Ui];
+const uiTests = [];
 
 async function loadTestConfig() {
   try {

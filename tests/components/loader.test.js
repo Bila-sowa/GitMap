@@ -1,77 +1,79 @@
+// @vitest-environment jsdom
+import { describe, expect, test, beforeEach, afterEach, vi } from "vitest";
 import { generateLoader, removeLoader } from "@/js/components/Loader";
-import { TestConfig } from "../tools/testTools";
 
-/**
- * #### Description:
- *
- * Verifies that each loader operation owns its cleanup and that a loader is
- * removed automatically when its configured safety timeout expires.
- *
- * #### Params:
- * - file: `Loader/index.js`
- * - test: `test_vyk8w_Data`
- * - name: `generateLoader/removeLoader`
- * - type: `function`
- *
- * @returns {Promise<TestFeedback>} Test feedback for loader ownership and timeout cleanup.
- */
-export default function test_vyk8w_Data() {
-  const config = new TestConfig(
-    {
-      file: "Loader/index.js",
-      test: "test_vyk8w_Data",
-      name: "generateLoader/removeLoader",
-      type: "function",
-    },
-    {
-      replacedOldLoader: true,
-      oldCleanupPreservesNewLoader: true,
-      manualCleanup: true,
-      configuredTimeoutPersists: true,
-      timeoutCleanup: true,
-    },
-  );
+const createContainer = () => {
+  const container = document.createElement("div");
+  document.body.append(container);
+  return container;
+};
 
-  return config.run(async () => {
-    const container = document.createElement("div");
-    document.body.append(container);
-    const options = { showLoader: true, container };
-    const createdLoaders = [];
-
-    try {
-      const firstLoader = generateLoader(1000, options);
-      createdLoaders.push(firstLoader);
-      const secondLoader = generateLoader(1000, options);
-      createdLoaders.push(secondLoader);
-      const replacedOldLoader = !firstLoader.isConnected && secondLoader.isConnected;
-
-      removeLoader(firstLoader);
-      const oldCleanupPreservesNewLoader = secondLoader.isConnected;
-
-      removeLoader(secondLoader);
-      const manualCleanup = !secondLoader.isConnected;
-
-      const configuredTimeoutLoader = generateLoader(undefined, options);
-      createdLoaders.push(configuredTimeoutLoader);
-      await new Promise((resolve) => setTimeout(resolve, 20));
-      const configuredTimeoutPersists = configuredTimeoutLoader.isConnected;
-      removeLoader(configuredTimeoutLoader);
-
-      const timeoutLoader = generateLoader(10, options);
-      createdLoaders.push(timeoutLoader);
-      await new Promise((resolve) => setTimeout(resolve, 20));
-      const timeoutCleanup = !timeoutLoader.isConnected;
-
-      return {
-        replacedOldLoader,
-        oldCleanupPreservesNewLoader,
-        manualCleanup,
-        configuredTimeoutPersists,
-        timeoutCleanup,
-      };
-    } finally {
-      createdLoaders.filter(Boolean).forEach(removeLoader);
-      container.remove();
-    }
+describe("Loader", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
   });
-}
+
+  afterEach(() => {
+    removeLoader(undefined, document.body);
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    document.body.innerHTML = "";
+  });
+
+  test("replaces an existing loader when a new one is generated", () => {
+    const container = createContainer();
+    const firstLoader = generateLoader(1000, { showLoader: true, container });
+
+    const secondLoader = generateLoader(1000, { showLoader: true, container });
+
+    expect(firstLoader.isConnected).toBe(false);
+    expect(secondLoader.isConnected).toBe(true);
+  });
+
+  test("removing the previous loader keeps the replacement", () => {
+    const container = createContainer();
+    const firstLoader = generateLoader(1000, { showLoader: true, container });
+    const secondLoader = generateLoader(1000, { showLoader: true, container });
+
+    removeLoader(firstLoader);
+
+    expect(firstLoader.isConnected).toBe(false);
+    expect(secondLoader.isConnected).toBe(true);
+  });
+
+  test("removes a loader manually", () => {
+    const container = createContainer();
+    const loader = generateLoader(1000, { showLoader: true, container });
+
+    removeLoader(loader);
+
+    expect(loader.isConnected).toBe(false);
+  });
+
+  test("does not run the default cleanup timeout after 20 milliseconds", () => {
+    const container = createContainer();
+    const loader = generateLoader(undefined, { showLoader: true, container });
+
+    vi.advanceTimersByTime(20);
+
+    expect(loader.isConnected).toBe(true);
+  });
+
+  test("removes a loader when its timeout expires", () => {
+    const container = createContainer();
+    const loader = generateLoader(10, { showLoader: true, container });
+
+    vi.advanceTimersByTime(10);
+
+    expect(loader.isConnected).toBe(false);
+  });
+
+  test("does not create a loader when loaders are disabled", () => {
+    const container = createContainer();
+
+    const result = generateLoader(1000, { showLoader: false, container });
+
+    expect(result).toBeUndefined();
+    expect(container.querySelector(".loader")).toBeNull();
+  });
+});
