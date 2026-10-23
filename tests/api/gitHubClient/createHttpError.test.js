@@ -1,4 +1,4 @@
-import { afterEach, describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, afterEach } from "vitest";
 import GitHubHttpApi from "@/js/api/gitHubClient/gitHubHttpApi";
 
 describe("createHttpError", () => {

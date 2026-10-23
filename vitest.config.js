@@ -19,6 +19,8 @@ export default mergeConfig(
               "tests/api/gitHubClient/getHttpErrorMessage.test.js",
               "tests/api/gitHubClient/createHttpError.test.js",
               "tests/api/gitHubClient/requestControl.test.js",
+              "tests/api/gitHubClient/gitHubTransport.test.js",
+              "tests/api/gitHubClient/setToken.test.js",
             ],
             setupFiles: ["./tests/vitest/setupLocal.js"],
           },
