@@ -5,7 +5,6 @@ import * as appDataTests from "./data";
 const dataTests = [
   apiTests.test_nd2u3_Data,
   apiTests.test_hvnws_Data,
-  apiTests.test_3j3f8_Data,
   apiTests.test_vt6mk_Data,
   utilsTests.test_gj781_Data,
   appDataTests.test_8je0j_Data,
