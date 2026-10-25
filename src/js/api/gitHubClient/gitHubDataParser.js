@@ -1,5 +1,6 @@
 import formatter from "@/js/utils/formatter";
-import { escapeHTML, isNonEmptyString, isRecord, isValidDate } from "@/js/utils/utils";
+import { isNonEmptyString, isRecord, isValidDate } from "@/js/utils/matchers";
+import { escapeHTML } from "@/js/utils/utils";
 
 class GitHubDataParser {
   #createInvalidDataResult(method, rawResponse) {

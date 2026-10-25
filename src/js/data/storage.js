@@ -1,3 +1,5 @@
+import { isPlainObject } from "../utils/matchers";
+
 class Storage {
   #link = "";
   #theme = "dark-theme";
@@ -17,7 +19,7 @@ class Storage {
   }
 
   setData(data = {}) {
-    if (data === null || typeof data !== "object" || Array.isArray(data)) {
+    if (!isPlainObject(data)) {
       throw new TypeError("setData: expected a plain object");
     }
 
@@ -33,12 +35,7 @@ class Storage {
         throw new TypeError(`setData: token must be a string, got ${typeof data.token}`);
       }
 
-      const trimmedToken = data.token.trim();
-
-      if (trimmedToken !== "" && !trimmedToken.startsWith("ghp_") && !trimmedToken.startsWith("github_pat_")) {
-        throw new SyntaxError('setData: token must start with "ghp_" or "github_pat_"');
-      }
-      this.#token = trimmedToken;
+      this.#token = data.token.trim();
     }
 
     if (data.localStorage !== undefined) {
@@ -63,10 +60,11 @@ class Storage {
     }
 
     if (data.theme !== undefined) {
-      const isValid = data.theme === "light-theme" || data.theme === "dark-theme";
-      this.#theme = isValid ? data.theme : "dark-theme";
+      const theme = typeof data.theme === "string" ? data.theme.trim() : data.theme;
+      const isValid = theme === "light-theme" || theme === "dark-theme";
+      this.#theme = isValid ? theme : "dark-theme";
       if (!isValid) {
-        throw new TypeError(`setData: invalid theme "${data.theme}", expected "light-theme" or "dark-theme"`);
+        throw new TypeError(`setData: invalid theme "${theme}", expected "light-theme" or "dark-theme"`);
       }
     }
   }

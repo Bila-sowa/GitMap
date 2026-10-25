@@ -1,122 +1,171 @@
 import { describe, test, expect } from "vitest";
 import { Storage } from "@/js/data/storage";
 
+const DEFAULT_DATA = {
+  link: "",
+  theme: "dark-theme",
+  token: "",
+  localStorage: {
+    saveLink: false,
+    saveToken: false,
+  },
+};
+
+class Settings {}
+
 describe("Storage", () => {
-  test("checks the initial data", () => {
+  test("returns default settings and detached snapshots", () => {
     const storage = new Storage();
-    const result = storage.getData();
+    const first = storage.getData();
 
-    expect(result).toEqual({
-      link: "",
-      theme: "dark-theme",
-      token: "",
-      localStorage: {
-        saveLink: false,
-        saveToken: false,
-      },
+    expect(first).toStrictEqual(DEFAULT_DATA);
+
+    first.link = "https://github.com/example/project";
+    first.localStorage.saveLink = true;
+
+    const second = storage.getData();
+
+    expect(second).toStrictEqual(DEFAULT_DATA);
+    expect(first).not.toBe(second);
+  });
+
+  test.each([
+    { label: "null", update: null },
+    { label: "an array", update: [] },
+    { label: "a string", update: "link" },
+    { label: "a number", update: 42 },
+    { label: "a boolean", update: true },
+    { label: "a function", update: () => {} },
+    { label: "a non-string link", update: { link: 42 } },
+    { label: "a non-string token", update: { token: null } },
+    { label: "a non-string theme", update: { theme: {} } },
+    { label: "a non-object localStorage", update: { localStorage: null } },
+    { label: "an array localStorage", update: { localStorage: [] } },
+    { label: "a non-boolean saveLink", update: { localStorage: { saveLink: "true" } } },
+    { label: "a non-boolean saveToken", update: { localStorage: { saveToken: 1 } } },
+  ])("rejects $label as an invalid update", ({ update }) => {
+    const storage = new Storage();
+
+    const result = () => storage.setData(update);
+
+    expect(result).toThrow(TypeError);
+    expect(storage.getData()).toStrictEqual(DEFAULT_DATA);
+  });
+
+  test("trims link and token values and clears empty strings", () => {
+    const storage = new Storage();
+
+    storage.setData({
+      link: "  https://github.com/example/project  ",
+      token: "  ghp_abc  ",
     });
+
+    const trimmed = storage.getData();
+
+    expect(trimmed.link).toBe("https://github.com/example/project");
+    expect(trimmed.token).toBe("ghp_abc");
+
+    storage.setData({ link: "   ", token: "   " });
+
+    const cleared = storage.getData();
+
+    expect(cleared.link).toBe("");
+    expect(cleared.token).toBe("");
   });
 
-  test("validates and sets the token", () => {
+  test("updates localStorage flags independently", () => {
     const storage = new Storage();
 
-    const setNonStringToken = () => storage.setData({ token: 12345 });
-    expect(setNonStringToken).toThrow(TypeError);
+    storage.setData({ localStorage: { saveLink: true } });
+    const afterSaveLink = storage.getData().localStorage;
 
-    const setInvalidPrefixToken = () => storage.setData({ token: "invalid_token_prefix" });
-    expect(setInvalidPrefixToken).toThrow(SyntaxError);
+    expect(afterSaveLink).toStrictEqual({ saveLink: true, saveToken: false });
 
-    storage.setData({ token: "ghp_classicToken123" });
-    const classicResult = storage.getData().token;
-    expect(classicResult).toBe("ghp_classicToken123");
+    storage.setData({ localStorage: { saveToken: true } });
+    const afterSaveToken = storage.getData().localStorage;
 
-    storage.setData({ token: "github_pat_fineGrainedToken456" });
-    const fineGrainedResult = storage.getData().token;
-    expect(fineGrainedResult).toBe("github_pat_fineGrainedToken456");
+    expect(afterSaveToken).toStrictEqual({ saveLink: true, saveToken: true });
 
-    storage.setData({ token: "" });
-    const emptyResult = storage.getData().token;
-    expect(emptyResult).toBe("");
+    storage.setData({ localStorage: { saveLink: false } });
+    const afterDisable = storage.getData().localStorage;
 
-    storage.setData({ token: "   " });
-    const trimmedEmptyResult = storage.getData().token;
-    expect(trimmedEmptyResult).toBe("");
+    expect(afterDisable).toStrictEqual({ saveLink: false, saveToken: true });
+
+    storage.setData({ localStorage: {} });
+    const afterEmptyUpdate = storage.getData().localStorage;
+
+    expect(afterEmptyUpdate).toStrictEqual({ saveLink: false, saveToken: true });
   });
 
-  test("sets the invalid data types", () => {
+  test("applies valid fields before a later field fails", () => {
     const storage = new Storage();
 
-    const setInvalidLink = () => storage.setData({ link: 123 });
-    expect(setInvalidLink).toThrow(TypeError);
+    const localStorageResult = () => storage.setData({ localStorage: { saveLink: true, saveToken: "yes" } });
 
-    const setInvalidSaveLink = () => storage.setData({ localStorage: { saveLink: "none" } });
-    expect(setInvalidSaveLink).toThrow(TypeError);
+    expect(localStorageResult).toThrow(TypeError);
+    expect(storage.getData().localStorage).toStrictEqual({ saveLink: true, saveToken: false });
 
-    const setInvalidTheme = () => storage.setData({ token: "", localStorage: { saveToken: true }, theme: "bad" });
-    expect(setInvalidTheme).toThrow(TypeError);
+    const themeResult = () =>
+      storage.setData({ token: "  ghp_next  ", localStorage: { saveToken: true }, theme: "unknown" });
+
+    expect(themeResult).toThrow(TypeError);
 
     const result = storage.getData();
+
+    expect(result.token).toBe("ghp_next");
+    expect(result.localStorage).toStrictEqual({ saveLink: true, saveToken: true });
     expect(result.theme).toBe("dark-theme");
-    expect(result.token).toBe("");
-    expect(result.localStorage.saveToken).toBe(true);
   });
 
-  test("sets the valid data", () => {
+  test("applies a complete settings update in one call", () => {
     const storage = new Storage();
 
     storage.setData({
-      link: "git@github.com:Bila-sowa/GitMap.git",
+      link: "  https://github.com/example/project  ",
+      token: "  ghp_completeToken  ",
       theme: "light-theme",
-      localStorage: {
-        saveToken: false,
-      },
+      localStorage: { saveLink: true, saveToken: true },
     });
 
     const result = storage.getData();
-    expect(result).toEqual({
-      link: "git@github.com:Bila-sowa/GitMap.git",
+
+    expect(result).toStrictEqual({
+      link: "https://github.com/example/project",
       theme: "light-theme",
-      token: "",
-      localStorage: {
-        saveLink: false,
-        saveToken: false,
-      },
+      token: "ghp_completeToken",
+      localStorage: { saveLink: true, saveToken: true },
     });
   });
 
-  test("changes the data", () => {
-    const storage = new Storage();
-
-    storage.setData({ link: "git@github.com:Bila-sowa/GitMap.git" });
-    storage.setData({ link: "https://github.com/Bila-sowa/GitMap.git" });
-
-    const result = storage.getData().link;
-    expect(result).toBe("https://github.com/Bila-sowa/GitMap.git");
-  });
-
-  test("resets the storage", () => {
+  test("resets every setting after changes and failed updates", () => {
     const storage = new Storage();
 
     storage.setData({
-      token: "ghp_012",
-      link: "",
-      localStorage: {
-        saveLink: true,
-        saveToken: false,
-      },
+      link: "https://github.com/example/project",
+      token: "ghp_token",
+      theme: "light-theme",
+      localStorage: { saveLink: true, saveToken: true },
     });
+
+    const result = () => storage.setData({ token: "  ghp_next  ", theme: "unknown" });
+
+    expect(result).toThrow(TypeError);
 
     storage.reset();
 
-    const result = storage.getData();
-    expect(result).toEqual({
-      link: "",
-      theme: "dark-theme",
-      token: "",
-      localStorage: {
-        saveLink: false,
-        saveToken: false,
-      },
-    });
+    expect(storage.getData()).toStrictEqual(DEFAULT_DATA);
+  });
+
+  test.each([
+    { label: "a Date", update: new Date() },
+    { label: "a Map", update: new Map() },
+    { label: "a class instance", update: new Settings() },
+  ])("rejects $label as an update payload", ({ update }) => {
+    const storage = new Storage();
+
+    const result = () => storage.setData(update);
+
+    expect(result).toThrow(TypeError);
+    expect(storage.getData()).toStrictEqual(DEFAULT_DATA);
   });
 });
