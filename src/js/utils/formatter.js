@@ -1,26 +1,38 @@
 class Formatter {
   getCleanRepoUrl(repoUrl) {
-    return repoUrl?.replace(/\.git$/, "").replace(/\/$/, "");
+    if (!repoUrl || typeof repoUrl !== "string") return "";
+    return repoUrl.replace(/\.git\/?$/, "").replace(/\/$/, "");
   }
 
   getFormattedTitle(commitName) {
-    return commitName?.split("\n").slice(0, 1).join("\n");
+    if (!commitName || typeof commitName !== "string") return "";
+    return commitName.split("\n").slice(0, 1).join("\n");
   }
 
   getFormattedDescription(commitName) {
-    return commitName?.split("\n").slice(1).join("\n");
+    if (!commitName || typeof commitName !== "string") return "";
+    const parts = commitName.split("\n");
+    if (parts.length <= 1) return "";
+    return parts.slice(1).join("\n");
   }
 
   getDateInLocaleString(date, locales, options) {
-    return new Date(date).toLocaleString(locales, options);
+    if (!date) return "Invalid Date";
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) return "Invalid Date";
+    return parsedDate.toLocaleString(locales, options);
   }
 
   getFormattedDate(date, locales, options) {
-    return new Intl.DateTimeFormat(locales, options).format(new Date(date));
+    if (!date) return "Invalid Date";
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) return "Invalid Date";
+    return new Intl.DateTimeFormat(locales, options).format(parsedDate);
   }
 
   getShortHash(hash) {
-    return hash?.slice(0, 7);
+    if (!hash || typeof hash !== "string") return "";
+    return hash.slice(0, 7);
   }
 
   getFormattedExtension(fileName) {
@@ -35,7 +47,8 @@ class Formatter {
   }
 
   getShortStatus(fileStatus) {
-    return fileStatus?.slice(0, 1).toUpperCase();
+    if (!fileStatus || typeof fileStatus !== "string") return "";
+    return fileStatus.slice(0, 1).toUpperCase();
   }
 }
 
