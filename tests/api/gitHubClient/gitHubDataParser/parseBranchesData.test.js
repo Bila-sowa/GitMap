@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import GitHubDataParser from "@/js/api/gitHubClient/gitHubDataParser";
-import { createBranch } from "../../../fixtures/github/dataParser";
-import { expectInvalidParserResult } from "../../../vitest/expectInvalidParserResult";
+import { createBranch } from "#/fixtures/github/dataParser";
+import { expectInvalidParserResult } from "#/vitest/expectInvalidParserResult";
 
 describe("parseBranchesData", () => {
   const parser = new GitHubDataParser();

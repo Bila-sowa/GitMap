@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import GitHubDataParser from "@/js/api/gitHubClient/gitHubDataParser";
-import { createFile } from "../../../fixtures/github/dataParser";
-import { expectInvalidParserResult } from "../../../vitest/expectInvalidParserResult";
+import { createFile } from "#/fixtures/github/dataParser";
+import { expectInvalidParserResult } from "#/vitest/expectInvalidParserResult";
 
 const createFiles = (count) =>
   Array.from({ length: count }, (_, index) => createFile({ filename: `src/file-${index}.js` }));

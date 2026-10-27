@@ -1,17 +1,9 @@
 import { describe, test, expect, vi, afterEach } from "vitest";
 import { GitHubClient } from "@/js/api/gitHubClient";
 import notifications from "@/js/utils/notificationManager";
+import { TEST_REPO_URL, getHttpErrorStatus } from "#/fixtures/github/gitHubClient";
 
-const TEST_REPO_URL = "https://github.com/Bila-sowa/GitMap";
 const TEST_BRANCH_NAME = "main";
-const HTTP_ERROR_MIN = 400;
-const HTTP_ERROR_MAX = 599;
-
-const getHttpErrorStatus = (result) => {
-  const status = result.devError?.status;
-
-  return Number.isInteger(status) && status >= HTTP_ERROR_MIN && status <= HTTP_ERROR_MAX ? status : null;
-};
 
 describe("getDataByBranch (live GitHub API)", () => {
   afterEach(() => {

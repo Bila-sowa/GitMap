@@ -1,35 +1,11 @@
 import { describe, test, expect, vi, afterEach, beforeEach } from "vitest";
 import { GitHubClient } from "@/js/api/gitHubClient";
 import notifications from "@/js/utils/notificationManager";
-import { createFile } from "../../../../fixtures/github/dataParser";
+import { createFile } from "#/fixtures/github/dataParser";
+import { TEST_REPO_URL, PINNED_COMMIT_SHA, createResponse, useFetch } from "#/fixtures/github/gitHubClient";
 
-const TEST_REPO_URL = "https://github.com/Bila-sowa/GitMap";
-const TEST_COMMIT_SHA = "46f5cd270ddda0267790caf4fe48ec8895149ec6";
+const TEST_COMMIT_SHA = PINNED_COMMIT_SHA;
 const COMMIT_URL = `https://api.github.com/repos/Bila-sowa/GitMap/commits/${TEST_COMMIT_SHA}`;
-
-const createResponse = ({ status = 200, body = {}, url = COMMIT_URL } = {}) => ({
-  ok: status >= 200 && status < 300,
-  status,
-  url,
-  headers: new Headers(),
-  json: async () => body,
-});
-
-const useFetch = (response) => {
-  const requests = [];
-  const fetcher = async (url) => {
-    requests.push(url);
-
-    if (url !== COMMIT_URL) {
-      throw new Error(`Unexpected request: ${url}`);
-    }
-
-    return response;
-  };
-
-  vi.stubGlobal("fetch", fetcher);
-  return requests;
-};
 
 const createFiles = (count) =>
   Array.from({ length: count }, (_, index) => createFile({ filename: `src/file-${index}.js` }));
@@ -48,7 +24,7 @@ describe("getCommitFiles", () => {
       createFile({ filename: "src/js/<app>.js", status: "modified", additions: 12, deletions: 3 }),
       createFile({ filename: "assets/README", status: "added", additions: 5, deletions: 0 }),
     ];
-    const requests = useFetch(createResponse({ body: { files: rawFiles } }));
+    const requests = useFetch(createResponse({ body: { files: rawFiles }, url: COMMIT_URL }), COMMIT_URL);
     const client = new GitHubClient();
 
     const result = await client.getCommitFiles(TEST_REPO_URL, TEST_COMMIT_SHA);
@@ -80,7 +56,7 @@ describe("getCommitFiles", () => {
   });
 
   test("marks the result as truncated when commit contains 300 files", async () => {
-    useFetch(createResponse({ body: { files: createFiles(300) } }));
+    useFetch(createResponse({ body: { files: createFiles(300) }, url: COMMIT_URL }), COMMIT_URL);
     const client = new GitHubClient();
 
     const result = await client.getCommitFiles(TEST_REPO_URL, TEST_COMMIT_SHA);
@@ -118,7 +94,10 @@ describe("getCommitFiles", () => {
   });
 
   test("handles HTTP error responses from GitHub API", async () => {
-    useFetch(createResponse({ status: 404, body: { message: "No commit found for SHA" } }));
+    useFetch(
+      createResponse({ status: 404, body: { message: "No commit found for SHA" }, url: COMMIT_URL }),
+      COMMIT_URL,
+    );
     const client = new GitHubClient();
     const userError = "Not Found (404): Repository or resource not found.";
 

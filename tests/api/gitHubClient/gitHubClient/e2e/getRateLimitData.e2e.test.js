@@ -1,16 +1,9 @@
 import { describe, test, expect, vi, afterEach } from "vitest";
 import { GitHubClient } from "@/js/api/gitHubClient";
 import notifications from "@/js/utils/notificationManager";
+import { getHttpErrorStatus } from "#/fixtures/github/gitHubClient";
 
 const EMPTY_RATE_LIMIT_DATA = { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 };
-const HTTP_ERROR_MIN = 400;
-const HTTP_ERROR_MAX = 599;
-
-const getHttpErrorStatus = (result) => {
-  const status = result.devError?.status;
-
-  return Number.isInteger(status) && status >= HTTP_ERROR_MIN && status <= HTTP_ERROR_MAX ? status : null;
-};
 
 describe("getRateLimitData (live GitHub API)", () => {
   afterEach(() => {

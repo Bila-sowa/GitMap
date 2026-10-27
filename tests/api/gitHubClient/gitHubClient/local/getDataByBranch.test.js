@@ -2,35 +2,11 @@ import { describe, test, expect, vi, afterEach, beforeEach } from "vitest";
 import { GitHubClient } from "@/js/api/gitHubClient";
 import notifications from "@/js/utils/notificationManager";
 import storage from "@/js/data/storage";
-import { createCommit } from "../../../../fixtures/github/dataParser";
+import { createCommit } from "#/fixtures/github/dataParser";
+import { TEST_REPO_URL, createResponse, useFetch } from "#/fixtures/github/gitHubClient";
 
-const TEST_REPO_URL = "https://github.com/Bila-sowa/GitMap";
 const TEST_BRANCH_NAME = "main";
 const COMMITS_URL = "https://api.github.com/repos/Bila-sowa/GitMap/commits?sha=main";
-
-const createResponse = ({ status = 200, body = [], url = COMMITS_URL } = {}) => ({
-  ok: status >= 200 && status < 300,
-  status,
-  url,
-  headers: new Headers(),
-  json: async () => body,
-});
-
-const useFetch = (response, expectedUrl = COMMITS_URL) => {
-  const requests = [];
-  const fetcher = async (url) => {
-    requests.push(url);
-
-    if (url !== expectedUrl) {
-      throw new Error(`Unexpected request: ${url}`);
-    }
-
-    return response;
-  };
-
-  vi.stubGlobal("fetch", fetcher);
-  return requests;
-};
 
 describe("getDataByBranch", () => {
   beforeEach(() => {
@@ -45,7 +21,7 @@ describe("getDataByBranch", () => {
 
   test("normalizes commits for a valid repository URL and branch name", async () => {
     const rawCommits = [createCommit()];
-    const requests = useFetch(createResponse({ body: rawCommits }));
+    const requests = useFetch(createResponse({ body: rawCommits, url: COMMITS_URL }), COMMITS_URL);
     const client = new GitHubClient();
 
     const result = await client.getDataByBranch(TEST_BRANCH_NAME, TEST_REPO_URL);
@@ -88,7 +64,7 @@ describe("getDataByBranch", () => {
 
   test("falls back to repository link stored in storage when url is omitted", async () => {
     storage.setData({ link: TEST_REPO_URL });
-    useFetch(createResponse({ body: [createCommit()] }));
+    useFetch(createResponse({ body: [createCommit()], url: COMMITS_URL }), COMMITS_URL);
     const client = new GitHubClient();
 
     const result = await client.getDataByBranch(TEST_BRANCH_NAME);
@@ -127,7 +103,7 @@ describe("getDataByBranch", () => {
   });
 
   test("handles HTTP error responses from GitHub API", async () => {
-    useFetch(createResponse({ status: 404, body: { message: "Branch not found" } }));
+    useFetch(createResponse({ status: 404, body: { message: "Branch not found" }, url: COMMITS_URL }), COMMITS_URL);
     const client = new GitHubClient();
     const userError = "Not Found (404): Repository or resource not found.";
 
@@ -147,7 +123,7 @@ describe("getDataByBranch", () => {
 
   test("handles parser failure for invalid commit payloads", async () => {
     const invalidCommit = createCommit({ sha: "" });
-    useFetch(createResponse({ body: [invalidCommit] }));
+    useFetch(createResponse({ body: [invalidCommit], url: COMMITS_URL }), COMMITS_URL);
     const client = new GitHubClient();
 
     const result = await client.getDataByBranch(TEST_BRANCH_NAME, TEST_REPO_URL);

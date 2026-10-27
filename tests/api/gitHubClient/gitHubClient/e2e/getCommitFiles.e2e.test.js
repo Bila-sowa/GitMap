@@ -1,17 +1,7 @@
 import { describe, test, expect, vi, afterEach } from "vitest";
 import { GitHubClient } from "@/js/api/gitHubClient";
 import notifications from "@/js/utils/notificationManager";
-
-const TEST_REPO_URL = "https://github.com/Bila-sowa/GitMap";
-const PINNED_COMMIT_SHA = "46f5cd270ddda0267790caf4fe48ec8895149ec6";
-const HTTP_ERROR_MIN = 400;
-const HTTP_ERROR_MAX = 599;
-
-const getHttpErrorStatus = (result) => {
-  const status = result.devError?.status;
-
-  return Number.isInteger(status) && status >= HTTP_ERROR_MIN && status <= HTTP_ERROR_MAX ? status : null;
-};
+import { TEST_REPO_URL, PINNED_COMMIT_SHA, getHttpErrorStatus } from "#/fixtures/github/gitHubClient";
 
 describe("getCommitFiles (live GitHub API)", () => {
   afterEach(() => {
