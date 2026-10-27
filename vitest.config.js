@@ -25,6 +25,7 @@ export default mergeConfig(
               "tests/api/gitHubClient/gitHubTransport/gitHubTransport.test.js",
               "tests/api/gitHubClient/gitHubClient/local/setToken.test.js",
               "tests/api/gitHubClient/gitHubClient/local/getRateLimitData.test.js",
+              "tests/api/gitHubClient/gitHubClient/local/getCommitFiles.test.js",
               "tests/api/gitHubClient/gitHubDataParser/parseBranchesData.test.js",
               "tests/api/gitHubClient/gitHubDataParser/parseCommitsData.test.js",
               "tests/api/gitHubClient/gitHubDataParser/parseRepoData.test.js",
@@ -37,7 +38,10 @@ export default mergeConfig(
           test: {
             name: "e2e",
             environment: "node",
-            include: ["tests/api/gitHubClient/gitHubClient/e2e/getRateLimitData.e2e.test.js"],
+            include: [
+              "tests/api/gitHubClient/gitHubClient/e2e/getRateLimitData.e2e.test.js",
+              "tests/api/gitHubClient/gitHubClient/e2e/getCommitFiles.e2e.test.js",
+            ],
           },
         },
       ],
