@@ -4,41 +4,41 @@ import styles from "./styles.module.scss";
 import gitHubAvatarFallbackSrc from "@/assets/gitHubAvatarFallback.png";
 
 const closeHoverCommitModals = () => {
-    [...document.querySelectorAll(".hover-commit-modal")].forEach((modal) => {
-        document.querySelectorAll(`[aria-describedby~="${modal.id}"]`).forEach((trigger) => {
-            const describedBy = trigger
-                .getAttribute("aria-describedby")
-                .split(/\s+/)
-                .filter((id) => id !== modal.id);
+  [...document.querySelectorAll(".hover-commit-modal")].forEach((modal) => {
+    document.querySelectorAll(`[aria-describedby~="${modal.id}"]`).forEach((trigger) => {
+      const describedBy = trigger
+        .getAttribute("aria-describedby")
+        .split(/\s+/)
+        .filter((id) => id !== modal.id);
 
-            if (describedBy.length) {
-                trigger.setAttribute("aria-describedby", describedBy.join(" "));
-            } else {
-                trigger.removeAttribute("aria-describedby");
-            }
-        });
-
-        stopModalPositioning(modal);
-        modal.remove();
+      if (describedBy.length) {
+        trigger.setAttribute("aria-describedby", describedBy.join(" "));
+      } else {
+        trigger.removeAttribute("aria-describedby");
+      }
     });
+
+    stopModalPositioning(modal);
+    modal.remove();
+  });
 };
 
 const generateHoverCommitModalHTML = (commitData) => {
-    if (!commitData) return;
+  if (!commitData) return;
 
-    const {
-        title,
-        author: { name: authorName, avatar: authorAvatar, date: authorDate },
-        hash,
-    } = commitData;
+  const {
+    title,
+    author: { name: authorName, avatar: authorAvatar, date: authorDate },
+    hash,
+  } = commitData;
 
-    closeHoverCommitModals();
+  closeHoverCommitModals();
 
-    const shortDate = formatter.getFormattedDate(authorDate, undefined, { dateStyle: "short" });
+  const shortDate = formatter.getFormattedDate(authorDate, undefined, { dateStyle: "short" });
 
-    const formattedTitle = truncateTitle(title, 12);
+  const formattedTitle = truncateTitle(title, 12);
 
-    return `
+  return `
         <div class="${styles.modal} hover-commit-modal" id="hover-commit-modal" role="tooltip">
             <h3>${formattedTitle}</h3>
             <div class="${styles["modal-hr"]}"></div>

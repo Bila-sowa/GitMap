@@ -1,41 +1,33 @@
+// @vitest-environment jsdom
+import { describe, test, expect } from "vitest";
 import { sanitizeMarkdown } from "@/js/utils/sanitizeMarkdown";
-import { TestConfig } from "../tools/testTools";
 
-const parseHTML = (html) => {
-    const template = document.createElement("template");
-    template.innerHTML = html;
-    return template.content;
-};
+describe("sanitizeMarkdown", () => {
+  test("removes an unsafe javascript link target", () => {
+    const result = sanitizeMarkdown("[audit link](javascript:alert%281%29)");
 
-export default function test_d4x9p_Data() {
-    const config = new TestConfig(
-        {
-            file: "sanitizeMarkdown.js",
-            test: "test_d4x9p_Data",
-            name: "sanitizeMarkdown",
-            type: "function",
-        },
-        {
-            dangerousHrefRemoved: true,
-            eventHandlerRemoved: true,
-            imageRemoved: true,
-            markdownPreserved: true,
-            safeHrefPreserved: true,
-        },
-    );
+    expect(result).toBe("<p><a>audit link</a></p>\n");
+  });
 
-    return config.run(() => {
-        const dangerousLink = parseHTML(sanitizeMarkdown("[audit link](javascript:alert%281%29)"));
-        const dangerousHTML = parseHTML(sanitizeMarkdown('<img src="x" onerror="alert(1)">'));
-        const safeMarkdown = parseHTML(sanitizeMarkdown("**Safe** [link](https://example.com/audit)"));
+  test("removes images and event handlers from raw HTML", () => {
+    const result = sanitizeMarkdown('<img src="x" onerror="alert(1)">');
 
-        return {
-            dangerousHrefRemoved: !dangerousLink.querySelector("a")?.hasAttribute("href"),
-            eventHandlerRemoved: !dangerousHTML.querySelector("[onerror]"),
-            imageRemoved: !dangerousHTML.querySelector("img"),
-            markdownPreserved: safeMarkdown.querySelector("strong")?.textContent === "Safe",
-            safeHrefPreserved:
-                safeMarkdown.querySelector("a")?.getAttribute("href") === "https://example.com/audit",
-        };
-    });
-}
+    expect(result).toBe("");
+  });
+
+  test("preserves safe markdown markup and HTTPS links", () => {
+    const result = sanitizeMarkdown("**Safe** [link](https://example.com/audit)");
+
+    expect(result).toBe('<p><strong>Safe</strong> <a href="https://example.com/audit">link</a></p>\n');
+  });
+
+  test.each([
+    { label: "an empty string", input: "" },
+    { label: "null", input: null },
+    { label: "undefined", input: undefined },
+  ])("returns an empty string for $label", ({ input }) => {
+    const result = sanitizeMarkdown(input);
+
+    expect(result).toBe("");
+  });
+});
