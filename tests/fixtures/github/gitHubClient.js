@@ -23,32 +23,39 @@ export const getHttpErrorStatus = (result) => {
  * The caller must supply the url that matches the intercepted endpoint so that
  * the response.url field is accurate and useFetch can enforce strict URL matching.
  */
-export const createResponse = ({ status = 200, body = {}, url } = {}) => ({
+export const createResponse = ({ status = 200, body = {}, url, headers = new Headers() } = {}) => ({
   ok: status >= 200 && status < 300,
   status,
   url,
-  headers: new Headers(),
+  headers,
   json: async () => body,
 });
 
 /**
- * Stubs globalThis.fetch to intercept requests to exactly one expectedUrl.
- * Any request to a different URL throws an error to catch accidental network
- * calls in the offline local test environment.
+ * Stubs globalThis.fetch to intercept requests to an explicit list of routes.
+ * Any request to a URL outside that list throws an error to catch accidental
+ * network calls in the offline local test environment.
  * Returns the requests array so callers can assert which URLs were fetched.
  */
-export const useFetch = (response, expectedUrl) => {
+export const useFetchRoutes = (routes) => {
   const requests = [];
+  const responsesByUrl = new Map(routes.map(({ url, response }) => [url, response]));
 
   vi.stubGlobal("fetch", async (url) => {
     requests.push(url);
 
-    if (url !== expectedUrl) {
+    if (!responsesByUrl.has(url)) {
       throw new Error(`Unexpected request: ${url}`);
     }
 
-    return response;
+    return responsesByUrl.get(url);
   });
 
   return requests;
 };
+
+/**
+ * Stubs globalThis.fetch to intercept requests to exactly one expectedUrl.
+ * Returns the requests array so callers can assert which URLs were fetched.
+ */
+export const useFetch = (response, expectedUrl) => useFetchRoutes([{ url: expectedUrl, response }]);

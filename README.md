@@ -79,13 +79,6 @@ Run commands from the repository root after installing dependencies.
 | `npm run compile` | Compile `src/styles.scss` to `src/styles.css` directly with Sass. |
 | `npm run deploy` | Publish the existing `dist/` directory to the `gh-pages` branch. |
 
-> [!WARNING]
-> **Test migration status**
->
-> Vitest migration is in progress. [vitest.config.js](./vitest.config.js) currently includes only [mergeConfigs.test.js](./tests/api/config/mergeConfigs.test.js) in the offline `local` project. The `e2e` project's include list is empty. Both projects use `--passWithNoTests`, so a successful exit with no discovered tests does not demonstrate test coverage.
->
-> The remaining legacy tests use the browser harness in [tests/tests.html](./tests/tests.html), with registration in [tests/tests.js](./tests/tests.js) and switches in [tests/config.json](./tests/config.json). That harness includes live GitHub API tests and is separate from `npm test`. Migration plans and historical validation results are recorded in [documentation/refactors/vitest/](./documentation/refactors/vitest/).
-
 ### Build, preview, and deployment
 
 Build first, then inspect the output locally:
