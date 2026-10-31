@@ -1,67 +1,67 @@
-import { stopModalPositioning, truncateTitle } from "@/js/utils/utils";
-import formatter from "@/js/utils/formatter";
-import styles from "./styles.module.scss";
-import gitHubAvatarFallbackSrc from "@/assets/gitHubAvatarFallback.png";
+import { stopModalPositioning, truncateTitle } from '@/js/utils/utils'
+import formatter from '@/js/utils/formatter'
+import styles from './styles.module.scss'
+import gitHubAvatarFallbackSrc from '@/assets/gitHubAvatarFallback.png'
 
 const closeHoverCommitModals = () => {
-  [...document.querySelectorAll(".hover-commit-modal")].forEach((modal) => {
+  ;[...document.querySelectorAll('.hover-commit-modal')].forEach((modal) => {
     document.querySelectorAll(`[aria-describedby~="${modal.id}"]`).forEach((trigger) => {
       const describedBy = trigger
-        .getAttribute("aria-describedby")
+        .getAttribute('aria-describedby')
         .split(/\s+/)
-        .filter((id) => id !== modal.id);
+        .filter((id) => id !== modal.id)
 
       if (describedBy.length) {
-        trigger.setAttribute("aria-describedby", describedBy.join(" "));
+        trigger.setAttribute('aria-describedby', describedBy.join(' '))
       } else {
-        trigger.removeAttribute("aria-describedby");
+        trigger.removeAttribute('aria-describedby')
       }
-    });
+    })
 
-    stopModalPositioning(modal);
-    modal.remove();
-  });
-};
+    stopModalPositioning(modal)
+    modal.remove()
+  })
+}
 
 const generateHoverCommitModalHTML = (commitData) => {
-  if (!commitData) return;
+  if (!commitData) return
 
   const {
     title,
     author: { name: authorName, avatar: authorAvatar, date: authorDate },
     hash,
-  } = commitData;
+  } = commitData
 
-  closeHoverCommitModals();
+  closeHoverCommitModals()
 
-  const shortDate = formatter.getFormattedDate(authorDate, undefined, { dateStyle: "short" });
+  const shortDate = formatter.getFormattedDate(authorDate, undefined, { dateStyle: 'short' })
 
-  const formattedTitle = truncateTitle(title, 12);
+  const formattedTitle = truncateTitle(title, 12)
 
   return `
         <div class="${styles.modal} hover-commit-modal" id="hover-commit-modal" role="tooltip">
             <h3>${formattedTitle}</h3>
-            <div class="${styles["modal-hr"]}"></div>
-            <div class="${styles["modal-content"]}">
-                <div class="${styles["modal-data"]}">
-                    <div class="${styles["modal-item"]} ${styles["author-item"]} rounded-normal">
+            <div class="${styles['modal-hr']}"></div>
+            <div class="${styles['modal-content']}">
+                <div class="${styles['modal-data']}">
+                    <div class="${styles['modal-item']} ${styles['author-item']} rounded-normal">
                         <div class="flex-align-center">
                             <span>Author: ${authorName}</span>
                             <img class="avatar rounded-full" src="${authorAvatar ? authorAvatar : gitHubAvatarFallbackSrc}" alt="${authorName}'s avatar">
                         </div>
                     </div>
-                    <div class="${styles["modal-item"]} rounded-normal">
+                    <div class="${styles['modal-item']} rounded-normal">
                         <span>Hash: </span>
                         <span>#${hash}</span>
                     </div>
-                    <div class="${styles["modal-item"]} rounded-normal">
+                    <div class="${styles['modal-item']} rounded-normal">
                         <span>Date: </span>
                         <span>${shortDate}</span>
                     </div>
                 </div>
             </div>
         </div>
-    `;
-};
+    `
+}
 
-export { generateHoverCommitModalHTML, closeHoverCommitModals };
+export { generateHoverCommitModalHTML, closeHoverCommitModals }

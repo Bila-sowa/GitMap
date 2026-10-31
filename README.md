@@ -17,7 +17,7 @@
 - Pan and zoom the commit graph with mouse or touch controls.
 - Browse the default branch or switch to another branch using the branch selector.
 - Hover over or focus a commit for a summary; click it to inspect its description, author, date, hash, and changed files.
-- Refresh the selected branch and switch between light and dark themes.
+- Refresh the selected branch and switch between system, light, and dark themes.
 - Configure an optional GitHub personal access token and view API usage in Settings.
 - Choose whether to remember the repository URL and token between visits.
 
@@ -45,18 +45,22 @@ Open the local URL printed by Vite. The project uses the `/GitMap/` base path, s
 2. Browse the default branch, or choose another branch from the branch selector below the graph.
 3. Drag the canvas to pan. Use the `+` and `-` buttons, mouse wheel, or touch gestures to zoom.
 4. Hover over or focus a commit for a summary. Click it for details and changed files; hover over the author in the details to see their email when available.
-5. Use the header buttons to refresh the graph, change the theme, or open Settings.
+5. Use the header buttons to refresh the graph, cycle the theme (System, Dark, Light), or open Settings. System follows your operating system preference and updates automatically.
 6. In Settings, configure a token, choose whether to save the repository URL or token, and check API usage and token status.
+
+### Recent repositories
+
+The link field keeps up to three recently loaded repository URLs, most recent first. Hover over or focus the field to open the list; choosing an entry fills the field without loading the repository until you press Enter or leave the field. After the pointer leaves, the list stays open for `settings.linkHistory.HIDE_DELAY_MS` (5 seconds by default, configured in [public/config.json](./public/config.json)). The history is stored in `localStorage` as part of the `GitMap` record and is kept independently of **Save current repo in page**.
 
 ### History limits
 
-The graph displays commits for one selected branch at a time. It is not a complete view of every branch or the repository's entire history: commit loading currently uses a single API page, and the renderer applies `graph.renderLimit` from [public/config.json](./public/config.json), currently `30`. Increasing the rendering limit alone does not fetch older commits. The graph indicates how many of the loaded commits are shown.
+The graph displays commits for one selected branch at a time. It is not a complete view of every branch or the repository's entire history: commit loading currently uses a single API page, and the renderer applies `settings.graph.renderLimit` from [public/config.json](./public/config.json), currently `30`. Increasing the rendering limit alone does not fetch older commits. The graph indicates how many of the loaded commits are shown.
 
 ### Tokens and API limits
 
 Public repositories can be browsed without a token. GitHub's primary REST API limit is 60 unauthenticated requests per hour per IP address; requests authenticated with a personal access token count toward the user's 5,000-request hourly limit. Secondary limits can also apply. See [GitHub's rate-limit documentation](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api) for details.
 
-A configured token is sent to GitHub's API to validate it and authenticate requests. It is kept in application memory and is written to the browser's `localStorage` only when **Save current token in page** is enabled in Settings; saving is disabled by default. Disabling that option removes the saved token on the next settings save. It does not encrypt the token or revoke it on GitHub. See [GitHub's token management guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for creating and revoking tokens.
+A configured token is sent to GitHub's API to validate it and authenticate requests. It is kept in application memory and is written to the browser's `localStorage` only when **Save current token in page** is enabled in Settings; saving is disabled by default. The saved token is encrypted with AES-256-GCM using a non-extractable key stored in IndexedDB, so the token is stored as ciphertext. This does not protect against cross-site scripting or a compromised browser extension that can run code in the page; see [Token encryption](./documentation/security/token-encryption.md) for the threat model. Disabling that option removes the saved token on the next settings save. The token is not revoked on GitHub. See [GitHub's token management guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for creating and revoking tokens.
 
 If a request fails, check the repository URL, token status, and API usage. A token does not bypass rate limits or grant access to repositories beyond its permissions.
 
