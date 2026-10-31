@@ -1,10 +1,10 @@
 const getDefaultConfig = () => {
   return {
-    name: "GitMap",
+    name: 'GitMap',
     debug: false,
     versionDetails: {
-      version: "not found",
-      versionType: "not found",
+      version: 'not found',
+      versionType: 'not found',
       versionIsStable: false,
     },
     graph: {
@@ -25,28 +25,31 @@ const getDefaultConfig = () => {
       HIDE_DELAY_MS: 5000,
       LINK_HISTORY_LIMIT: 3,
     },
-  };
-};
+  }
+}
 
 const mergeConfigs = (invalidConfig) => {
-  const defaultConfig = getDefaultConfig();
+  const defaultConfig = getDefaultConfig()
   const config =
-    invalidConfig && typeof invalidConfig === "object" && !Array.isArray(invalidConfig) ? invalidConfig : {};
+    invalidConfig && typeof invalidConfig === 'object' && !Array.isArray(invalidConfig)
+      ? invalidConfig
+      : {}
 
   return {
-    name: typeof config.name === "string" && config.name.trim() ? config.name : defaultConfig.name,
-    debug: typeof config.debug === "boolean" ? config.debug : defaultConfig.debug,
+    name: typeof config.name === 'string' && config.name.trim() ? config.name : defaultConfig.name,
+    debug: typeof config.debug === 'boolean' ? config.debug : defaultConfig.debug,
     versionDetails: {
       version:
-        typeof config.versionDetails?.version === "string" && config.versionDetails.version.trim()
+        typeof config.versionDetails?.version === 'string' && config.versionDetails.version.trim()
           ? config.versionDetails.version
           : defaultConfig.versionDetails.version,
       versionType:
-        typeof config.versionDetails?.versionType === "string" && config.versionDetails.versionType.trim()
+        typeof config.versionDetails?.versionType === 'string' &&
+        config.versionDetails.versionType.trim()
           ? config.versionDetails.versionType
           : defaultConfig.versionDetails.versionType,
       versionIsStable:
-        typeof config.versionDetails?.versionIsStable === "boolean"
+        typeof config.versionDetails?.versionIsStable === 'boolean'
           ? config.versionDetails.versionIsStable
           : defaultConfig.versionDetails.versionIsStable,
     },
@@ -66,7 +69,7 @@ const mergeConfigs = (invalidConfig) => {
     },
     notifications: {
       showNotifications:
-        typeof config.notifications?.showNotifications === "boolean"
+        typeof config.notifications?.showNotifications === 'boolean'
           ? config.notifications.showNotifications
           : defaultConfig.notifications.showNotifications,
       COOLDOWN_MS:
@@ -78,7 +81,9 @@ const mergeConfigs = (invalidConfig) => {
     },
     loader: {
       showLoader:
-        typeof config.loader?.showLoader === "boolean" ? config.loader.showLoader : defaultConfig.loader.showLoader,
+        typeof config.loader?.showLoader === 'boolean'
+          ? config.loader.showLoader
+          : defaultConfig.loader.showLoader,
       CLEANUP_TIMEOUT_MS:
         Number.isInteger(config.loader?.CLEANUP_TIMEOUT_MS) &&
         config.loader.CLEANUP_TIMEOUT_MS >= 1000 &&
@@ -100,46 +105,46 @@ const mergeConfigs = (invalidConfig) => {
           ? config.linkHistory.LINK_HISTORY_LIMIT
           : defaultConfig.linkHistory.LINK_HISTORY_LIMIT,
     },
-  };
-};
+  }
+}
 
 const getConfigData = async (url = `${import.meta.env.BASE_URL}config.json`) => {
   try {
-    const configRes = await fetch(url);
+    const configRes = await fetch(url)
 
     if (!configRes.ok) {
-      throw new Error(`Failed to load config.json: ${configRes.status}`);
+      throw new Error(`Failed to load config.json: ${configRes.status}`)
     }
 
-    const configData = await configRes.json();
+    const configData = await configRes.json()
 
-    return mergeConfigs(configData);
+    return mergeConfigs(configData)
   } catch (error) {
-    console.error("Returning default config, error fetching config:", error);
-    return getDefaultConfig();
+    console.error('Returning default config, error fetching config:', error)
+    return getDefaultConfig()
   }
-};
+}
 
-const config = getDefaultConfig();
-let configPromise = null;
+const config = getDefaultConfig()
+let configPromise = null
 
 function loadConfig() {
   if (!configPromise) {
     configPromise = getConfigData().then((data) => {
-      Object.assign(config, data);
-      return config;
-    });
+      Object.assign(config, data)
+      return config
+    })
   }
 
-  return configPromise;
+  return configPromise
 }
 
 async function refreshConfig() {
-  if (configPromise) await configPromise;
-  const data = await getConfigData();
-  Object.assign(config, data);
-  configPromise = Promise.resolve(config);
-  return config;
+  if (configPromise) await configPromise
+  const data = await getConfigData()
+  Object.assign(config, data)
+  configPromise = Promise.resolve(config)
+  return config
 }
 
-export { config, getConfigData, getDefaultConfig, mergeConfigs, loadConfig, refreshConfig };
+export { config, getConfigData, getDefaultConfig, mergeConfigs, loadConfig, refreshConfig }

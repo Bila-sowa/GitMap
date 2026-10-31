@@ -28,9 +28,9 @@ header {
         display: none;
       }
 
-      &[data-theme-state="system"] .theme-icon-system,
-      &[data-theme-state="dark"] .theme-icon-dark,
-      &[data-theme-state="light"] .theme-icon-light {
+      &[data-theme-state='system'] .theme-icon-system,
+      &[data-theme-state='dark'] .theme-icon-dark,
+      &[data-theme-state='light'] .theme-icon-light {
         display: block;
       }
     }
@@ -83,7 +83,7 @@ header {
       }
 
       &:hover,
-      &[aria-selected="true"] {
+      &[aria-selected='true'] {
         background: var(--hover-color-1);
       }
     }

@@ -1,36 +1,36 @@
-import { describe, test, expect } from "vitest";
-import { getDefaultConfig, mergeConfigs } from "@/js/api/config";
+import { describe, test, expect } from 'vitest'
+import { getDefaultConfig, mergeConfigs } from '@/js/api/config'
 
-describe("mergeConfigs", () => {
-  const defaultConfig = getDefaultConfig();
+describe('mergeConfigs', () => {
+  const defaultConfig = getDefaultConfig()
 
-  test("preserves valid partial values and fills missing fields with defaults", () => {
+  test('preserves valid partial values and fills missing fields with defaults', () => {
     const result = mergeConfigs({
-      name: "Custom GitMap",
+      name: 'Custom GitMap',
       graph: { renderLimit: 50 },
       linkHistory: { HIDE_DELAY_MS: 2500, LINK_HISTORY_LIMIT: 4 },
-    });
+    })
 
     expect(result).toStrictEqual({
       ...defaultConfig,
-      name: "Custom GitMap",
+      name: 'Custom GitMap',
       graph: { renderLimit: 50 },
       linkHistory: { HIDE_DELAY_MS: 2500, LINK_HISTORY_LIMIT: 4 },
-    });
-  });
+    })
+  })
 
-  test("replaces malformed values with defaults while preserving a valid version type", () => {
+  test('replaces malformed values with defaults while preserving a valid version type', () => {
     const result = mergeConfigs({
-      name: "",
-      debug: "true",
+      name: '',
+      debug: 'true',
       versionDetails: {
         version: 3,
-        versionType: "beta",
-        versionIsStable: "false",
+        versionType: 'beta',
+        versionIsStable: 'false',
       },
       graph: { renderLimit: -1.5 },
       notifications: {
-        showNotifications: "yes",
+        showNotifications: 'yes',
         COOLDOWN_MS: Number.POSITIVE_INFINITY,
       },
       gitHub: { REQUEST_TIMEOUT_MS: 0 },
@@ -42,20 +42,20 @@ describe("mergeConfigs", () => {
         HIDE_DELAY_MS: -1,
         LINK_HISTORY_LIMIT: 0.3,
       },
-    });
+    })
 
     expect(result).toStrictEqual({
       ...defaultConfig,
       versionDetails: {
         ...defaultConfig.versionDetails,
-        versionType: "beta",
+        versionType: 'beta',
       },
-    });
-  });
+    })
+  })
 
-  test("returns the full default config for null", () => {
-    const result = mergeConfigs(null);
+  test('returns the full default config for null', () => {
+    const result = mergeConfigs(null)
 
-    expect(result).toStrictEqual(defaultConfig);
-  });
-});
+    expect(result).toStrictEqual(defaultConfig)
+  })
+})

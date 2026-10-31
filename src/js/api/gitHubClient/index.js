@@ -1,1 +1,1 @@
-export { default, GitHubClient } from "./gitHubClient.js";
+export { default, GitHubClient } from './gitHubClient.js'

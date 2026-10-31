@@ -1,4 +1,4 @@
-@use "../mixins/" as *;
+@use '../mixins/' as *;
 
 .viewport {
   width: 100%;
@@ -49,7 +49,7 @@
   pointer-events: auto;
 }
 
-.commit:not([data-lane="0"])::before {
+.commit:not([data-lane='0'])::before {
   right: auto;
   left: 60px;
 }
