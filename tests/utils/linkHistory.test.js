@@ -42,7 +42,7 @@ describe('linkHistory', () => {
       'https://github.com/example/one',
       'https://github.com/example/two',
     ])
-    expect(result).toHaveLength(config.linkHistory.LINK_HISTORY_LIMIT)
+    expect(result).toHaveLength(config.settings.linkHistory.LINK_HISTORY_LIMIT)
   })
 
   test('returns a trimmed copy for an empty link', () => {

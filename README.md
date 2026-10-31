@@ -50,11 +50,11 @@ Open the local URL printed by Vite. The project uses the `/GitMap/` base path, s
 
 ### Recent repositories
 
-The link field keeps up to three recently loaded repository URLs, most recent first. Hover over or focus the field to open the list; choosing an entry fills the field without loading the repository until you press Enter or leave the field. The history is stored in `localStorage` as part of the `GitMap` record and is kept independently of **Save current repo in page**.
+The link field keeps up to three recently loaded repository URLs, most recent first. Hover over or focus the field to open the list; choosing an entry fills the field without loading the repository until you press Enter or leave the field. After the pointer leaves, the list stays open for `settings.linkHistory.HIDE_DELAY_MS` (5 seconds by default, configured in [public/config.json](./public/config.json)). The history is stored in `localStorage` as part of the `GitMap` record and is kept independently of **Save current repo in page**.
 
 ### History limits
 
-The graph displays commits for one selected branch at a time. It is not a complete view of every branch or the repository's entire history: commit loading currently uses a single API page, and the renderer applies `graph.renderLimit` from [public/config.json](./public/config.json), currently `30`. Increasing the rendering limit alone does not fetch older commits. The graph indicates how many of the loaded commits are shown.
+The graph displays commits for one selected branch at a time. It is not a complete view of every branch or the repository's entire history: commit loading currently uses a single API page, and the renderer applies `settings.graph.renderLimit` from [public/config.json](./public/config.json), currently `30`. Increasing the rendering limit alone does not fetch older commits. The graph indicates how many of the loaded commits are shown.
 
 ### Tokens and API limits
 

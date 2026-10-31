@@ -67,7 +67,7 @@ describe('notify', () => {
 
     const visibleBeforeCleanup = getNotifications().length
 
-    await vi.advanceTimersByTimeAsync(config.notifications.COOLDOWN_MS)
+    await vi.advanceTimersByTimeAsync(config.settings.notifications.COOLDOWN_MS)
 
     expect(visibleBeforeCleanup).toBe(1)
     expect(getNotifications()).toStrictEqual([])

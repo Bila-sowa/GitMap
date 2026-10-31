@@ -7,15 +7,20 @@ describe('mergeConfigs', () => {
   test('preserves valid partial values and fills missing fields with defaults', () => {
     const result = mergeConfigs({
       name: 'Custom GitMap',
-      graph: { renderLimit: 50 },
-      linkHistory: { HIDE_DELAY_MS: 2500, LINK_HISTORY_LIMIT: 4 },
+      settings: {
+        graph: { renderLimit: 50 },
+        linkHistory: { HIDE_DELAY_MS: 2500, LINK_HISTORY_LIMIT: 4 },
+      },
     })
 
     expect(result).toStrictEqual({
       ...defaultConfig,
       name: 'Custom GitMap',
-      graph: { renderLimit: 50 },
-      linkHistory: { HIDE_DELAY_MS: 2500, LINK_HISTORY_LIMIT: 4 },
+      settings: {
+        ...defaultConfig.settings,
+        graph: { renderLimit: 50 },
+        linkHistory: { HIDE_DELAY_MS: 2500, LINK_HISTORY_LIMIT: 4 },
+      },
     })
   })
 
@@ -28,19 +33,21 @@ describe('mergeConfigs', () => {
         versionType: 'beta',
         versionIsStable: 'false',
       },
-      graph: { renderLimit: -1.5 },
-      notifications: {
-        showNotifications: 'yes',
-        COOLDOWN_MS: Number.POSITIVE_INFINITY,
-      },
-      gitHub: { REQUEST_TIMEOUT_MS: 0 },
-      loader: {
-        showLoader: 1,
-        CLEANUP_TIMEOUT_MS: -1,
-      },
-      linkHistory: {
-        HIDE_DELAY_MS: -1,
-        LINK_HISTORY_LIMIT: 0.3,
+      settings: {
+        graph: { renderLimit: -1.5 },
+        notifications: {
+          showNotifications: 'yes',
+          COOLDOWN_MS: Number.POSITIVE_INFINITY,
+        },
+        gitHub: { REQUEST_TIMEOUT_MS: 0 },
+        loader: {
+          showLoader: 1,
+          CLEANUP_TIMEOUT_MS: -1,
+        },
+        linkHistory: {
+          HIDE_DELAY_MS: -1,
+          LINK_HISTORY_LIMIT: 0.3,
+        },
       },
     })
 

@@ -13,7 +13,7 @@ class NotificationManager {
   }
 
   async notify(message, type) {
-    const { showNotifications, COOLDOWN_MS } = config?.notifications
+    const { showNotifications, COOLDOWN_MS } = config.settings.notifications
 
     if (!message || !type || !showNotifications) return
 

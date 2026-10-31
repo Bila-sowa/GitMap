@@ -94,7 +94,9 @@ class Storage {
         return item.trim()
       })
 
-      this.#history = history.filter(Boolean).slice(0, config.linkHistory.LINK_HISTORY_LIMIT)
+      this.#history = history
+        .filter(Boolean)
+        .slice(0, config.settings.linkHistory.LINK_HISTORY_LIMIT)
     }
   }
 

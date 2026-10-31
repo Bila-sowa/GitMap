@@ -19,12 +19,12 @@ function addLinkToHistory(history, link) {
     : []
   const trimmed = typeof link === 'string' ? link.trim() : ''
 
-  if (!trimmed) return current.slice(0, config.linkHistory.LINK_HISTORY_LIMIT)
+  if (!trimmed) return current.slice(0, config.settings.linkHistory.LINK_HISTORY_LIMIT)
 
   const key = getLinkKey(trimmed)
   const rest = current.filter((item) => getLinkKey(item) !== key)
 
-  return [trimmed, ...rest].slice(0, config.linkHistory.LINK_HISTORY_LIMIT)
+  return [trimmed, ...rest].slice(0, config.settings.linkHistory.LINK_HISTORY_LIMIT)
 }
 
 export { addLinkToHistory, getLinkKey }

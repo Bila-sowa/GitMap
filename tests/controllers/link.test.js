@@ -132,9 +132,9 @@ describe('LinkController history', () => {
   })
 
   test('uses the configured hide delay', () => {
-    const originalDelay = config.linkHistory.HIDE_DELAY_MS
+    const originalDelay = config.settings.linkHistory.HIDE_DELAY_MS
 
-    config.linkHistory.HIDE_DELAY_MS = 1000
+    config.settings.linkHistory.HIDE_DELAY_MS = 1000
     vi.useFakeTimers()
 
     try {
@@ -151,7 +151,7 @@ describe('LinkController history', () => {
       expect(afterDelay).toBe(true)
     } finally {
       vi.useRealTimers()
-      config.linkHistory.HIDE_DELAY_MS = originalDelay
+      config.settings.linkHistory.HIDE_DELAY_MS = originalDelay
     }
   })
 

@@ -107,7 +107,7 @@ class LinkController {
       if (document.activeElement === this.#input) return
 
       this.#closeHistory()
-    }, config.linkHistory.HIDE_DELAY_MS)
+    }, config.settings.linkHistory.HIDE_DELAY_MS)
   }
 
   #cancelHistoryHide() {

@@ -2,26 +2,29 @@
   "name": "GitMap",
   "debug": true,
   "versionDetails": {
-    "version": "2.14.0",
+    "version": "2.14.1",
     "versionType": "beta",
     "versionIsStable": true
   },
-  "graph": {
-    "renderLimit": 30
-  },
-  "gitHub": {
-    "REQUEST_TIMEOUT_MS": 15000
-  },
-  "notifications": {
-    "showNotifications": true,
-    "COOLDOWN_MS": 5000
-  },
-  "loader": {
-    "showLoader": true,
-    "CLEANUP_TIMEOUT_MS": 30000
-  },
-  "linkHistory": {
-    "HIDE_DELAY_MS": 5000,
-    "LINK_HISTORY_LIMIT": 3
+
+  "settings": {
+    "graph": {
+      "renderLimit": 30
+    },
+    "gitHub": {
+      "REQUEST_TIMEOUT_MS": 15000
+    },
+    "notifications": {
+      "showNotifications": true,
+      "COOLDOWN_MS": 5000
+    },
+    "loader": {
+      "showLoader": true,
+      "CLEANUP_TIMEOUT_MS": 30000
+    },
+    "linkHistory": {
+      "HIDE_DELAY_MS": 5000,
+      "LINK_HISTORY_LIMIT": 3
+    }
   }
 }

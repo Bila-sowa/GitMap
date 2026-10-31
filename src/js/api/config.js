@@ -1,29 +1,32 @@
 const getDefaultConfig = () => {
   return {
     name: 'GitMap',
-    debug: false,
+    debug: true,
     versionDetails: {
-      version: 'not found',
-      versionType: 'not found',
-      versionIsStable: false,
+      version: '2.14.1',
+      versionType: 'beta',
+      versionIsStable: true,
     },
-    graph: {
-      renderLimit: 30,
-    },
-    gitHub: {
-      REQUEST_TIMEOUT_MS: 15000,
-    },
-    notifications: {
-      showNotifications: true,
-      COOLDOWN_MS: 5000,
-    },
-    loader: {
-      showLoader: false,
-      CLEANUP_TIMEOUT_MS: 30000,
-    },
-    linkHistory: {
-      HIDE_DELAY_MS: 5000,
-      LINK_HISTORY_LIMIT: 3,
+
+    settings: {
+      graph: {
+        renderLimit: 30,
+      },
+      gitHub: {
+        REQUEST_TIMEOUT_MS: 15000,
+      },
+      notifications: {
+        showNotifications: true,
+        COOLDOWN_MS: 5000,
+      },
+      loader: {
+        showLoader: true,
+        CLEANUP_TIMEOUT_MS: 30000,
+      },
+      linkHistory: {
+        HIDE_DELAY_MS: 5000,
+        LINK_HISTORY_LIMIT: 3,
+      },
     },
   }
 }
@@ -53,57 +56,61 @@ const mergeConfigs = (invalidConfig) => {
           ? config.versionDetails.versionIsStable
           : defaultConfig.versionDetails.versionIsStable,
     },
-    graph: {
-      renderLimit:
-        Number.isInteger(config.graph?.renderLimit) && config.graph.renderLimit > 0
-          ? config.graph.renderLimit
-          : defaultConfig.graph.renderLimit,
-    },
-    gitHub: {
-      REQUEST_TIMEOUT_MS:
-        Number.isInteger(config.gitHub?.REQUEST_TIMEOUT_MS) &&
-        config.gitHub.REQUEST_TIMEOUT_MS >= 1000 &&
-        config.gitHub.REQUEST_TIMEOUT_MS <= 120000
-          ? config.gitHub.REQUEST_TIMEOUT_MS
-          : defaultConfig.gitHub.REQUEST_TIMEOUT_MS,
-    },
-    notifications: {
-      showNotifications:
-        typeof config.notifications?.showNotifications === 'boolean'
-          ? config.notifications.showNotifications
-          : defaultConfig.notifications.showNotifications,
-      COOLDOWN_MS:
-        Number.isFinite(config.notifications?.COOLDOWN_MS) &&
-        config.notifications.COOLDOWN_MS >= 0 &&
-        config.notifications.COOLDOWN_MS <= 60000
-          ? config.notifications.COOLDOWN_MS
-          : defaultConfig.notifications.COOLDOWN_MS,
-    },
-    loader: {
-      showLoader:
-        typeof config.loader?.showLoader === 'boolean'
-          ? config.loader.showLoader
-          : defaultConfig.loader.showLoader,
-      CLEANUP_TIMEOUT_MS:
-        Number.isInteger(config.loader?.CLEANUP_TIMEOUT_MS) &&
-        config.loader.CLEANUP_TIMEOUT_MS >= 1000 &&
-        config.loader.CLEANUP_TIMEOUT_MS <= 120000
-          ? config.loader.CLEANUP_TIMEOUT_MS
-          : defaultConfig.loader.CLEANUP_TIMEOUT_MS,
-    },
-    linkHistory: {
-      HIDE_DELAY_MS:
-        Number.isInteger(config.linkHistory?.HIDE_DELAY_MS) &&
-        config.linkHistory.HIDE_DELAY_MS >= 0 &&
-        config.linkHistory.HIDE_DELAY_MS <= 60000
-          ? config.linkHistory.HIDE_DELAY_MS
-          : defaultConfig.linkHistory.HIDE_DELAY_MS,
-      LINK_HISTORY_LIMIT:
-        Number.isInteger(config.linkHistory?.LINK_HISTORY_LIMIT) &&
-        config.linkHistory.LINK_HISTORY_LIMIT >= 0 &&
-        config.linkHistory.LINK_HISTORY_LIMIT <= 10
-          ? config.linkHistory.LINK_HISTORY_LIMIT
-          : defaultConfig.linkHistory.LINK_HISTORY_LIMIT,
+
+    settings: {
+      graph: {
+        renderLimit:
+          Number.isInteger(config.settings?.graph?.renderLimit) &&
+          config.settings.graph.renderLimit > 0
+            ? config.settings.graph.renderLimit
+            : defaultConfig.settings.graph.renderLimit,
+      },
+      gitHub: {
+        REQUEST_TIMEOUT_MS:
+          Number.isInteger(config.settings?.gitHub?.REQUEST_TIMEOUT_MS) &&
+          config.settings.gitHub.REQUEST_TIMEOUT_MS >= 1000 &&
+          config.settings.gitHub.REQUEST_TIMEOUT_MS <= 120000
+            ? config.settings.gitHub.REQUEST_TIMEOUT_MS
+            : defaultConfig.settings.gitHub.REQUEST_TIMEOUT_MS,
+      },
+      notifications: {
+        showNotifications:
+          typeof config.settings?.notifications?.showNotifications === 'boolean'
+            ? config.settings.notifications.showNotifications
+            : defaultConfig.settings.notifications.showNotifications,
+        COOLDOWN_MS:
+          Number.isFinite(config.settings?.notifications?.COOLDOWN_MS) &&
+          config.settings.notifications.COOLDOWN_MS >= 0 &&
+          config.settings.notifications.COOLDOWN_MS <= 60000
+            ? config.settings.notifications.COOLDOWN_MS
+            : defaultConfig.settings.notifications.COOLDOWN_MS,
+      },
+      loader: {
+        showLoader:
+          typeof config.settings?.loader?.showLoader === 'boolean'
+            ? config.settings.loader.showLoader
+            : defaultConfig.settings.loader.showLoader,
+        CLEANUP_TIMEOUT_MS:
+          Number.isInteger(config.settings?.loader?.CLEANUP_TIMEOUT_MS) &&
+          config.settings.loader.CLEANUP_TIMEOUT_MS >= 1000 &&
+          config.settings.loader.CLEANUP_TIMEOUT_MS <= 120000
+            ? config.settings.loader.CLEANUP_TIMEOUT_MS
+            : defaultConfig.settings.loader.CLEANUP_TIMEOUT_MS,
+      },
+      linkHistory: {
+        HIDE_DELAY_MS:
+          Number.isInteger(config.settings?.linkHistory?.HIDE_DELAY_MS) &&
+          config.settings.linkHistory.HIDE_DELAY_MS >= 0 &&
+          config.settings.linkHistory.HIDE_DELAY_MS <= 60000
+            ? config.settings.linkHistory.HIDE_DELAY_MS
+            : defaultConfig.settings.linkHistory.HIDE_DELAY_MS,
+        LINK_HISTORY_LIMIT:
+          Number.isInteger(config.settings?.linkHistory?.LINK_HISTORY_LIMIT) &&
+          config.settings.linkHistory.LINK_HISTORY_LIMIT >= 0 &&
+          config.settings.linkHistory.LINK_HISTORY_LIMIT <= 10
+            ? config.settings.linkHistory.LINK_HISTORY_LIMIT
+            : defaultConfig.settings.linkHistory.LINK_HISTORY_LIMIT,
+      },
     },
   }
 }

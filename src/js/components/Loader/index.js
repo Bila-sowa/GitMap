@@ -3,8 +3,8 @@ import styles from './styles.module.scss'
 
 const loaderTimeouts = new WeakMap()
 
-function generateLoader(timeout = config.loader.CLEANUP_TIMEOUT_MS, options = {}) {
-  const { showLoader = config.loader.showLoader, container = document.body } = options
+function generateLoader(timeout = config.settings.loader.CLEANUP_TIMEOUT_MS, options = {}) {
+  const { showLoader = config.settings.loader.showLoader, container = document.body } = options
   if (!showLoader) return
 
   removeLoader(undefined, container)

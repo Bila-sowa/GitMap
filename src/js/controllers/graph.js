@@ -165,7 +165,7 @@ class GraphController {
     const LANE_GAP = 88
     const ROW_GAP = 160
     const CONTINUATION_LENGTH = 70
-    const renderLimit = +config.graph.renderLimit
+    const renderLimit = +config.settings.graph.renderLimit
     const layout = buildCommitGraphLayout(array, renderLimit)
     const hasContinuation = layout.edges.some((edge) => edge.isContinuation)
     const graphWidth = (layout.laneCount - 1) * LANE_GAP + COMMIT_SIZE

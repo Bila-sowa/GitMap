@@ -52,7 +52,7 @@ class GitHubTransport {
       error: errorMessage = 'Failed to fetch GitHub data',
       context = 'getJson',
     } = options
-    const request = new RequestControl(signal, config.gitHub.REQUEST_TIMEOUT_MS)
+    const request = new RequestControl(signal, config.settings.gitHub.REQUEST_TIMEOUT_MS)
     const pages = []
     const visited = new Set()
     let nextUrl = url
