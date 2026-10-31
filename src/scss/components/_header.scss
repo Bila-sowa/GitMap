@@ -43,6 +43,39 @@ header {
       }
     }
 
+    .link-history-container {
+      position: relative;
+    }
+
+    .link-history {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      z-index: 30;
+      width: 100%;
+      max-height: 240px;
+      overflow: hidden auto;
+      background: var(--color-4);
+    }
+
+    .link-history-item {
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--border-color-1);
+      }
+
+      &:hover,
+      &[aria-selected="true"] {
+        background: var(--hover-color-1);
+      }
+    }
+
     a {
       background: none;
       position: absolute;

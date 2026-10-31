@@ -4,6 +4,8 @@ function getDomElements(root = document) {
     viewport: root.querySelector("#viewport"),
     canvas: root.querySelector("#canvas"),
     linkInput: root.querySelector("#linkInput"),
+    linkHistoryContainer: root.querySelector("#link-history-container"),
+    linkHistoryList: root.querySelector("#link-history-list"),
     refreshButton: root.querySelector("#refresh"),
     themeButton: root.querySelector("#theme"),
     settingsButton: root.querySelector("#settings"),

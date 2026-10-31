@@ -69,6 +69,34 @@ describe("LocalStorageController", () => {
     expect(result.data.token).toBe("ghp_secretToken");
   });
 
+  test("persists repository history independently of the saved link", async () => {
+    storage.setData({
+      history: ["https://github.com/example/project"],
+      localStorage: { saveLink: false, saveToken: false },
+    });
+
+    const result = await controller.save();
+    const stored = readStoredData();
+
+    expect(result).toStrictEqual({ success: true });
+    expect(stored.link).toBe("");
+    expect(stored.history).toStrictEqual(["https://github.com/example/project"]);
+  });
+
+  test("loads repository history", async () => {
+    storage.setData({
+      history: ["https://github.com/example/project"],
+      localStorage: { saveLink: false, saveToken: false },
+    });
+    await controller.save();
+
+    const restoredStorage = new Storage();
+    const restored = new LocalStorageController(restoredStorage, notifications, keyStore);
+    const result = await restored.init();
+
+    expect(result.data.history).toStrictEqual(["https://github.com/example/project"]);
+  });
+
   test("migrates a legacy plaintext token", async () => {
     globalThis.localStorage.setItem(
       "GitMap",

@@ -2,22 +2,24 @@ import { describe, test, expect } from "vitest";
 import { getDefaultConfig, mergeConfigs } from "@/js/api/config";
 
 describe("mergeConfigs", () => {
+  const defaultConfig = getDefaultConfig();
+
   test("preserves valid partial values and fills missing fields with defaults", () => {
-    const defaultConfig = getDefaultConfig();
     const result = mergeConfigs({
       name: "Custom GitMap",
       graph: { renderLimit: 50 },
+      linkHistory: { HIDE_DELAY_MS: 2500, LINK_HISTORY_LIMIT: 4 },
     });
 
     expect(result).toStrictEqual({
       ...defaultConfig,
       name: "Custom GitMap",
       graph: { renderLimit: 50 },
+      linkHistory: { HIDE_DELAY_MS: 2500, LINK_HISTORY_LIMIT: 4 },
     });
   });
 
   test("replaces malformed values with defaults while preserving a valid version type", () => {
-    const defaultConfig = getDefaultConfig();
     const result = mergeConfigs({
       name: "",
       debug: "true",
@@ -36,6 +38,10 @@ describe("mergeConfigs", () => {
         showLoader: 1,
         CLEANUP_TIMEOUT_MS: -1,
       },
+      linkHistory: {
+        HIDE_DELAY_MS: -1,
+        LINK_HISTORY_LIMIT: 0.3,
+      },
     });
 
     expect(result).toStrictEqual({
@@ -48,7 +54,6 @@ describe("mergeConfigs", () => {
   });
 
   test("returns the full default config for null", () => {
-    const defaultConfig = getDefaultConfig();
     const result = mergeConfigs(null);
 
     expect(result).toStrictEqual(defaultConfig);

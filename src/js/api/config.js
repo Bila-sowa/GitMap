@@ -21,6 +21,10 @@ const getDefaultConfig = () => {
       showLoader: false,
       CLEANUP_TIMEOUT_MS: 30000,
     },
+    linkHistory: {
+      HIDE_DELAY_MS: 5000,
+      LINK_HISTORY_LIMIT: 3,
+    },
   };
 };
 
@@ -81,6 +85,20 @@ const mergeConfigs = (invalidConfig) => {
         config.loader.CLEANUP_TIMEOUT_MS <= 120000
           ? config.loader.CLEANUP_TIMEOUT_MS
           : defaultConfig.loader.CLEANUP_TIMEOUT_MS,
+    },
+    linkHistory: {
+      HIDE_DELAY_MS:
+        Number.isInteger(config.linkHistory?.HIDE_DELAY_MS) &&
+        config.linkHistory.HIDE_DELAY_MS >= 0 &&
+        config.linkHistory.HIDE_DELAY_MS <= 60000
+          ? config.linkHistory.HIDE_DELAY_MS
+          : defaultConfig.linkHistory.HIDE_DELAY_MS,
+      LINK_HISTORY_LIMIT:
+        Number.isInteger(config.linkHistory?.LINK_HISTORY_LIMIT) &&
+        config.linkHistory.LINK_HISTORY_LIMIT >= 0 &&
+        config.linkHistory.LINK_HISTORY_LIMIT <= 10
+          ? config.linkHistory.LINK_HISTORY_LIMIT
+          : defaultConfig.linkHistory.LINK_HISTORY_LIMIT,
     },
   };
 };

@@ -1,9 +1,11 @@
 import { isPlainObject } from "../utils/matchers";
+import { config } from "@/js/api/config";
 
 class Storage {
   #link = "";
   #theme = "dark-theme";
   #token = "";
+  #history = [];
   #localStorage = {
     saveLink: false,
     saveToken: false,
@@ -14,6 +16,7 @@ class Storage {
       link: this.#link,
       theme: this.#theme,
       token: this.#token,
+      history: [...this.#history],
       localStorage: { ...this.#localStorage },
     };
   }
@@ -67,12 +70,29 @@ class Storage {
         throw new TypeError(`setData: invalid theme "${theme}", expected "light-theme" or "dark-theme"`);
       }
     }
+
+    if (data.history !== undefined) {
+      if (!Array.isArray(data.history)) {
+        throw new TypeError("setData: history must be an array");
+      }
+
+      const history = data.history.map((item) => {
+        if (typeof item !== "string") {
+          throw new TypeError(`setData: history items must be strings, got ${typeof item}`);
+        }
+
+        return item.trim();
+      });
+
+      this.#history = history.filter(Boolean).slice(0, config.linkHistory.LINK_HISTORY_LIMIT);
+    }
   }
 
   reset() {
     this.#link = "";
     this.#theme = "dark-theme";
     this.#token = "";
+    this.#history = [];
     this.#localStorage = {
       saveLink: false,
       saveToken: false,

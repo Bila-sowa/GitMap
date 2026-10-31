@@ -30,7 +30,14 @@ async function bootstrap() {
     const scale = new ScaleController(dom.scaleIncreaseButton, dom.scaleDisplay, dom.scaleDecreaseButton, canvas);
     const dropDown = new DropDown(dom.dropDownTrigger, dom.dropDownList, dom.dropDownLabel);
     const graph = new GraphController(dom.graph, dom.body, storage, gitHubClient, dropDown);
-    const linkInput = new LinkController(dom.linkInput, graph, storage, localStorage);
+    const linkInput = new LinkController(
+      dom.linkInput,
+      dom.linkHistoryContainer,
+      dom.linkHistoryList,
+      graph,
+      storage,
+      localStorage,
+    );
     const refresh = new RefreshButtonController(dom.refreshButton, graph);
     const settings = new SettingsController(dom.settingsButton, gitHubClient, storage, localStorage);
     const theme = new ThemeController(dom.themeButton, dom.body, storage, localStorage);

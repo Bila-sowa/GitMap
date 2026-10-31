@@ -77,6 +77,7 @@ class LocalStorageController {
 
     if (data.theme) update.theme = data.theme;
     if (data.localStorage) update.localStorage = data.localStorage;
+    if (data.history) update.history = data.history;
 
     if (Object.keys(update).length) {
       try {

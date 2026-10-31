@@ -5,6 +5,7 @@ const DEFAULT_DATA = {
   link: "",
   theme: "dark-theme",
   token: "",
+  history: [],
   localStorage: {
     saveLink: false,
     saveToken: false,
@@ -39,6 +40,8 @@ describe("Storage", () => {
     { label: "a non-string link", update: { link: 42 } },
     { label: "a non-string token", update: { token: null } },
     { label: "a non-string theme", update: { theme: {} } },
+    { label: "a non-array history", update: { history: "link" } },
+    { label: "a non-string history item", update: { history: [42] } },
     { label: "a non-object localStorage", update: { localStorage: null } },
     { label: "an array localStorage", update: { localStorage: [] } },
     { label: "a non-boolean saveLink", update: { localStorage: { saveLink: "true" } } },
@@ -71,6 +74,40 @@ describe("Storage", () => {
 
     expect(cleared.link).toBe("");
     expect(cleared.token).toBe("");
+  });
+
+  test("stores up to three trimmed history links", () => {
+    const storage = new Storage();
+
+    storage.setData({
+      history: [
+        "  https://github.com/example/project  ",
+        "https://github.com/example/second",
+        "https://github.com/example/third",
+        "https://github.com/example/fourth",
+      ],
+    });
+
+    const result = storage.getData().history;
+
+    expect(result).toStrictEqual([
+      "https://github.com/example/project",
+      "https://github.com/example/second",
+      "https://github.com/example/third",
+    ]);
+  });
+
+  test("returns a detached history snapshot", () => {
+    const storage = new Storage();
+
+    storage.setData({ history: ["https://github.com/example/project"] });
+
+    const first = storage.getData();
+    first.history.push("https://github.com/example/other");
+
+    const second = storage.getData();
+
+    expect(second.history).toStrictEqual(["https://github.com/example/project"]);
   });
 
   test("updates localStorage flags independently", () => {
@@ -124,6 +161,7 @@ describe("Storage", () => {
       link: "  https://github.com/example/project  ",
       token: "  ghp_completeToken  ",
       theme: "light-theme",
+      history: ["  https://github.com/example/project  ", "https://github.com/example/other"],
       localStorage: { saveLink: true, saveToken: true },
     });
 
@@ -133,6 +171,7 @@ describe("Storage", () => {
       link: "https://github.com/example/project",
       theme: "light-theme",
       token: "ghp_completeToken",
+      history: ["https://github.com/example/project", "https://github.com/example/other"],
       localStorage: { saveLink: true, saveToken: true },
     });
   });
@@ -144,6 +183,7 @@ describe("Storage", () => {
       link: "https://github.com/example/project",
       token: "ghp_token",
       theme: "light-theme",
+      history: ["https://github.com/example/project"],
       localStorage: { saveLink: true, saveToken: true },
     });
 
