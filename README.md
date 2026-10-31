@@ -17,7 +17,7 @@
 - Pan and zoom the commit graph with mouse or touch controls.
 - Browse the default branch or switch to another branch using the branch selector.
 - Hover over or focus a commit for a summary; click it to inspect its description, author, date, hash, and changed files.
-- Refresh the selected branch and switch between light and dark themes.
+- Refresh the selected branch and switch between system, light, and dark themes.
 - Configure an optional GitHub personal access token and view API usage in Settings.
 - Choose whether to remember the repository URL and token between visits.
 
@@ -45,7 +45,7 @@ Open the local URL printed by Vite. The project uses the `/GitMap/` base path, s
 2. Browse the default branch, or choose another branch from the branch selector below the graph.
 3. Drag the canvas to pan. Use the `+` and `-` buttons, mouse wheel, or touch gestures to zoom.
 4. Hover over or focus a commit for a summary. Click it for details and changed files; hover over the author in the details to see their email when available.
-5. Use the header buttons to refresh the graph, change the theme, or open Settings.
+5. Use the header buttons to refresh the graph, cycle the theme (System, Dark, Light), or open Settings. System follows your operating system preference and updates automatically.
 6. In Settings, configure a token, choose whether to save the repository URL or token, and check API usage and token status.
 
 ### Recent repositories

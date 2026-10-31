@@ -3,7 +3,7 @@ import { Storage } from "@/js/data/storage";
 
 const DEFAULT_DATA = {
   link: "",
-  theme: "dark-theme",
+  theme: "system",
   token: "",
   history: [],
   localStorage: {
@@ -151,7 +151,15 @@ describe("Storage", () => {
 
     expect(result.token).toBe("ghp_next");
     expect(result.localStorage).toStrictEqual({ saveLink: true, saveToken: true });
-    expect(result.theme).toBe("dark-theme");
+    expect(result.theme).toBe("system");
+  });
+
+  test.each(["system", "dark-theme", "light-theme"])("accepts the %s theme", (theme) => {
+    const storage = new Storage();
+
+    storage.setData({ theme });
+
+    expect(storage.getData().theme).toBe(theme);
   });
 
   test("applies a complete settings update in one call", () => {

@@ -97,6 +97,18 @@ describe("LocalStorageController", () => {
     expect(result.data.history).toStrictEqual(["https://github.com/example/project"]);
   });
 
+  test("persists the system theme", async () => {
+    storage.setData({ theme: "system", localStorage: { saveLink: false, saveToken: false } });
+
+    await controller.save();
+
+    const restoredStorage = new Storage();
+    const restored = new LocalStorageController(restoredStorage, notifications, keyStore);
+    const result = await restored.init();
+
+    expect(result.data.theme).toBe("system");
+  });
+
   test("migrates a legacy plaintext token", async () => {
     globalThis.localStorage.setItem(
       "GitMap",

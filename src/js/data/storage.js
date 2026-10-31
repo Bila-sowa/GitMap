@@ -3,7 +3,7 @@ import { config } from "@/js/api/config";
 
 class Storage {
   #link = "";
-  #theme = "dark-theme";
+  #theme = "system";
   #token = "";
   #history = [];
   #localStorage = {
@@ -64,10 +64,10 @@ class Storage {
 
     if (data.theme !== undefined) {
       const theme = typeof data.theme === "string" ? data.theme.trim() : data.theme;
-      const isValid = theme === "light-theme" || theme === "dark-theme";
-      this.#theme = isValid ? theme : "dark-theme";
+      const isValid = theme === "system" || theme === "light-theme" || theme === "dark-theme";
+      this.#theme = isValid ? theme : "system";
       if (!isValid) {
-        throw new TypeError(`setData: invalid theme "${theme}", expected "light-theme" or "dark-theme"`);
+        throw new TypeError(`setData: invalid theme "${theme}", expected "system", "light-theme", or "dark-theme"`);
       }
     }
 
@@ -90,7 +90,7 @@ class Storage {
 
   reset() {
     this.#link = "";
-    this.#theme = "dark-theme";
+    this.#theme = "system";
     this.#token = "";
     this.#history = [];
     this.#localStorage = {

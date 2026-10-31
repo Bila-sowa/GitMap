@@ -20,6 +20,7 @@ export default mergeConfig(
               "tests/data/encryptionKeyStore.test.js",
               "tests/controllers/localStorage.test.js",
               "tests/controllers/link.test.js",
+              "tests/controllers/theme.test.js",
               "tests/utils/escapeHTML.test.js",
               "tests/utils/sanitizeMarkdown.test.js",
               "tests/utils/notify.test.js",

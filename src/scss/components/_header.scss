@@ -22,6 +22,18 @@ header {
       justify-content: center;
       align-items: center;
     }
+
+    .theme-button {
+      .theme-icon {
+        display: none;
+      }
+
+      &[data-theme-state="system"] .theme-icon-system,
+      &[data-theme-state="dark"] .theme-icon-dark,
+      &[data-theme-state="light"] .theme-icon-light {
+        display: block;
+      }
+    }
   }
 
   .nav-link-input-container {
