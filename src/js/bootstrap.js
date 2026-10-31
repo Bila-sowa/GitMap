@@ -22,7 +22,7 @@ async function bootstrap() {
     await loadConfig();
     const dom = getDomElements();
     const localStorage = new LocalStorageController(storage, notifications);
-    localStorage.init();
+    await localStorage.init();
 
     const { default: gitHubClient } = await import("./api/gitHubClient");
     const tokenResult = storage.getData().token ? await gitHubClient.setToken(storage.getData().token) : { success: true };

@@ -1,39 +1,53 @@
+import { decrypt, encrypt, isEncryptedValue } from "../utils/cipher.js";
+import encryptionKeyStore from "../data/encryptionKeyStore.js";
+
+const STORAGE_KEY = "GitMap";
+
 class LocalStorageController {
   #storage;
   #notifications;
+  #keyStore;
+  #writeQueue = Promise.resolve();
 
-  constructor(storage, notifications) {
+  constructor(storage, notifications, keyStore = encryptionKeyStore) {
     this.#storage = storage;
     this.#notifications = notifications;
+    this.#keyStore = keyStore;
   }
 
-  init() {
-    return this.load();
+  async init() {
+    return await this.load();
   }
 
   destroy() {}
 
-  save() {
-    const currentData = this.#storage.getData();
-    const dataToSave = {
-      ...currentData,
-      localStorage: { ...currentData.localStorage },
-      link: currentData.localStorage.saveLink ? currentData.link : "",
-      token: currentData.localStorage.saveToken ? currentData.token : "",
-    };
+  async save() {
+    return await this.#enqueue(async () => {
+      const currentData = this.#storage.getData();
+      const encrypted = await this.#encryptToken(currentData);
 
-    try {
-      globalThis.localStorage.setItem("GitMap", JSON.stringify(dataToSave));
-      return { success: true };
-    } catch (err) {
-      this.#notifications.notify("Unable to save data in local storage.", "error");
-      return { error: err.name, success: false };
-    }
+      if (!encrypted.success) return { error: encrypted.error, success: false };
+
+      const dataToSave = {
+        ...currentData,
+        localStorage: { ...currentData.localStorage },
+        link: currentData.localStorage.saveLink ? currentData.link : "",
+        token: encrypted.token,
+      };
+
+      try {
+        globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        return { success: true };
+      } catch (err) {
+        this.#notifications.notify("Unable to save data in local storage.", "error");
+        return { error: err.name, success: false };
+      }
+    });
   }
 
   get() {
     try {
-      const value = globalThis.localStorage.getItem("GitMap");
+      const value = globalThis.localStorage.getItem(STORAGE_KEY);
       let parse = {};
 
       if (value) parse = JSON.parse(value);
@@ -52,7 +66,7 @@ class LocalStorageController {
     }
   }
 
-  load() {
+  async load() {
     const result = this.get();
     if (!result.success || !result.data || !Object.keys(result.data).length) {
       return { success: false, data: null };
@@ -74,6 +88,7 @@ class LocalStorageController {
     }
 
     const { localStorage: ls } = this.#storage.getData();
+    let shouldRewrite = false;
 
     if (ls.saveLink && data.link) {
       try {
@@ -84,14 +99,82 @@ class LocalStorageController {
     }
 
     if (ls.saveToken && data.token) {
-      try {
-        this.#storage.setData({ token: data.token });
-      } catch {
-        // Invalid stored token is ignored to prevent initialization failure
+      const token = await this.#decryptToken(data.token);
+
+      if (token === null) {
+        shouldRewrite = true;
+      } else {
+        try {
+          this.#storage.setData({ token });
+        } catch {
+          shouldRewrite = true;
+        }
+
+        if (!isEncryptedValue(data.token)) shouldRewrite = true;
       }
+    } else if (data.token) {
+      shouldRewrite = true;
     }
 
+    if (shouldRewrite) await this.save();
+
     return { success: true, data: this.#storage.getData() };
+  }
+
+  async #encryptToken(currentData) {
+    if (!currentData.localStorage.saveToken || !currentData.token) return { success: true, token: "" };
+
+    try {
+      const key = await this.#keyStore.getKey();
+
+      return { success: true, token: await encrypt(currentData.token, key) };
+    } catch (err) {
+      this.#notifications.notify("Unable to encrypt the token for local storage.", "error");
+      this.#removePlaintextToken();
+      return { error: err.name, success: false, token: "" };
+    }
+  }
+
+  #removePlaintextToken() {
+    const stored = this.get();
+
+    if (!stored.success || !stored.data || !stored.data.token || isEncryptedValue(stored.data.token)) return;
+
+    try {
+      globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...stored.data, token: "" }));
+    } catch {
+      // The failed save already reports the storage error to the user.
+    }
+  }
+
+  async #decryptToken(storedToken) {
+    if (typeof storedToken === "string") return storedToken;
+
+    if (!isEncryptedValue(storedToken)) {
+      this.#notifications.notify("Invalid saved token data. Please enter the token again.", "error");
+      return null;
+    }
+
+    try {
+      const key = await this.#keyStore.getKey();
+
+      return await decrypt(storedToken, key);
+    } catch (err) {
+      console.error("Failed to decrypt the saved token:", err);
+      this.#notifications.notify("Unable to decrypt the saved token. Please enter the token again.", "error");
+      return null;
+    }
+  }
+
+  #enqueue(task) {
+    const result = this.#writeQueue.then(task, task);
+
+    this.#writeQueue = result.then(
+      () => undefined,
+      () => undefined,
+    );
+
+    return result;
   }
 }
 

@@ -52,7 +52,7 @@ class SettingsController {
 
       const rateLimitRes = await this.#gitHubClient.getRateLimitData({ signal });
       if (signal.aborted) return;
-      const modalHTML = generateSettingsModalHTML(rateLimitRes, tokenState, config.versionDetails, token);
+      const modalHTML = generateSettingsModalHTML(rateLimitRes, tokenState, config.versionDetails);
 
       if (!modalHTML) return;
 
@@ -63,6 +63,8 @@ class SettingsController {
       if (!modal) return;
 
       document.body.append(modal);
+      const tokenInput = modal.querySelector("#token-input");
+      if (tokenInput) tokenInput.value = token;
       this.#modal = modal;
       this.#closeModal = bindSettingsModalEvents(
         modal,

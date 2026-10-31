@@ -80,7 +80,7 @@ function renderRateLimitProgressBar(modal, rateLimitResponse) {
   progress.setAttribute("aria-valuenow", String(usedPerPercent));
 }
 
-const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails, token = "") => {
+const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails) => {
   const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse);
   const tokenStatus = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable;
   const rateLimitAvailable = rateLimitResponse?.success;
@@ -101,7 +101,7 @@ const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails
                         <h3>GitHub</h3>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <label for="token-input">GitHub rest api token</label>
-                            <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" value="${token}" placeholder="ghp_ or github_pat_">
+                            <input style="height: 30px" class="rounded-normal border-sm" type="password" id="token-input" placeholder="ghp_ or github_pat_">
                         </div>
                         <div class="${styles["settings-item"]} rounded-normal border-sm">
                             <span>GitHub Rest api token status:</span>
@@ -187,7 +187,7 @@ function bindSettingsModalEvents(modal = getSettingsModal(), onClose, { storage,
     renderTokenStatus(modal, tokenState);
 
     if (result.success && storage.getData().localStorage.saveToken) {
-      localStorage.save();
+      await localStorage.save();
     }
 
     const rateLimitResponse = await gitHubClient.getRateLimitData({ signal });
@@ -200,6 +200,7 @@ function bindSettingsModalEvents(modal = getSettingsModal(), onClose, { storage,
   function closeModal() {
     if (signal.aborted) return;
 
+    tokenInput.value = "";
     controller.abort();
     modal.remove();
     onClose?.();
@@ -217,14 +218,14 @@ function bindSettingsModalEvents(modal = getSettingsModal(), onClose, { storage,
     }
   }
 
-  function toggleSaveLink() {
+  async function toggleSaveLink() {
     storage.setData({ localStorage: { saveLink: saveLinkToggle.checked } });
-    localStorage.save();
+    await localStorage.save();
   }
 
-  function toggleSaveToken() {
+  async function toggleSaveToken() {
     storage.setData({ localStorage: { saveToken: saveTokenToggle.checked } });
-    localStorage.save();
+    await localStorage.save();
   }
 
   tokenInput.addEventListener("blur", saveToken, { signal });
