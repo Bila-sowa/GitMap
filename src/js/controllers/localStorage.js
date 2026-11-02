@@ -1,4 +1,5 @@
 import { decrypt, encrypt, isEncryptedValue } from '../utils/cipher.js'
+import { isNonEmptyString, isPlainObject, isString } from '../utils/matchers.js'
 import encryptionKeyStore from '../data/encryptionKeyStore.js'
 
 const STORAGE_KEY = 'GitMap'
@@ -52,7 +53,7 @@ class LocalStorageController {
 
       if (value) parse = JSON.parse(value)
 
-      if (!parse || typeof parse !== 'object' || Array.isArray(parse)) {
+      if (!isPlainObject(parse)) {
         return { data: {}, success: false }
       }
 
@@ -123,7 +124,7 @@ class LocalStorageController {
   }
 
   async #encryptToken(currentData) {
-    if (!currentData.localStorage.saveToken || !currentData.token)
+    if (!currentData.localStorage.saveToken || !isNonEmptyString(currentData.token))
       return { success: true, token: '' }
 
     try {
@@ -142,8 +143,7 @@ class LocalStorageController {
 
     if (
       !stored.success ||
-      !stored.data ||
-      !stored.data.token ||
+      !isNonEmptyString(stored.data?.token) ||
       isEncryptedValue(stored.data.token)
     )
       return
@@ -156,7 +156,7 @@ class LocalStorageController {
   }
 
   async #decryptToken(storedToken) {
-    if (typeof storedToken === 'string') return storedToken
+    if (isString(storedToken)) return storedToken
 
     if (!isEncryptedValue(storedToken)) {
       this.#notifications.notify('Invalid saved token data. Please enter the token again.', 'error')

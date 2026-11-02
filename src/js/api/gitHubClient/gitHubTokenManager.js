@@ -1,6 +1,7 @@
 import notifications from '@/js/utils/notificationManager'
 import storage from '@/js/data/storage'
 import GitHubTransport from './gitHubTransport'
+import { GITHUB_API_ORIGIN } from './gitHubConstants'
 
 class GitHubTokenManager {
   #headers
@@ -15,7 +16,7 @@ class GitHubTokenManager {
   }
 
   async #validateToken(token, options = {}) {
-    return this.#transport.getJson('https://api.github.com/rate_limit', {
+    return this.#transport.getJson(`${GITHUB_API_ORIGIN}/rate_limit`, {
       signal: options.signal,
       authorization: `Bearer ${token}`,
       parseJson: false,

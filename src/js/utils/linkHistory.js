@@ -1,10 +1,10 @@
 import parseGitHubUrl from '../api/gitHubClient/gitHubUrlParser.js'
 import { config } from '../api/config.js'
+import { isNonEmptyString } from './matchers.js'
+import { toArray, toTrimmedString } from './coercions.js'
 
 function getLinkKey(link) {
-  if (typeof link !== 'string') return ''
-
-  const trimmed = link.trim()
+  const trimmed = toTrimmedString(link)
 
   if (!trimmed) return ''
 
@@ -14,10 +14,10 @@ function getLinkKey(link) {
 }
 
 function addLinkToHistory(history, link) {
-  const current = Array.isArray(history)
-    ? history.filter((item) => typeof item === 'string' && item.trim()).map((item) => item.trim())
-    : []
-  const trimmed = typeof link === 'string' ? link.trim() : ''
+  const current = toArray(history)
+    .filter((item) => isNonEmptyString(item))
+    .map((item) => item.trim())
+  const trimmed = toTrimmedString(link)
 
   if (!trimmed) return current.slice(0, config.settings.linkHistory.LINK_HISTORY_LIMIT)
 

@@ -2,6 +2,7 @@ import { loadConfig } from './api/config.js'
 import storage from './data/storage.js'
 import notifications from './utils/notificationManager.js'
 import { getDomElements } from './controllers/dom.js'
+import { isNonEmptyString } from './utils/matchers.js'
 import { LocalStorageController } from './controllers/localStorage.js'
 import { CanvasController } from './controllers/canvas.js'
 import { ScaleController } from './controllers/scale.js'
@@ -25,8 +26,9 @@ async function bootstrap() {
     await localStorage.init()
 
     const { default: gitHubClient } = await import('./api/gitHubClient')
-    const tokenResult = storage.getData().token
-      ? await gitHubClient.setToken(storage.getData().token)
+    const { token } = storage.getData()
+    const tokenResult = isNonEmptyString(token)
+      ? await gitHubClient.setToken(token)
       : { success: true }
     const canvas = new CanvasController(dom.viewport, dom.canvas)
     const scale = new ScaleController(
@@ -75,7 +77,7 @@ async function bootstrap() {
     }
     application = app
 
-    if (storage.getData().link && tokenResult.success) graph.render()
+    if (isNonEmptyString(storage.getData().link) && tokenResult.success) graph.render()
 
     return application
   })().catch((error) => {

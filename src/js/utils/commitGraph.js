@@ -1,13 +1,14 @@
-const getParentShas = (commit) => {
-  if (!Array.isArray(commit?.parents)) return []
+import { isNonEmptyString, isPositiveInteger } from './matchers.js'
+import { toArray } from './coercions.js'
 
-  return commit.parents.filter((sha) => typeof sha === 'string' && sha)
+const getParentShas = (commit) => {
+  return toArray(commit?.parents).filter((sha) => isNonEmptyString(sha))
 }
 
 const buildCommitGraphLayout = (commits, renderLimit = commits?.length) => {
-  const commitList = Array.isArray(commits) ? commits : []
+  const commitList = toArray(commits)
   const parsedLimit = Number.parseInt(renderLimit, 10)
-  const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : commitList.length
+  const limit = isPositiveInteger(parsedLimit) ? parsedLimit : commitList.length
   const visibleCommits = commitList.slice(0, limit)
   const activeLanes = []
   const nodes = []

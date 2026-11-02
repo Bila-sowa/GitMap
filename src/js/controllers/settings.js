@@ -6,6 +6,7 @@ import {
   getTokenStatusState,
 } from '../components/SettingsModal/index.js'
 import notifications from '../utils/notificationManager.js'
+import { isNonEmptyString } from '../utils/matchers.js'
 
 class SettingsController {
   #button
@@ -48,7 +49,7 @@ class SettingsController {
 
     try {
       const token = this.#storage.getData().token
-      const tokenResult = token
+      const tokenResult = isNonEmptyString(token)
         ? await this.#gitHubClient.setToken(token, { signal })
         : { success: true }
       if (signal.aborted) return

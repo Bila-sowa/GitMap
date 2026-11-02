@@ -1,5 +1,7 @@
 import { config } from '../api/config.js'
 import { addLinkToHistory } from '../utils/linkHistory.js'
+import { isNonEmptyString } from '../utils/matchers.js'
+import { toTrimmedString } from '../utils/coercions.js'
 
 class LinkController {
   #input
@@ -62,7 +64,7 @@ class LinkController {
     const fragment = document.createDocumentFragment()
 
     this.#storage.getData().history.forEach((link, index) => {
-      if (typeof link !== 'string' || !link.trim()) return
+      if (!isNonEmptyString(link)) return
 
       const item = document.createElement('li')
 
@@ -142,7 +144,7 @@ class LinkController {
   #selectHistoryItem(item) {
     const link = item.dataset.link
 
-    if (!link) return
+    if (!isNonEmptyString(link)) return
 
     this.#isSelectingHistory = true
     this.#input.value = link
@@ -201,7 +203,7 @@ class LinkController {
         }
       }
 
-      this.#setLink(this.#input.value.trim())
+      this.#setLink(toTrimmedString(this.#input.value))
       return
     }
 
@@ -219,7 +221,7 @@ class LinkController {
 
     if (this.#isSelectingHistory) return
 
-    const value = this.#input.value.trim()
+    const value = toTrimmedString(this.#input.value)
 
     if (value) this.#setLink(value)
   }

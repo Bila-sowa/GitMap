@@ -1,5 +1,6 @@
 import notifications from './notificationManager'
 import getRandomID from './randomId'
+import { isNonEmptyString, isPositiveInteger } from './matchers.js'
 
 const modalPositioning = new WeakMap()
 
@@ -78,9 +79,9 @@ function stopModalPositioning(modal) {
 }
 
 const truncateTitle = (title, wordCount = 5) => {
-  if (typeof title !== 'string' || !title.trim()) return ''
+  if (!isNonEmptyString(title)) return ''
 
-  const validWordCount = Number.isInteger(wordCount) && wordCount > 0 ? wordCount : 5
+  const validWordCount = isPositiveInteger(wordCount) ? wordCount : 5
   const words = title.trim().split(/\s+/)
   return words.length > validWordCount ? words.slice(0, validWordCount).join(' ') + '...' : title
 }
@@ -88,7 +89,7 @@ const truncateTitle = (title, wordCount = 5) => {
 function appendHTML(HTML) {
   const body = document.body
 
-  if (!HTML | !body) return
+  if (!isNonEmptyString(HTML) || !body) return
 
   body.insertAdjacentHTML('beforeend', HTML)
 }

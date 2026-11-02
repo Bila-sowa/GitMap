@@ -1,4 +1,7 @@
 import notifications from '@/js/utils/notificationManager'
+import { isFiniteNumber } from '@/js/utils/matchers'
+import { createRateLimitData, EMPTY_RATE_LIMIT_DATA } from '@/js/utils/rateLimit'
+import { GITHUB_API_ORIGIN } from './gitHubConstants'
 
 class GitHubRateLimiter {
   #transport
@@ -22,15 +25,11 @@ class GitHubRateLimiter {
     const limit = Number(limitHeader)
     const used = usedHeader === null ? limit - Number(remainingHeader) : Number(usedHeader)
 
-    if (!Number.isFinite(limit) || limit <= 0 || !Number.isFinite(used) || used < 0) return
+    if (!isFiniteNumber(limit) || limit <= 0 || !isFiniteNumber(used) || used < 0) return
 
     const response = {
       success: true,
-      data: {
-        limitPerNumber: limit,
-        usedPerNumber: used,
-        usedPerPercent: Number(((used / limit) * 100).toFixed(2)),
-      },
+      data: createRateLimitData(limit, used),
     }
 
     const wasHigh = this.#latestResponse?.data.usedPerPercent >= 70
@@ -45,7 +44,7 @@ class GitHubRateLimiter {
   checkIsRateLimitHigh(response, percent = 70) {
     if (
       response?.success &&
-      typeof response.data?.usedPerPercent === 'number' &&
+      isFiniteNumber(response.data?.usedPerPercent) &&
       response.data.usedPerPercent >= percent &&
       response.data.usedPerPercent !== 100
     ) {
@@ -59,16 +58,15 @@ class GitHubRateLimiter {
   }
 
   async getRateLimitData(options = {}) {
-    const result = await this.#transport.getJson('https://api.github.com/rate_limit', {
+    const result = await this.#transport.getJson(`${GITHUB_API_ORIGIN}/rate_limit`, {
       signal: options.signal,
       error: 'Failed to fetch rate limit data',
       context: 'getRateLimitData',
     })
-    const emptyData = { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 }
 
     if (!result.success) {
       if (!result.cancelled) notifications.notify(result.error, 'error')
-      return { ...result, data: emptyData }
+      return { ...result, data: { ...EMPTY_RATE_LIMIT_DATA } }
     }
 
     const core = result.data?.resources?.core
@@ -82,19 +80,15 @@ class GitHubRateLimiter {
           message: 'Missing data.resources.core in GitHub rate_limit response',
           rawResponse: result.data,
         },
-        data: emptyData,
+        data: { ...EMPTY_RATE_LIMIT_DATA },
       }
     }
 
     const { limit, remaining, used } = core
-    const usedCount = used !== undefined ? used : limit - remaining
+    const usedCount = used ?? limit - remaining
     const response = {
       success: true,
-      data: {
-        limitPerNumber: limit,
-        usedPerNumber: usedCount,
-        usedPerPercent: limit > 0 ? Number(((usedCount / limit) * 100).toFixed(2)) : 0,
-      },
+      data: createRateLimitData(limit, usedCount),
     }
 
     this.#latestResponse = response

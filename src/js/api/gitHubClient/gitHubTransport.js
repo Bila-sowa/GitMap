@@ -1,5 +1,7 @@
 import { config } from '@/js/api/config'
+import { isAbortError } from '@/js/utils/matchers'
 import RequestControl from './requestControl'
+import { isGitHubApiUrl } from './gitHubConstants'
 
 class GitHubTransport {
   #headers
@@ -18,7 +20,7 @@ class GitHubTransport {
     const headers = { Accept: this.#headers.Accept }
 
     try {
-      if (new URL(url).origin === 'https://api.github.com' && authorization) {
+      if (isGitHubApiUrl(url) && authorization) {
         headers.Authorization = authorization
       }
     } catch (error) {
@@ -36,7 +38,7 @@ class GitHubTransport {
     if (!match) return null
 
     const nextUrl = new URL(match[1], url)
-    if (nextUrl.origin !== 'https://api.github.com') {
+    if (!isGitHubApiUrl(nextUrl)) {
       throw new Error('Invalid GitHub pagination URL')
     }
 
@@ -66,7 +68,7 @@ class GitHubTransport {
           headers: this.#getSafeHeaders(nextUrl, authorization),
           signal: request.signal,
         })
-        if (new URL(response.url || nextUrl).origin === 'https://api.github.com') {
+        if (isGitHubApiUrl(response.url || nextUrl)) {
           this.#onResponse?.(response)
         }
 
@@ -91,7 +93,7 @@ class GitHubTransport {
         return { success: false, timedOut: true, error: 'GitHub request timed out' }
       }
 
-      if (err.name === 'AbortError' || request.signal.aborted) {
+      if (isAbortError(err) || request.signal.aborted) {
         return { success: false, cancelled: true }
       }
 

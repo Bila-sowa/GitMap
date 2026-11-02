@@ -1,4 +1,4 @@
-import { isPlainObject } from './matchers.js'
+import { isNonEmptyString, isPlainObject, isString } from './matchers.js'
 
 const ALGORITHM = 'AES-GCM'
 const IV_LENGTH = 12
@@ -34,10 +34,8 @@ function isEncryptedValue(value) {
   return (
     isPlainObject(value) &&
     value.v === ENVELOPE_VERSION &&
-    typeof value.iv === 'string' &&
-    value.iv.length > 0 &&
-    typeof value.data === 'string' &&
-    value.data.length > 0
+    isNonEmptyString(value.iv) &&
+    isNonEmptyString(value.data)
   )
 }
 
@@ -48,7 +46,7 @@ function assertEncryptedValue(value) {
 }
 
 async function encrypt(plaintext, key) {
-  if (typeof plaintext !== 'string') {
+  if (!isString(plaintext)) {
     throw new TypeError(`encrypt: plaintext must be a string, got ${typeof plaintext}`)
   }
 

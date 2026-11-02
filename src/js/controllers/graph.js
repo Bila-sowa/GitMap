@@ -10,6 +10,7 @@ import {
 } from '../components/HoverCommitModal/index'
 import { generateLoader, removeLoader } from '../components/Loader/index.js'
 import { buildCommitGraphLayout } from '../utils/commitGraph.js'
+import { toTrimmedString } from '../utils/coercions.js'
 import notifications from '../utils/notificationManager.js'
 import { appendHTML, positionModalNearElement, truncateTitle } from '../utils/utils.js'
 
@@ -86,7 +87,7 @@ class GraphController {
   }
 
   async renderByBranch(branch) {
-    const branchName = typeof branch === 'string' ? branch.trim() : ''
+    const branchName = toTrimmedString(branch)
     const link = this.#storage.getData().link
 
     if (!link || !branchName || !this.#data?.success || this.#link !== link) {

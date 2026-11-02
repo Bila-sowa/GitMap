@@ -1,9 +1,10 @@
-import { isPlainObject } from '../utils/matchers'
+import { isBoolean, isPlainObject, isString } from '../utils/matchers'
+import { DEFAULT_THEME, isThemeState } from '../utils/theme'
 import { config } from '@/js/api/config'
 
 class Storage {
   #link = ''
-  #theme = 'system'
+  #theme = DEFAULT_THEME
   #token = ''
   #history = []
   #localStorage = {
@@ -27,14 +28,14 @@ class Storage {
     }
 
     if (data.link !== undefined) {
-      if (typeof data.link !== 'string') {
+      if (!isString(data.link)) {
         throw new TypeError(`setData: link must be a string, got ${typeof data.link}`)
       }
       this.#link = data.link.trim()
     }
 
     if (data.token !== undefined) {
-      if (typeof data.token !== 'string') {
+      if (!isString(data.token)) {
         throw new TypeError(`setData: token must be a string, got ${typeof data.token}`)
       }
 
@@ -42,18 +43,14 @@ class Storage {
     }
 
     if (data.localStorage !== undefined) {
-      if (
-        data.localStorage === null ||
-        typeof data.localStorage !== 'object' ||
-        Array.isArray(data.localStorage)
-      ) {
+      if (!isPlainObject(data.localStorage)) {
         throw new TypeError('setData: localStorage must be a plain object')
       }
 
       const { saveLink, saveToken } = data.localStorage
 
       if (saveLink !== undefined) {
-        if (typeof saveLink !== 'boolean') {
+        if (!isBoolean(saveLink)) {
           throw new TypeError(
             `setData: localStorage.saveLink must be a boolean, got ${typeof saveLink}`,
           )
@@ -61,7 +58,7 @@ class Storage {
         this.#localStorage.saveLink = saveLink
       }
       if (saveToken !== undefined) {
-        if (typeof saveToken !== 'boolean') {
+        if (!isBoolean(saveToken)) {
           throw new TypeError(
             `setData: localStorage.saveToken must be a boolean, got ${typeof saveToken}`,
           )
@@ -71,9 +68,9 @@ class Storage {
     }
 
     if (data.theme !== undefined) {
-      const theme = typeof data.theme === 'string' ? data.theme.trim() : data.theme
-      const isValid = theme === 'system' || theme === 'light-theme' || theme === 'dark-theme'
-      this.#theme = isValid ? theme : 'system'
+      const theme = isString(data.theme) ? data.theme.trim() : data.theme
+      const isValid = isThemeState(theme)
+      this.#theme = isValid ? theme : DEFAULT_THEME
       if (!isValid) {
         throw new TypeError(
           `setData: invalid theme "${theme}", expected "system", "light-theme", or "dark-theme"`,
@@ -87,7 +84,7 @@ class Storage {
       }
 
       const history = data.history.map((item) => {
-        if (typeof item !== 'string') {
+        if (!isString(item)) {
           throw new TypeError(`setData: history items must be strings, got ${typeof item}`)
         }
 
@@ -102,7 +99,7 @@ class Storage {
 
   reset() {
     this.#link = ''
-    this.#theme = 'system'
+    this.#theme = DEFAULT_THEME
     this.#token = ''
     this.#history = []
     this.#localStorage = {

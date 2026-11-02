@@ -1,14 +1,9 @@
-const THEME_STATES = ['system', 'dark-theme', 'light-theme']
-const DEFAULT_THEME = 'system'
+import { DEFAULT_THEME, normalizeTheme, THEME_STATES } from '../utils/theme.js'
 
 const THEME_DETAILS = {
   system: { icon: 'system', label: 'System', next: 'dark' },
   'dark-theme': { icon: 'dark', label: 'Dark', next: 'light' },
   'light-theme': { icon: 'light', label: 'Light', next: 'system' },
-}
-
-function normalizeTheme(theme) {
-  return THEME_STATES.includes(theme) ? theme : DEFAULT_THEME
 }
 
 class ThemeController {

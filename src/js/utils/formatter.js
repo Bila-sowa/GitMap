@@ -1,42 +1,50 @@
+import { isString } from './matchers.js'
+
+const parseDate = (value) => {
+  if (!value) return null
+
+  const parsedDate = new Date(value)
+
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate
+}
+
 class Formatter {
   getCleanRepoUrl(repoUrl) {
-    if (!repoUrl || typeof repoUrl !== 'string') return ''
+    if (!isString(repoUrl)) return ''
     return repoUrl.replace(/\.git\/?$/, '').replace(/\/$/, '')
   }
 
   getFormattedTitle(commitName) {
-    if (!commitName || typeof commitName !== 'string') return ''
+    if (!isString(commitName)) return ''
     return commitName.split('\n').slice(0, 1).join('\n')
   }
 
   getFormattedDescription(commitName) {
-    if (!commitName || typeof commitName !== 'string') return ''
+    if (!isString(commitName)) return ''
     const parts = commitName.split('\n')
     if (parts.length <= 1) return ''
     return parts.slice(1).join('\n')
   }
 
   getDateInLocaleString(date, locales, options) {
-    if (!date) return 'Invalid Date'
-    const parsedDate = new Date(date)
-    if (isNaN(parsedDate.getTime())) return 'Invalid Date'
+    const parsedDate = parseDate(date)
+    if (!parsedDate) return 'Invalid Date'
     return parsedDate.toLocaleString(locales, options)
   }
 
   getFormattedDate(date, locales, options) {
-    if (!date) return 'Invalid Date'
-    const parsedDate = new Date(date)
-    if (isNaN(parsedDate.getTime())) return 'Invalid Date'
+    const parsedDate = parseDate(date)
+    if (!parsedDate) return 'Invalid Date'
     return new Intl.DateTimeFormat(locales, options).format(parsedDate)
   }
 
   getShortHash(hash) {
-    if (!hash || typeof hash !== 'string') return ''
+    if (!isString(hash)) return ''
     return hash.slice(0, 7)
   }
 
   getFormattedExtension(fileName) {
-    if (typeof fileName !== 'string' || !fileName) return 'file'
+    if (!isString(fileName) || !fileName) return 'file'
 
     const baseName = fileName.split(/[\\/]/).pop().toLowerCase()
     const extensionSeparator = baseName.lastIndexOf('.')
@@ -47,7 +55,7 @@ class Formatter {
   }
 
   getShortStatus(fileStatus) {
-    if (!fileStatus || typeof fileStatus !== 'string') return ''
+    if (!isString(fileStatus)) return ''
     return fileStatus.slice(0, 1).toUpperCase()
   }
 }

@@ -1,3 +1,5 @@
+import { isNonEmptyString } from '../utils/matchers.js'
+
 class DropDown {
   #trigger
   #list
@@ -148,7 +150,7 @@ class DropDown {
     const fragment = document.createDocumentFragment()
 
     branches.forEach((branch) => {
-      if (typeof branch !== 'string' || !branch.trim()) return
+      if (!isNonEmptyString(branch)) return
 
       const item = document.createElement('li')
       item.className = 'branch-dropdown-item'

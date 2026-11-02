@@ -1,4 +1,7 @@
+import { normalizeRateLimitData } from '@/js/utils/rateLimit'
 import styles from './styles.module.scss'
+
+const UNAVAILABLE_RATE_LIMIT_TITLE = 'Rate limit data is unavailable.'
 
 const tokenStatusDetails = {
   checking: {
@@ -31,17 +34,6 @@ function getTokenStatusState(tokenResult, hasToken) {
   return 'unavailable'
 }
 
-function getRateLimitData(rateLimitResponse) {
-  const rateLimit = rateLimitResponse?.data || {}
-  const limitPerNumber = Number.isFinite(rateLimit.limitPerNumber) ? rateLimit.limitPerNumber : 0
-  const usedPerNumber = Number.isFinite(rateLimit.usedPerNumber) ? rateLimit.usedPerNumber : 0
-  const usedPerPercent = Number.isFinite(rateLimit.usedPerPercent)
-    ? Math.min(Math.max(rateLimit.usedPerPercent, 0), 100)
-    : 0
-
-  return { limitPerNumber, usedPerNumber, usedPerPercent }
-}
-
 function renderTokenStatus(modal, tokenState) {
   const status = modal.querySelector('#token-status')
   const details = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable
@@ -62,7 +54,7 @@ function renderRateLimitProgressBar(modal, rateLimitResponse) {
   if (!progress || !bar) return
 
   if (!rateLimitResponse?.success) {
-    const title = 'Rate limit data is unavailable.'
+    const title = UNAVAILABLE_RATE_LIMIT_TITLE
 
     bar.style.width = '0%'
     progress.title = title
@@ -71,7 +63,9 @@ function renderRateLimitProgressBar(modal, rateLimitResponse) {
     return
   }
 
-  const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse)
+  const { usedPerNumber, limitPerNumber, usedPerPercent } = normalizeRateLimitData(
+    rateLimitResponse.data,
+  )
   const title = `Used: ${usedPerNumber} / ${limitPerNumber}`
 
   bar.style.width = `${usedPerPercent}%`
@@ -81,9 +75,14 @@ function renderRateLimitProgressBar(modal, rateLimitResponse) {
 }
 
 const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails) => {
-  const { usedPerNumber, limitPerNumber, usedPerPercent } = getRateLimitData(rateLimitResponse)
+  const { usedPerNumber, limitPerNumber, usedPerPercent } = normalizeRateLimitData(
+    rateLimitResponse?.data,
+  )
   const tokenStatus = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable
   const rateLimitAvailable = rateLimitResponse?.success
+  const rateLimitLabel = rateLimitAvailable
+    ? `Used: ${usedPerNumber} / ${limitPerNumber}`
+    : UNAVAILABLE_RATE_LIMIT_TITLE
 
   const notStableMessage =
     "This version provides no guarantees regarding your security and the program's operability."
@@ -135,12 +134,12 @@ const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails
                                 id="settings-rest-api-limit-progress"
                                 class="${styles['settings-rest-api-limit-progress']}
                                 rounded-full border-normal"
-                                title="${rateLimitAvailable ? `Used: ${usedPerNumber} / ${limitPerNumber}` : 'Rate limit data is unavailable.'}"
+                                title="${rateLimitLabel}"
                                 role="progressbar"
                                 aria-valuemin="0"
                                 aria-valuemax="100"
                                 ${rateLimitAvailable ? `aria-valuenow="${usedPerPercent}"` : ''}
-                                aria-label="${rateLimitAvailable ? `Used: ${usedPerNumber} / ${limitPerNumber}` : 'Rate limit data is unavailable.'}"
+                                aria-label="${rateLimitLabel}"
                             >
                                 <span id="settings-rest-api-limit-bar"
                                     class="${styles['settings-rest-api-limit-bar']}"

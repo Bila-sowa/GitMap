@@ -1,6 +1,39 @@
 import formatter from '@/js/utils/formatter'
-import { isNonEmptyString, isRecord, isValidDate } from '@/js/utils/matchers'
+import { isFiniteNumber, isNonEmptyString, isRecord, isValidDate } from '@/js/utils/matchers'
+import { toArray } from '@/js/utils/coercions'
 import { escapeHTML } from '@/js/utils/utils'
+
+const isValidCommitAuthor = (author) => {
+  return (
+    isRecord(author) &&
+    isNonEmptyString(author.name) &&
+    isNonEmptyString(author.email) &&
+    isValidDate(author.date)
+  )
+}
+
+const isValidCommit = (commit) => {
+  const commitData = commit?.commit
+
+  return (
+    isRecord(commit) &&
+    isNonEmptyString(commit.sha) &&
+    isRecord(commitData) &&
+    isNonEmptyString(commitData.message) &&
+    isValidCommitAuthor(commitData.author) &&
+    (commit.author === null || commit.author === undefined || isRecord(commit.author))
+  )
+}
+
+const isValidCommitFile = (file) => {
+  return (
+    isRecord(file) &&
+    isNonEmptyString(file.filename) &&
+    isNonEmptyString(file.status) &&
+    isFiniteNumber(file.additions) &&
+    isFiniteNumber(file.deletions)
+  )
+}
 
 class GitHubDataParser {
   #createInvalidDataResult(method, rawResponse) {
@@ -40,22 +73,12 @@ class GitHubDataParser {
     const commitsDetails = []
 
     for (const commit of commits) {
-      const commitData = commit?.commit
-      const author = commitData?.author
-
-      if (
-        !isRecord(commit) ||
-        !isNonEmptyString(commit.sha) ||
-        !isRecord(commitData) ||
-        !isNonEmptyString(commitData.message) ||
-        !isRecord(author) ||
-        !isNonEmptyString(author.name) ||
-        !isNonEmptyString(author.email) ||
-        !isValidDate(author.date) ||
-        (commit.author !== null && commit.author !== undefined && !isRecord(commit.author))
-      ) {
+      if (!isValidCommit(commit)) {
         return this.#createInvalidDataResult('parseCommitsData', commit)
       }
+
+      const commitData = commit.commit
+      const author = commitData.author
 
       const formattedTitle = formatter.getFormattedTitle(commitData.message)
       const formattedDescription = formatter.getFormattedDescription(commitData.message)
@@ -65,20 +88,18 @@ class GitHubDataParser {
         author: {
           name: escapeHTML(author.name),
           email: escapeHTML(author.email),
-          avatar: typeof commit.author?.avatar_url === 'string' ? commit.author.avatar_url : '',
-          url: typeof commit.author?.html_url === 'string' ? commit.author.html_url : '',
+          avatar: isNonEmptyString(commit.author?.avatar_url) ? commit.author.avatar_url : '',
+          url: isNonEmptyString(commit.author?.html_url) ? commit.author.html_url : '',
           date: author.date,
         },
         title: escapeHTML(formattedTitle),
         description: formattedDescription ? escapeHTML(formattedDescription) : '',
         hash: shortHash,
-        url: typeof commit.html_url === 'string' ? commit.html_url : '',
+        url: isNonEmptyString(commit.html_url) ? commit.html_url : '',
         sha: commit.sha,
-        parents: Array.isArray(commit.parents)
-          ? commit.parents
-              .map((parent) => parent?.sha)
-              .filter((sha) => typeof sha === 'string' && sha)
-          : [],
+        parents: toArray(commit.parents)
+          .map((parent) => parent?.sha)
+          .filter((sha) => isNonEmptyString(sha)),
       }
 
       commitsDetails.push(details)
@@ -99,7 +120,7 @@ class GitHubDataParser {
     if (!commitsResult.success) return commitsResult
 
     const branchesDetails = [...branchesResult.branchesDetails]
-    const hasDefaultBranch = typeof raw.defaultBranch === 'string' && raw.defaultBranch.trim()
+    const hasDefaultBranch = isNonEmptyString(raw.defaultBranch)
     const defaultBranch = hasDefaultBranch ? raw.defaultBranch.trim() : branchesDetails[0]
 
     if (defaultBranch && !branchesDetails.includes(defaultBranch)) {
@@ -123,13 +144,7 @@ class GitHubDataParser {
     const formattedData = []
 
     for (const file of files) {
-      if (
-        !isRecord(file) ||
-        !isNonEmptyString(file.filename) ||
-        !isNonEmptyString(file.status) ||
-        !Number.isFinite(file.additions) ||
-        !Number.isFinite(file.deletions)
-      ) {
+      if (!isValidCommitFile(file)) {
         return this.#createInvalidDataResult('parseCommitFilesData', file)
       }
 

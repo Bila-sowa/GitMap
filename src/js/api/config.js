@@ -1,3 +1,12 @@
+import {
+  isBoolean,
+  isIntegerInRange,
+  isNonEmptyString,
+  isNumberInRange,
+  isPlainObject,
+  isPositiveInteger,
+} from '@/js/utils/matchers'
+
 const getDefaultConfig = () => {
   return {
     name: 'GitMap',
@@ -31,85 +40,85 @@ const getDefaultConfig = () => {
   }
 }
 
+const resolveConfigValue = (value, isValid, fallback) => {
+  return isValid(value) ? value : fallback
+}
+
 const mergeConfigs = (invalidConfig) => {
   const defaultConfig = getDefaultConfig()
-  const config =
-    invalidConfig && typeof invalidConfig === 'object' && !Array.isArray(invalidConfig)
-      ? invalidConfig
-      : {}
+  const config = isPlainObject(invalidConfig) ? invalidConfig : {}
 
   return {
-    name: typeof config.name === 'string' && config.name.trim() ? config.name : defaultConfig.name,
-    debug: typeof config.debug === 'boolean' ? config.debug : defaultConfig.debug,
+    name: resolveConfigValue(config.name, isNonEmptyString, defaultConfig.name),
+    debug: resolveConfigValue(config.debug, isBoolean, defaultConfig.debug),
     versionDetails: {
-      version:
-        typeof config.versionDetails?.version === 'string' && config.versionDetails.version.trim()
-          ? config.versionDetails.version
-          : defaultConfig.versionDetails.version,
-      versionType:
-        typeof config.versionDetails?.versionType === 'string' &&
-        config.versionDetails.versionType.trim()
-          ? config.versionDetails.versionType
-          : defaultConfig.versionDetails.versionType,
-      versionIsStable:
-        typeof config.versionDetails?.versionIsStable === 'boolean'
-          ? config.versionDetails.versionIsStable
-          : defaultConfig.versionDetails.versionIsStable,
+      version: resolveConfigValue(
+        config.versionDetails?.version,
+        isNonEmptyString,
+        defaultConfig.versionDetails.version,
+      ),
+      versionType: resolveConfigValue(
+        config.versionDetails?.versionType,
+        isNonEmptyString,
+        defaultConfig.versionDetails.versionType,
+      ),
+      versionIsStable: resolveConfigValue(
+        config.versionDetails?.versionIsStable,
+        isBoolean,
+        defaultConfig.versionDetails.versionIsStable,
+      ),
     },
 
     settings: {
       graph: {
-        renderLimit:
-          Number.isInteger(config.settings?.graph?.renderLimit) &&
-          config.settings.graph.renderLimit > 0
-            ? config.settings.graph.renderLimit
-            : defaultConfig.settings.graph.renderLimit,
+        renderLimit: resolveConfigValue(
+          config.settings?.graph?.renderLimit,
+          isPositiveInteger,
+          defaultConfig.settings.graph.renderLimit,
+        ),
       },
       gitHub: {
-        REQUEST_TIMEOUT_MS:
-          Number.isInteger(config.settings?.gitHub?.REQUEST_TIMEOUT_MS) &&
-          config.settings.gitHub.REQUEST_TIMEOUT_MS >= 1000 &&
-          config.settings.gitHub.REQUEST_TIMEOUT_MS <= 120000
-            ? config.settings.gitHub.REQUEST_TIMEOUT_MS
-            : defaultConfig.settings.gitHub.REQUEST_TIMEOUT_MS,
+        REQUEST_TIMEOUT_MS: resolveConfigValue(
+          config.settings?.gitHub?.REQUEST_TIMEOUT_MS,
+          (value) => isIntegerInRange(value, 1000, 120000),
+          defaultConfig.settings.gitHub.REQUEST_TIMEOUT_MS,
+        ),
       },
       notifications: {
-        showNotifications:
-          typeof config.settings?.notifications?.showNotifications === 'boolean'
-            ? config.settings.notifications.showNotifications
-            : defaultConfig.settings.notifications.showNotifications,
-        COOLDOWN_MS:
-          Number.isFinite(config.settings?.notifications?.COOLDOWN_MS) &&
-          config.settings.notifications.COOLDOWN_MS >= 0 &&
-          config.settings.notifications.COOLDOWN_MS <= 60000
-            ? config.settings.notifications.COOLDOWN_MS
-            : defaultConfig.settings.notifications.COOLDOWN_MS,
+        showNotifications: resolveConfigValue(
+          config.settings?.notifications?.showNotifications,
+          isBoolean,
+          defaultConfig.settings.notifications.showNotifications,
+        ),
+        COOLDOWN_MS: resolveConfigValue(
+          config.settings?.notifications?.COOLDOWN_MS,
+          (value) => isNumberInRange(value, 0, 60000),
+          defaultConfig.settings.notifications.COOLDOWN_MS,
+        ),
       },
       loader: {
-        showLoader:
-          typeof config.settings?.loader?.showLoader === 'boolean'
-            ? config.settings.loader.showLoader
-            : defaultConfig.settings.loader.showLoader,
-        CLEANUP_TIMEOUT_MS:
-          Number.isInteger(config.settings?.loader?.CLEANUP_TIMEOUT_MS) &&
-          config.settings.loader.CLEANUP_TIMEOUT_MS >= 1000 &&
-          config.settings.loader.CLEANUP_TIMEOUT_MS <= 120000
-            ? config.settings.loader.CLEANUP_TIMEOUT_MS
-            : defaultConfig.settings.loader.CLEANUP_TIMEOUT_MS,
+        showLoader: resolveConfigValue(
+          config.settings?.loader?.showLoader,
+          isBoolean,
+          defaultConfig.settings.loader.showLoader,
+        ),
+        CLEANUP_TIMEOUT_MS: resolveConfigValue(
+          config.settings?.loader?.CLEANUP_TIMEOUT_MS,
+          (value) => isIntegerInRange(value, 1000, 120000),
+          defaultConfig.settings.loader.CLEANUP_TIMEOUT_MS,
+        ),
       },
       linkHistory: {
-        HIDE_DELAY_MS:
-          Number.isInteger(config.settings?.linkHistory?.HIDE_DELAY_MS) &&
-          config.settings.linkHistory.HIDE_DELAY_MS >= 0 &&
-          config.settings.linkHistory.HIDE_DELAY_MS <= 60000
-            ? config.settings.linkHistory.HIDE_DELAY_MS
-            : defaultConfig.settings.linkHistory.HIDE_DELAY_MS,
-        LINK_HISTORY_LIMIT:
-          Number.isInteger(config.settings?.linkHistory?.LINK_HISTORY_LIMIT) &&
-          config.settings.linkHistory.LINK_HISTORY_LIMIT >= 0 &&
-          config.settings.linkHistory.LINK_HISTORY_LIMIT <= 10
-            ? config.settings.linkHistory.LINK_HISTORY_LIMIT
-            : defaultConfig.settings.linkHistory.LINK_HISTORY_LIMIT,
+        HIDE_DELAY_MS: resolveConfigValue(
+          config.settings?.linkHistory?.HIDE_DELAY_MS,
+          (value) => isIntegerInRange(value, 0, 60000),
+          defaultConfig.settings.linkHistory.HIDE_DELAY_MS,
+        ),
+        LINK_HISTORY_LIMIT: resolveConfigValue(
+          config.settings?.linkHistory?.LINK_HISTORY_LIMIT,
+          (value) => isIntegerInRange(value, 0, 10),
+          defaultConfig.settings.linkHistory.LINK_HISTORY_LIMIT,
+        ),
       },
     },
   }

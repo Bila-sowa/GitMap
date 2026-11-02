@@ -3,6 +3,8 @@ import GitHubTokenManager from './gitHubTokenManager'
 import GitHubRateLimiter from './gitHubRateLimiter'
 import GitHubDataParser from './gitHubDataParser'
 import parseGitHubUrl from './gitHubUrlParser'
+import { isNonEmptyString } from '@/js/utils/matchers'
+import { toTrimmedString } from '@/js/utils/coercions'
 import notifications from '@/js/utils/notificationManager'
 import storage from '@/js/data/storage'
 import GitHubTransport from './gitHubTransport'
@@ -29,6 +31,16 @@ class GitHubClient extends GitHubHttpApi {
       this.#transport,
     )
     this.#parser = new GitHubDataParser()
+  }
+
+  #notifyFailure(result) {
+    if (!result.cancelled) notifications.notify(result.error, 'error')
+    return result
+  }
+
+  #createMissingParameterResult(error, message) {
+    notifications.notify(error, 'error')
+    return { success: false, error, devError: { message } }
   }
 
   async #getRawData(url, options = {}) {
@@ -62,37 +74,28 @@ class GitHubClient extends GitHubHttpApi {
   async getData(url, options = {}) {
     const data = await this.#getRawData(url, options)
 
-    if (!data.success) {
-      if (!data.cancelled) notifications.notify(data.error, 'error')
-      return data
-    }
+    if (!data.success) return this.#notifyFailure(data)
 
     const parsed = this.#parser.parseRepoData(data)
 
-    if (!parsed.success) {
-      notifications.notify(parsed.error, 'error')
-      return parsed
-    }
+    if (!parsed.success) return this.#notifyFailure(parsed)
 
     return parsed
   }
 
   async getDataByBranch(name, url = storage.getData().link, options = {}) {
-    const branchName = typeof name === 'string' ? name.trim() : ''
+    const branchName = toTrimmedString(name)
 
-    if (!branchName) {
-      const error = 'Missing branch name'
-      const devError = { message: 'getDataByBranch requires a valid branch name parameter' }
-      notifications.notify(error, 'error')
-      return { success: false, error, devError }
+    if (!isNonEmptyString(branchName)) {
+      return this.#createMissingParameterResult(
+        'Missing branch name',
+        'getDataByBranch requires a valid branch name parameter',
+      )
     }
 
     const formatted = parseGitHubUrl(url)
 
-    if (!formatted.success) {
-      notifications.notify(formatted.error, 'error')
-      return formatted
-    }
+    if (!formatted.success) return this.#notifyFailure(formatted)
 
     const commitsUrl = `${formatted.commitsLink}?sha=${encodeURIComponent(branchName)}`
     const result = await this.#transport.getJson(commitsUrl, {
@@ -101,29 +104,23 @@ class GitHubClient extends GitHubHttpApi {
       context: 'getDataByBranch',
     })
 
-    if (!result.success) {
-      if (!result.cancelled) notifications.notify(result.error, 'error')
-      return result
-    }
+    if (!result.success) return this.#notifyFailure(result)
 
     const parsed = this.#parser.parseCommitsData(result.data)
-    if (!parsed.success) notifications.notify(parsed.error, 'error')
+    if (!parsed.success) return this.#notifyFailure(parsed)
     return parsed
   }
 
   async getCommitFiles(url, sha, options = {}) {
     const formatted = parseGitHubUrl(url)
 
-    if (!formatted.success) {
-      notifications.notify(formatted.error, 'error')
-      return formatted
-    }
+    if (!formatted.success) return this.#notifyFailure(formatted)
 
-    if (!sha) {
-      const error = 'Missing commit SHA'
-      const devError = { message: 'getCommitFiles requires a valid commit SHA parameter' }
-      notifications.notify(error, 'error')
-      return { success: false, error, devError }
+    if (!isNonEmptyString(sha)) {
+      return this.#createMissingParameterResult(
+        'Missing commit SHA',
+        'getCommitFiles requires a valid commit SHA parameter',
+      )
     }
 
     const commitUrl = `${formatted.commitsLink}/${sha}`
@@ -133,10 +130,7 @@ class GitHubClient extends GitHubHttpApi {
       context: 'getCommitFiles',
     })
 
-    if (!result.success) {
-      if (!result.cancelled) notifications.notify(result.error, 'error')
-      return result
-    }
+    if (!result.success) return this.#notifyFailure(result)
 
     return this.#parser.parseCommitFilesData(result.data)
   }
