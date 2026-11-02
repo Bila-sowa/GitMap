@@ -14,6 +14,8 @@ import { toTrimmedString } from '../utils/coercions.js'
 import notifications from '../utils/notificationManager.js'
 import { appendHTML, positionModalNearElement, truncateTitle } from '../utils/utils.js'
 
+const BRANCH_COLOR_COUNT = 4
+
 class GraphController {
   #body
   #graph = null
@@ -200,16 +202,22 @@ class GraphController {
           ? `M ${startX} ${startY} V ${endY}`
           : `M ${startX} ${startY} C ${startX} ${(startY + endY) / 2}, ${endX} ${(startY + endY) / 2}, ${endX} ${endY}`
 
+      const branchColorIndex = edge.level % BRANCH_COLOR_COUNT
+
       path.setAttribute(
         'class',
         edge.isContinuation ? 'commit-edge commit-edge-continuation' : 'commit-edge',
       )
+      path.setAttribute('data-branch-level', String(edge.level))
+      path.setAttribute('data-branch-color-index', String(branchColorIndex))
       path.setAttribute('d', pathData)
       edgesSvg.append(path)
 
       if (edge.isContinuation) {
         const endpoint = document.createElementNS(svgNamespace, 'circle')
         endpoint.setAttribute('class', 'commit-continuation-marker')
+        endpoint.setAttribute('data-branch-level', String(edge.level))
+        endpoint.setAttribute('data-branch-color-index', String(branchColorIndex))
         endpoint.setAttribute('cx', String(endX))
         endpoint.setAttribute('cy', String(endY))
         endpoint.setAttribute('r', '4')
@@ -219,19 +227,23 @@ class GraphController {
 
     graphFragment.append(edgesSvg)
 
-    layout.nodes.forEach(({ commit, lane, row }, index) => {
+    layout.nodes.forEach(({ commit, lane, row, level }, index) => {
       const formattedTitle = truncateTitle(commit.title, 5)
       const isFirst = index === 0
+      const branchColorIndex = level % BRANCH_COLOR_COUNT
+      const branchDescription = level === 0 ? 'Main branch' : `Branch level ${level}`
       const commitButton = document.createElement('button')
 
       commitButton.className = `commit neon rounded-full${isFirst ? ' head-commit' : ''}`
       commitButton.dataset.id = String(index)
       commitButton.dataset.lane = String(lane)
       commitButton.dataset.sha = commit.sha
+      commitButton.dataset.branch = branchName
+      commitButton.dataset.branchLevel = String(level)
+      commitButton.dataset.branchColorIndex = String(branchColorIndex)
       commitButton.setAttribute('name', formattedTitle)
       commitButton.setAttribute('aria-expanded', 'false')
-      commitButton.setAttribute('aria-label', `Open commit: ${commit.title}`)
-      commitButton.dataset.branch = branchName
+      commitButton.setAttribute('aria-label', `Open commit: ${commit.title}. ${branchDescription}.`)
       commitButton.style.setProperty('--commit-lane', lane)
       commitButton.style.setProperty('--commit-row', row)
       graphFragment.append(commitButton)
@@ -239,6 +251,7 @@ class GraphController {
       if (isFirst) {
         const connector = document.createElement('div')
         connector.className = 'triangular-connector'
+        connector.dataset.branchColorIndex = '0'
         connector.style.setProperty('--commit-lane', lane)
         graphFragment.append(connector)
       }

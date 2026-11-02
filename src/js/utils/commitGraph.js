@@ -44,16 +44,36 @@ const buildCommitGraphLayout = (commits, renderLimit = commits?.length) => {
     })
   })
 
+  const levelBySha = new Map()
+
+  if (nodes.length) levelBySha.set(nodes[0].commit.sha, 0)
+
+  nodes.forEach((node) => {
+    const level = levelBySha.get(node.commit.sha) ?? 0
+    node.level = level
+
+    node.parents.forEach((parentSha, parentIndex) => {
+      const parentLevel = parentIndex === 0 ? level : level + 1
+      const knownLevel = levelBySha.get(parentSha)
+
+      if (knownLevel === undefined || parentLevel < knownLevel) {
+        levelBySha.set(parentSha, parentLevel)
+      }
+    })
+  })
+
   const nodesBySha = new Map(nodes.map((node) => [node.commit.sha, node]))
   const edges = nodes.flatMap((node) =>
     node.parents.map((parentSha) => {
       const parent = nodesBySha.get(parentSha)
+      const toLevel = parent?.level ?? levelBySha.get(parentSha) ?? node.level
 
       return {
         fromLane: node.lane,
         fromRow: node.row,
         fromSha: node.commit.sha,
         isContinuation: !parent,
+        level: Math.max(node.level, toLevel),
         toLane: parent?.lane ?? node.lane,
         toRow: parent?.row ?? null,
         toSha: parentSha,
