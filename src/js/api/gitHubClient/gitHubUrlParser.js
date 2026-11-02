@@ -1,38 +1,39 @@
-function parseGitHubUrl(url) {
-  try {
-    let owner;
-    let repo;
+import { matchHttpsUrl, matchSshUrl } from '@/js/utils/matchers'
+import { GITHUB_API_ORIGIN } from './gitHubConstants'
 
-    const sshMatch = url.match(/^git@github\.com:([^/]+)\/([^/]+?)(?:\.git)?\/?$/i);
-    const httpsMatch = url.match(
-      /^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/?#]+)\/([^/?#]+?)(?:\.git)?\/?(?:[?#].*)?$/i,
-    );
+const parseGitHubUrl = (url) => {
+  try {
+    let owner
+    let repo
+
+    const sshMatch = matchSshUrl(url)
+    const httpsMatch = matchHttpsUrl(url)
 
     if (sshMatch) {
-      [, owner, repo] = sshMatch;
+      ;[, owner, repo] = sshMatch
     } else if (httpsMatch) {
-      [, owner, repo] = httpsMatch;
+      ;[, owner, repo] = httpsMatch
     } else {
       return {
         success: false,
-        error: "Invalid GitHub URL",
+        error: 'Invalid GitHub URL',
         devError: `Failed to parse GitHub URL: "${url}". Expected HTTPS or SSH format.`,
-      };
+      }
     }
 
     return {
       success: true,
-      repositoryLink: `https://api.github.com/repos/${owner}/${repo}`,
-      branchLink: `https://api.github.com/repos/${owner}/${repo}/branches`,
-      commitsLink: `https://api.github.com/repos/${owner}/${repo}/commits`,
-    };
+      repositoryLink: `${GITHUB_API_ORIGIN}/repos/${owner}/${repo}`,
+      branchLink: `${GITHUB_API_ORIGIN}/repos/${owner}/${repo}/branches`,
+      commitsLink: `${GITHUB_API_ORIGIN}/repos/${owner}/${repo}/commits`,
+    }
   } catch (err) {
     return {
       success: false,
-      error: "Invalid GitHub URL",
+      error: 'Invalid GitHub URL',
       devError: `URL parsing exception: ${err.message}`,
-    };
+    }
   }
 }
 
-export default parseGitHubUrl;
+export default parseGitHubUrl

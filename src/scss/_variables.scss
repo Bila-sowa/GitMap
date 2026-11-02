@@ -1,15 +1,16 @@
 :root {
   --font-monospace:
-    "Mona Sans Mono VF", ui-monospace, sfmono-regular, "SF Mono", menlo, consolas, "Liberation Mono", monospace;
+    'Mona Sans Mono VF', ui-monospace, sfmono-regular, 'SF Mono', menlo, consolas,
+    'Liberation Mono', monospace;
   --font-sans-serif:
-    "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji";
+    'Mona Sans VF', -apple-system, blinkmacsystemfont, 'Segoe UI', 'Noto Sans', helvetica, arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
   --font-sans-serif-display:
-    "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji";
+    'Mona Sans VF', -apple-system, blinkmacsystemfont, 'Segoe UI', 'Noto Sans', helvetica, arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
   --font-system:
-    "Mona Sans VF", -apple-system, blinkmacsystemfont, "Segoe UI", "Noto Sans", helvetica, arial, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji";
+    'Mona Sans VF', -apple-system, blinkmacsystemfont, 'Segoe UI', 'Noto Sans', helvetica, arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
   --accent-color-1: #4f7c77;
   --shadow-color-1: #4f7c77;
   --info-color: #58a6ff;
@@ -29,6 +30,10 @@
   --hover-color-1: #373e4a;
   --text-color-1: #e6edf3;
   --text-color-2: #727478;
+  --graph-color-0: #4f9d92;
+  --graph-color-1: #d7a53f;
+  --graph-color-2: #b07cf5;
+  --graph-color-3: #5fa8ff;
 }
 
 .light-theme {
@@ -40,4 +45,8 @@
   --hover-color-1: #dde3e8;
   --text-color-1: #1f2328;
   --text-color-2: #59636e;
+  --graph-color-0: #2f6f68;
+  --graph-color-1: #946200;
+  --graph-color-2: #7a45c7;
+  --graph-color-3: #0969da;
 }

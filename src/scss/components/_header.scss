@@ -22,6 +22,18 @@ header {
       justify-content: center;
       align-items: center;
     }
+
+    .theme-button {
+      .theme-icon {
+        display: none;
+      }
+
+      &[data-theme-state='system'] .theme-icon-system,
+      &[data-theme-state='dark'] .theme-icon-dark,
+      &[data-theme-state='light'] .theme-icon-light {
+        display: block;
+      }
+    }
   }
 
   .nav-link-input-container {
@@ -40,6 +52,39 @@ header {
 
       &::placeholder {
         color: var(--text-color-2);
+      }
+    }
+
+    .link-history-container {
+      position: relative;
+    }
+
+    .link-history {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      z-index: 30;
+      width: 100%;
+      max-height: 240px;
+      overflow: hidden auto;
+      background: var(--color-4);
+    }
+
+    .link-history-item {
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--border-color-1);
+      }
+
+      &:hover,
+      &[aria-selected='true'] {
+        background: var(--hover-color-1);
       }
     }
 

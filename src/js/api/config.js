@@ -1,127 +1,166 @@
+import {
+  isBoolean,
+  isIntegerInRange,
+  isNonEmptyString,
+  isNumberInRange,
+  isPlainObject,
+  isPositiveInteger,
+} from '@/js/utils/matchers'
+
 const getDefaultConfig = () => {
   return {
-    name: "GitMap",
-    debug: false,
+    name: 'GitMap',
+    debug: true,
     versionDetails: {
-      version: "not found",
-      versionType: "not found",
-      versionIsStable: false,
+      version: '2.14.1',
+      versionType: 'beta',
+      versionIsStable: true,
     },
-    graph: {
-      renderLimit: 30,
+
+    settings: {
+      graph: {
+        renderLimit: 30,
+      },
+      gitHub: {
+        REQUEST_TIMEOUT_MS: 15000,
+      },
+      notifications: {
+        showNotifications: true,
+        COOLDOWN_MS: 5000,
+      },
+      loader: {
+        showLoader: true,
+        CLEANUP_TIMEOUT_MS: 30000,
+      },
+      linkHistory: {
+        HIDE_DELAY_MS: 5000,
+        LINK_HISTORY_LIMIT: 3,
+      },
     },
-    gitHub: {
-      REQUEST_TIMEOUT_MS: 15000,
-    },
-    notifications: {
-      showNotifications: true,
-      COOLDOWN_MS: 5000,
-    },
-    loader: {
-      showLoader: false,
-      CLEANUP_TIMEOUT_MS: 30000,
-    },
-  };
-};
+  }
+}
+
+const resolveConfigValue = (value, isValid, fallback) => {
+  return isValid(value) ? value : fallback
+}
 
 const mergeConfigs = (invalidConfig) => {
-  const defaultConfig = getDefaultConfig();
-  const config =
-    invalidConfig && typeof invalidConfig === "object" && !Array.isArray(invalidConfig) ? invalidConfig : {};
+  const defaultConfig = getDefaultConfig()
+  const config = isPlainObject(invalidConfig) ? invalidConfig : {}
 
   return {
-    name: typeof config.name === "string" && config.name.trim() ? config.name : defaultConfig.name,
-    debug: typeof config.debug === "boolean" ? config.debug : defaultConfig.debug,
+    name: resolveConfigValue(config.name, isNonEmptyString, defaultConfig.name),
+    debug: resolveConfigValue(config.debug, isBoolean, defaultConfig.debug),
     versionDetails: {
-      version:
-        typeof config.versionDetails?.version === "string" && config.versionDetails.version.trim()
-          ? config.versionDetails.version
-          : defaultConfig.versionDetails.version,
-      versionType:
-        typeof config.versionDetails?.versionType === "string" && config.versionDetails.versionType.trim()
-          ? config.versionDetails.versionType
-          : defaultConfig.versionDetails.versionType,
-      versionIsStable:
-        typeof config.versionDetails?.versionIsStable === "boolean"
-          ? config.versionDetails.versionIsStable
-          : defaultConfig.versionDetails.versionIsStable,
+      version: resolveConfigValue(
+        config.versionDetails?.version,
+        isNonEmptyString,
+        defaultConfig.versionDetails.version,
+      ),
+      versionType: resolveConfigValue(
+        config.versionDetails?.versionType,
+        isNonEmptyString,
+        defaultConfig.versionDetails.versionType,
+      ),
+      versionIsStable: resolveConfigValue(
+        config.versionDetails?.versionIsStable,
+        isBoolean,
+        defaultConfig.versionDetails.versionIsStable,
+      ),
     },
-    graph: {
-      renderLimit:
-        Number.isInteger(config.graph?.renderLimit) && config.graph.renderLimit > 0
-          ? config.graph.renderLimit
-          : defaultConfig.graph.renderLimit,
+
+    settings: {
+      graph: {
+        renderLimit: resolveConfigValue(
+          config.settings?.graph?.renderLimit,
+          isPositiveInteger,
+          defaultConfig.settings.graph.renderLimit,
+        ),
+      },
+      gitHub: {
+        REQUEST_TIMEOUT_MS: resolveConfigValue(
+          config.settings?.gitHub?.REQUEST_TIMEOUT_MS,
+          (value) => isIntegerInRange(value, 1000, 120000),
+          defaultConfig.settings.gitHub.REQUEST_TIMEOUT_MS,
+        ),
+      },
+      notifications: {
+        showNotifications: resolveConfigValue(
+          config.settings?.notifications?.showNotifications,
+          isBoolean,
+          defaultConfig.settings.notifications.showNotifications,
+        ),
+        COOLDOWN_MS: resolveConfigValue(
+          config.settings?.notifications?.COOLDOWN_MS,
+          (value) => isNumberInRange(value, 0, 60000),
+          defaultConfig.settings.notifications.COOLDOWN_MS,
+        ),
+      },
+      loader: {
+        showLoader: resolveConfigValue(
+          config.settings?.loader?.showLoader,
+          isBoolean,
+          defaultConfig.settings.loader.showLoader,
+        ),
+        CLEANUP_TIMEOUT_MS: resolveConfigValue(
+          config.settings?.loader?.CLEANUP_TIMEOUT_MS,
+          (value) => isIntegerInRange(value, 1000, 120000),
+          defaultConfig.settings.loader.CLEANUP_TIMEOUT_MS,
+        ),
+      },
+      linkHistory: {
+        HIDE_DELAY_MS: resolveConfigValue(
+          config.settings?.linkHistory?.HIDE_DELAY_MS,
+          (value) => isIntegerInRange(value, 0, 60000),
+          defaultConfig.settings.linkHistory.HIDE_DELAY_MS,
+        ),
+        LINK_HISTORY_LIMIT: resolveConfigValue(
+          config.settings?.linkHistory?.LINK_HISTORY_LIMIT,
+          (value) => isIntegerInRange(value, 0, 10),
+          defaultConfig.settings.linkHistory.LINK_HISTORY_LIMIT,
+        ),
+      },
     },
-    gitHub: {
-      REQUEST_TIMEOUT_MS:
-        Number.isInteger(config.gitHub?.REQUEST_TIMEOUT_MS) &&
-        config.gitHub.REQUEST_TIMEOUT_MS >= 1000 &&
-        config.gitHub.REQUEST_TIMEOUT_MS <= 120000
-          ? config.gitHub.REQUEST_TIMEOUT_MS
-          : defaultConfig.gitHub.REQUEST_TIMEOUT_MS,
-    },
-    notifications: {
-      showNotifications:
-        typeof config.notifications?.showNotifications === "boolean"
-          ? config.notifications.showNotifications
-          : defaultConfig.notifications.showNotifications,
-      COOLDOWN_MS:
-        Number.isFinite(config.notifications?.COOLDOWN_MS) &&
-        config.notifications.COOLDOWN_MS >= 0 &&
-        config.notifications.COOLDOWN_MS <= 60000
-          ? config.notifications.COOLDOWN_MS
-          : defaultConfig.notifications.COOLDOWN_MS,
-    },
-    loader: {
-      showLoader:
-        typeof config.loader?.showLoader === "boolean" ? config.loader.showLoader : defaultConfig.loader.showLoader,
-      CLEANUP_TIMEOUT_MS:
-        Number.isInteger(config.loader?.CLEANUP_TIMEOUT_MS) &&
-        config.loader.CLEANUP_TIMEOUT_MS >= 1000 &&
-        config.loader.CLEANUP_TIMEOUT_MS <= 120000
-          ? config.loader.CLEANUP_TIMEOUT_MS
-          : defaultConfig.loader.CLEANUP_TIMEOUT_MS,
-    },
-  };
-};
+  }
+}
 
 const getConfigData = async (url = `${import.meta.env.BASE_URL}config.json`) => {
   try {
-    const configRes = await fetch(url);
+    const configRes = await fetch(url)
 
     if (!configRes.ok) {
-      throw new Error(`Failed to load config.json: ${configRes.status}`);
+      throw new Error(`Failed to load config.json: ${configRes.status}`)
     }
 
-    const configData = await configRes.json();
+    const configData = await configRes.json()
 
-    return mergeConfigs(configData);
+    return mergeConfigs(configData)
   } catch (error) {
-    console.error("Returning default config, error fetching config:", error);
-    return getDefaultConfig();
+    console.error('Returning default config, error fetching config:', error)
+    return getDefaultConfig()
   }
-};
+}
 
-const config = getDefaultConfig();
-let configPromise = null;
+const config = getDefaultConfig()
+let configPromise = null
 
 function loadConfig() {
   if (!configPromise) {
     configPromise = getConfigData().then((data) => {
-      Object.assign(config, data);
-      return config;
-    });
+      Object.assign(config, data)
+      return config
+    })
   }
 
-  return configPromise;
+  return configPromise
 }
 
 async function refreshConfig() {
-  if (configPromise) await configPromise;
-  const data = await getConfigData();
-  Object.assign(config, data);
-  configPromise = Promise.resolve(config);
-  return config;
+  if (configPromise) await configPromise
+  const data = await getConfigData()
+  Object.assign(config, data)
+  configPromise = Promise.resolve(config)
+  return config
 }
 
-export { config, getConfigData, getDefaultConfig, mergeConfigs, loadConfig, refreshConfig };
+export { config, getConfigData, getDefaultConfig, mergeConfigs, loadConfig, refreshConfig }

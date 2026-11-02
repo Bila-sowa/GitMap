@@ -1,10 +1,10 @@
-import { vi } from "vitest";
+import { vi } from 'vitest'
 
-export const TEST_REPO_URL = "https://github.com/Bila-sowa/GitMap";
-export const PINNED_COMMIT_SHA = "46f5cd270ddda0267790caf4fe48ec8895149ec6";
+export const TEST_REPO_URL = 'https://github.com/Bila-sowa/GitMap'
+export const PINNED_COMMIT_SHA = '46f5cd270ddda0267790caf4fe48ec8895149ec6'
 
-export const HTTP_ERROR_MIN = 400;
-export const HTTP_ERROR_MAX = 599;
+export const HTTP_ERROR_MIN = 400
+export const HTTP_ERROR_MAX = 599
 
 /**
  * Returns the HTTP status code from a result's devError if it falls in the
@@ -13,10 +13,12 @@ export const HTTP_ERROR_MAX = 599;
  * network failures without treating them as test failures.
  */
 export const getHttpErrorStatus = (result) => {
-  const status = result.devError?.status;
+  const status = result.devError?.status
 
-  return Number.isInteger(status) && status >= HTTP_ERROR_MIN && status <= HTTP_ERROR_MAX ? status : null;
-};
+  return Number.isInteger(status) && status >= HTTP_ERROR_MIN && status <= HTTP_ERROR_MAX
+    ? status
+    : null
+}
 
 /**
  * Builds a minimal Response-like object for mocking fetch in local tests.
@@ -29,7 +31,7 @@ export const createResponse = ({ status = 200, body = {}, url, headers = new Hea
   url,
   headers,
   json: async () => body,
-});
+})
 
 /**
  * Stubs globalThis.fetch to intercept requests to an explicit list of routes.
@@ -38,24 +40,24 @@ export const createResponse = ({ status = 200, body = {}, url, headers = new Hea
  * Returns the requests array so callers can assert which URLs were fetched.
  */
 export const useFetchRoutes = (routes) => {
-  const requests = [];
-  const responsesByUrl = new Map(routes.map(({ url, response }) => [url, response]));
+  const requests = []
+  const responsesByUrl = new Map(routes.map(({ url, response }) => [url, response]))
 
-  vi.stubGlobal("fetch", async (url) => {
-    requests.push(url);
+  vi.stubGlobal('fetch', async (url) => {
+    requests.push(url)
 
     if (!responsesByUrl.has(url)) {
-      throw new Error(`Unexpected request: ${url}`);
+      throw new Error(`Unexpected request: ${url}`)
     }
 
-    return responsesByUrl.get(url);
-  });
+    return responsesByUrl.get(url)
+  })
 
-  return requests;
-};
+  return requests
+}
 
 /**
  * Stubs globalThis.fetch to intercept requests to exactly one expectedUrl.
  * Returns the requests array so callers can assert which URLs were fetched.
  */
-export const useFetch = (response, expectedUrl) => useFetchRoutes([{ url: expectedUrl, response }]);
+export const useFetch = (response, expectedUrl) => useFetchRoutes([{ url: expectedUrl, response }])
