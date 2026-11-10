@@ -6,7 +6,10 @@ import {
   getTokenStatusState,
 } from '../components/SettingsModal/index.js'
 import notifications from '../utils/notificationManager.js'
-import { isNonEmptyString } from '../utils/matchers.js'
+import { isNonEmptyString, isAbortError } from '../utils/matchers.js'
+import { getUserMessage } from '../errors/index.js'
+import { logger } from '../utils/logger.js'
+import { notifyIfRateLimitHigh } from '../utils/rateLimitWarning.js'
 
 class SettingsController {
   #button
@@ -49,15 +52,38 @@ class SettingsController {
 
     try {
       const token = this.#storage.getData().token
-      const tokenResult = isNonEmptyString(token)
-        ? await this.#gitHubClient.setToken(token, { signal })
-        : { success: true }
-      if (signal.aborted) return
-      const tokenState = getTokenStatusState(tokenResult, Boolean(token))
+      let tokenError = null
 
-      const rateLimitRes = await this.#gitHubClient.getRateLimitData({ signal })
+      if (isNonEmptyString(token)) {
+        try {
+          await this.#gitHubClient.setToken(token, { signal })
+          notifications.notify('The token has been successfully set', 'success')
+        } catch (error) {
+          if (signal.aborted || isAbortError(error)) return
+
+          tokenError = error
+          logger.error('Failed to validate the saved GitHub token:', error)
+          notifications.notify(getUserMessage(error, 'Failed to validate GitHub token'), 'error')
+        }
+      }
+
       if (signal.aborted) return
-      const modalHTML = generateSettingsModalHTML(rateLimitRes, tokenState, config.versionDetails)
+      const tokenState = getTokenStatusState(tokenError, Boolean(token))
+
+      let rateLimitData = null
+
+      try {
+        rateLimitData = await this.#gitHubClient.getRateLimitData({ signal })
+        notifyIfRateLimitHigh(rateLimitData)
+      } catch (error) {
+        if (signal.aborted || isAbortError(error)) return
+
+        logger.error('Failed to fetch rate limit data for the settings modal:', error)
+        notifications.notify(getUserMessage(error, 'Failed to fetch rate limit data'), 'error')
+      }
+
+      if (signal.aborted) return
+      const modalHTML = generateSettingsModalHTML(rateLimitData, tokenState, config.versionDetails)
 
       if (!modalHTML) return
 
@@ -85,7 +111,7 @@ class SettingsController {
       )
     } catch (error) {
       notifications.notify('Failed to open settings', 'error')
-      console.error('Failed to open settings:', error)
+      logger.error('Failed to open settings:', error)
     } finally {
       this.#isOpening = false
       removeLoader(loader)

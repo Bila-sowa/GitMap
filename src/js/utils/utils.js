@@ -1,6 +1,7 @@
 import notifications from './notificationManager'
 import getRandomID from './randomId'
 import { isNonEmptyString, isPositiveInteger } from './matchers.js'
+import { logger } from './logger.js'
 
 const modalPositioning = new WeakMap()
 
@@ -14,7 +15,8 @@ const copyValueToClipboard = async (element) => {
     element.classList.add('copied')
     notifications.notify('Successfully copied', 'success')
     setTimeout(() => element.classList.remove('copied'), COOLDOWN_MS)
-  } catch {
+  } catch (error) {
+    logger.error('Failed to copy the value to the clipboard:', error)
     notifications.notify(
       'Copying error or copying is not allowed by your browser (especially if you launched the server on live server)',
       'error',

@@ -8,9 +8,14 @@ function getLinkKey(link) {
 
   if (!trimmed) return ''
 
-  const parsed = parseGitHubUrl(trimmed)
+  try {
+    const parsed = parseGitHubUrl(trimmed)
 
-  return parsed.success ? parsed.repositoryLink.toLowerCase() : trimmed.toLowerCase()
+    return parsed.repositoryLink.toLowerCase()
+  } catch {
+    // Invalid URLs keep their raw value as the comparison key.
+    return trimmed.toLowerCase()
+  }
 }
 
 function addLinkToHistory(history, link) {

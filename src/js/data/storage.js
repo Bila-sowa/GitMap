@@ -1,6 +1,13 @@
-import { isBoolean, isPlainObject, isString } from '../utils/matchers'
+import { isString } from '../utils/matchers'
 import { DEFAULT_THEME, isThemeState } from '../utils/theme'
 import { config } from '@/js/api/config'
+import {
+  assert,
+  assertArray,
+  assertBoolean,
+  assertPlainObject,
+  assertString,
+} from '@/js/utils/assertions'
 
 class Storage {
   #link = ''
@@ -23,46 +30,46 @@ class Storage {
   }
 
   setData(data = {}) {
-    if (!isPlainObject(data)) {
-      throw new TypeError('setData: expected a plain object')
-    }
+    const context = 'Storage.setData'
+
+    assertPlainObject(data, 'setData: expected a plain object', { context })
 
     if (data.link !== undefined) {
-      if (!isString(data.link)) {
-        throw new TypeError(`setData: link must be a string, got ${typeof data.link}`)
-      }
+      assertString(data.link, `setData: link must be a string, got ${typeof data.link}`, {
+        context,
+      })
       this.#link = data.link.trim()
     }
 
     if (data.token !== undefined) {
-      if (!isString(data.token)) {
-        throw new TypeError(`setData: token must be a string, got ${typeof data.token}`)
-      }
+      assertString(data.token, `setData: token must be a string, got ${typeof data.token}`, {
+        context,
+      })
 
       this.#token = data.token.trim()
     }
 
     if (data.localStorage !== undefined) {
-      if (!isPlainObject(data.localStorage)) {
-        throw new TypeError('setData: localStorage must be a plain object')
-      }
+      assertPlainObject(data.localStorage, 'setData: localStorage must be a plain object', {
+        context,
+      })
 
       const { saveLink, saveToken } = data.localStorage
 
       if (saveLink !== undefined) {
-        if (!isBoolean(saveLink)) {
-          throw new TypeError(
-            `setData: localStorage.saveLink must be a boolean, got ${typeof saveLink}`,
-          )
-        }
+        assertBoolean(
+          saveLink,
+          `setData: localStorage.saveLink must be a boolean, got ${typeof saveLink}`,
+          { context },
+        )
         this.#localStorage.saveLink = saveLink
       }
       if (saveToken !== undefined) {
-        if (!isBoolean(saveToken)) {
-          throw new TypeError(
-            `setData: localStorage.saveToken must be a boolean, got ${typeof saveToken}`,
-          )
-        }
+        assertBoolean(
+          saveToken,
+          `setData: localStorage.saveToken must be a boolean, got ${typeof saveToken}`,
+          { context },
+        )
         this.#localStorage.saveToken = saveToken
       }
     }
@@ -71,22 +78,20 @@ class Storage {
       const theme = isString(data.theme) ? data.theme.trim() : data.theme
       const isValid = isThemeState(theme)
       this.#theme = isValid ? theme : DEFAULT_THEME
-      if (!isValid) {
-        throw new TypeError(
-          `setData: invalid theme "${theme}", expected "system", "light-theme", or "dark-theme"`,
-        )
-      }
+      assert(
+        isValid,
+        `setData: invalid theme "${theme}", expected "system", "light-theme", or "dark-theme"`,
+        { context, userMessage: 'Invalid theme value' },
+      )
     }
 
     if (data.history !== undefined) {
-      if (!Array.isArray(data.history)) {
-        throw new TypeError('setData: history must be an array')
-      }
+      assertArray(data.history, 'setData: history must be an array', { context })
 
       const history = data.history.map((item) => {
-        if (!isString(item)) {
-          throw new TypeError(`setData: history items must be strings, got ${typeof item}`)
-        }
+        assertString(item, `setData: history items must be strings, got ${typeof item}`, {
+          context,
+        })
 
         return item.trim()
       })

@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, afterEach } from 'vitest'
 import { GitHubClient } from '@/js/api/gitHubClient'
 import notifications from '@/js/utils/notificationManager'
-import { TEST_REPO_URL, getHttpErrorStatus } from '#/fixtures/github/gitHubClient'
+import { TEST_REPO_URL, getApiWarning, isSkippableApiError } from '#/fixtures/github/gitHubClient'
 
 describe('getData (live GitHub API)', () => {
   afterEach(() => {
@@ -14,18 +14,17 @@ describe('getData (live GitHub API)', () => {
     async () => {
       vi.spyOn(notifications, 'notify').mockResolvedValue()
       const client = new GitHubClient()
+      let result
 
-      const result = await client.getData(TEST_REPO_URL)
-      const httpErrorStatus = getHttpErrorStatus(result)
+      try {
+        result = await client.getData(TEST_REPO_URL)
+      } catch (error) {
+        if (!isSkippableApiError(error)) throw error
 
-      if (httpErrorStatus !== null) {
-        console.log(`[WARN] GitHub API error (HTTP ${httpErrorStatus}): ${result.error}`)
-
-        expect(result.success).toBe(false)
+        console.log(`[WARN] ${getApiWarning(error)}`)
         return
       }
 
-      expect(result.success, result.error).toBe(true)
       expect(typeof result.defaultBranch).toBe('string')
       expect(result.defaultBranch.length).toBeGreaterThan(0)
       expect(Array.isArray(result.branchesDetails)).toBe(true)

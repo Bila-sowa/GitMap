@@ -1,15 +1,12 @@
-import notifications from '@/js/utils/notificationManager'
 import { isFiniteNumber } from '@/js/utils/matchers'
-import { createRateLimitData, EMPTY_RATE_LIMIT_DATA } from '@/js/utils/rateLimit'
+import { logger } from '@/js/utils/logger'
+import { ParseError } from '@/js/errors'
+import { createRateLimitData, isRateLimitHigh } from '@/js/utils/rateLimit'
 import { GITHUB_API_ORIGIN } from './gitHubConstants'
 
 class GitHubRateLimiter {
   #transport
-  #latestResponse
-
-  constructor() {
-    this.#latestResponse = null
-  }
+  #latestData = null
 
   setTransport(transport) {
     this.#transport = transport
@@ -25,75 +22,54 @@ class GitHubRateLimiter {
     const limit = Number(limitHeader)
     const used = usedHeader === null ? limit - Number(remainingHeader) : Number(usedHeader)
 
-    if (!isFiniteNumber(limit) || limit <= 0 || !isFiniteNumber(used) || used < 0) return
-
-    const response = {
-      success: true,
-      data: createRateLimitData(limit, used),
+    if (!isFiniteNumber(limit) || limit <= 0 || !isFiniteNumber(used) || used < 0) {
+      logger.debug('Ignoring malformed GitHub rate limit headers.', {
+        limitHeader,
+        remainingHeader,
+        usedHeader,
+      })
+      return
     }
 
-    const wasHigh = this.#latestResponse?.data.usedPerPercent >= 70
-    this.#latestResponse = response
-    if (!wasHigh) this.checkIsRateLimitHigh(response)
+    this.#latestData = createRateLimitData(limit, used)
   }
 
   getCachedRateLimitData() {
-    return this.#latestResponse
+    return this.#latestData
   }
 
-  checkIsRateLimitHigh(response, percent = 70) {
-    if (
-      response?.success &&
-      isFiniteNumber(response.data?.usedPerPercent) &&
-      response.data.usedPerPercent >= percent &&
-      response.data.usedPerPercent !== 100
-    ) {
-      notifications.notify(
-        `GitHub API rate limit is above ${percent}%. Consider reducing request volume or adding a personal access token.`,
-        'warning',
-      )
-    }
-
-    return response
+  checkIsRateLimitHigh(rateLimitData, percent = 70) {
+    return isRateLimitHigh(rateLimitData, percent)
   }
 
   async getRateLimitData(options = {}) {
-    const result = await this.#transport.getJson(`${GITHUB_API_ORIGIN}/rate_limit`, {
+    const data = await this.#transport.getJson(`${GITHUB_API_ORIGIN}/rate_limit`, {
       signal: options.signal,
-      error: 'Failed to fetch rate limit data',
+      userMessage: 'Failed to fetch rate limit data',
       context: 'getRateLimitData',
     })
 
-    if (!result.success) {
-      if (!result.cancelled) notifications.notify(result.error, 'error')
-      return { ...result, data: { ...EMPTY_RATE_LIMIT_DATA } }
-    }
-
-    const core = result.data?.resources?.core
+    const core = data?.resources?.core
     if (!core) {
-      const error = 'Invalid rate limit response format'
-      notifications.notify(error, 'error')
-      return {
-        success: false,
-        error,
-        devError: {
-          message: 'Missing data.resources.core in GitHub rate_limit response',
-          rawResponse: result.data,
-        },
-        data: { ...EMPTY_RATE_LIMIT_DATA },
-      }
+      throw new ParseError('Missing data.resources.core in GitHub rate_limit response', {
+        userMessage: 'Invalid rate limit response format',
+        context: 'getRateLimitData',
+      })
     }
 
     const { limit, remaining, used } = core
     const usedCount = used ?? limit - remaining
-    const response = {
-      success: true,
-      data: createRateLimitData(limit, usedCount),
+
+    if (!isFiniteNumber(limit) || limit <= 0 || !isFiniteNumber(usedCount) || usedCount < 0) {
+      throw new ParseError('Invalid core rate limit values in GitHub rate_limit response', {
+        userMessage: 'Invalid rate limit response format',
+        context: 'getRateLimitData',
+      })
     }
 
-    this.#latestResponse = response
-    this.checkIsRateLimitHigh(response)
-    return response
+    this.#latestData = createRateLimitData(limit, usedCount)
+
+    return this.#latestData
   }
 }
 

@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { Storage } from '@/js/data/storage'
+import { ValidationError } from '@/js/errors'
 
 const DEFAULT_DATA = {
   link: '',
@@ -51,7 +52,7 @@ describe('Storage', () => {
 
     const result = () => storage.setData(update)
 
-    expect(result).toThrow(TypeError)
+    expect(result).toThrow(ValidationError)
     expect(storage.getData()).toStrictEqual(DEFAULT_DATA)
   })
 
@@ -140,7 +141,7 @@ describe('Storage', () => {
     const localStorageResult = () =>
       storage.setData({ localStorage: { saveLink: true, saveToken: 'yes' } })
 
-    expect(localStorageResult).toThrow(TypeError)
+    expect(localStorageResult).toThrow(ValidationError)
     expect(storage.getData().localStorage).toStrictEqual({ saveLink: true, saveToken: false })
 
     const themeResult = () =>
@@ -150,7 +151,7 @@ describe('Storage', () => {
         theme: 'unknown',
       })
 
-    expect(themeResult).toThrow(TypeError)
+    expect(themeResult).toThrow(ValidationError)
 
     const result = storage.getData()
 
@@ -202,7 +203,7 @@ describe('Storage', () => {
 
     const result = () => storage.setData({ token: '  ghp_next  ', theme: 'unknown' })
 
-    expect(result).toThrow(TypeError)
+    expect(result).toThrow(ValidationError)
 
     storage.reset()
 
@@ -218,7 +219,7 @@ describe('Storage', () => {
 
     const result = () => storage.setData(update)
 
-    expect(result).toThrow(TypeError)
+    expect(result).toThrow(ValidationError)
     expect(storage.getData()).toStrictEqual(DEFAULT_DATA)
   })
 })

@@ -1,4 +1,5 @@
 import { vi } from 'vitest'
+import { HttpError, NetworkError, TimeoutError } from '@/js/errors'
 
 export const TEST_REPO_URL = 'https://github.com/Bila-sowa/GitMap'
 export const PINNED_COMMIT_SHA = '46f5cd270ddda0267790caf4fe48ec8895149ec6'
@@ -6,18 +7,48 @@ export const PINNED_COMMIT_SHA = '46f5cd270ddda0267790caf4fe48ec8895149ec6'
 export const HTTP_ERROR_MIN = 400
 export const HTTP_ERROR_MAX = 599
 
+const RATE_LIMIT_STATUSES = new Set([403, 429])
+const SERVER_ERROR_MIN = 500
+
 /**
- * Returns the HTTP status code from a result's devError if it falls in the
- * error range, or null when the result is not an HTTP error.
- * Used in E2E tests to log a warning and skip assertions on rate-limit or
- * network failures without treating them as test failures.
+ * Returns the HTTP status code from a typed application error if it falls in
+ * the error range, or null when the error is not an HTTP error.
  */
-export const getHttpErrorStatus = (result) => {
-  const status = result.devError?.status
+export const getHttpErrorStatus = (error) => {
+  const status = error?.status
 
   return Number.isInteger(status) && status >= HTTP_ERROR_MIN && status <= HTTP_ERROR_MAX
     ? status
     : null
+}
+
+/**
+ * Reports whether an E2E failure is caused by external GitHub availability
+ * (rate limit, server error, network, or timeout) rather than by a contract
+ * change or a defect in the client.
+ */
+export const isSkippableApiError = (error) => {
+  if (error instanceof NetworkError || error instanceof TimeoutError) return true
+  if (!(error instanceof HttpError)) return false
+
+  return (
+    RATE_LIMIT_STATUSES.has(error.status) ||
+    (error.status >= SERVER_ERROR_MIN && error.status <= HTTP_ERROR_MAX)
+  )
+}
+
+/**
+ * Builds a human-readable warning for a skippable E2E failure.
+ * HTTP failures are reported with their status; network and timeout failures
+ * are reported as incomplete requests.
+ */
+export const getApiWarning = (error) => {
+  const status = getHttpErrorStatus(error)
+  const message = error?.userMessage || error?.message || 'Unknown error'
+
+  return status === null
+    ? `GitHub request could not be completed: ${message}`
+    : `GitHub API error (HTTP ${status}): ${message}`
 }
 
 /**

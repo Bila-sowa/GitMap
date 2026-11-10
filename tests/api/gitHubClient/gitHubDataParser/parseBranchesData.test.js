@@ -9,10 +9,7 @@ describe('parseBranchesData', () => {
   test('maps branch records to their names in order', () => {
     const result = parser.parseBranchesData([createBranch('main'), createBranch('feature/a&b')])
 
-    expect(result).toStrictEqual({
-      success: true,
-      branchesDetails: ['main', 'feature/a&b'],
-    })
+    expect(result).toStrictEqual(['main', 'feature/a&b'])
   })
 
   test.each([
@@ -20,16 +17,16 @@ describe('parseBranchesData', () => {
     { label: 'a missing list', input: undefined },
     { label: 'a non-array value', input: 'main' },
   ])('rejects $label', ({ input }) => {
-    const result = parser.parseBranchesData(input)
+    const result = () => parser.parseBranchesData(input)
 
-    expectInvalidParserResult(result, 'parseBranchesData', input)
+    expectInvalidParserResult(result, 'parseBranchesData')
   })
 
   test('rejects a branch without a name', () => {
     const invalidBranch = { name: '   ' }
 
-    const result = parser.parseBranchesData([createBranch('main'), invalidBranch])
+    const result = () => parser.parseBranchesData([createBranch('main'), invalidBranch])
 
-    expectInvalidParserResult(result, 'parseBranchesData', invalidBranch)
+    expectInvalidParserResult(result, 'parseBranchesData')
   })
 })

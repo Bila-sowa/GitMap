@@ -18,7 +18,6 @@ describe('parseCommitFilesData', () => {
     const result = parser.parseCommitFilesData({ files })
 
     expect(result).toStrictEqual({
-      success: true,
       files: [
         {
           name: 'src/js/&lt;app&gt;.js',
@@ -46,7 +45,7 @@ describe('parseCommitFilesData', () => {
 
     const result = parser.parseCommitFilesData(raw)
 
-    expect(result).toStrictEqual({ success: true, files: [], truncated: false })
+    expect(result).toStrictEqual({ files: [], truncated: false })
   })
 
   test('marks the result as truncated at 300 files', () => {
@@ -64,9 +63,9 @@ describe('parseCommitFilesData', () => {
     { label: 'a non-array files value', raw: { files: 'invalid' } },
     { label: 'a non-object response', raw: null },
   ])('rejects $label', ({ raw }) => {
-    const result = parser.parseCommitFilesData(raw)
+    const result = () => parser.parseCommitFilesData(raw)
 
-    expectInvalidParserResult(result, 'parseCommitFilesData', raw)
+    expectInvalidParserResult(result, 'parseCommitFilesData')
   })
 
   test.each([
@@ -83,8 +82,8 @@ describe('parseCommitFilesData', () => {
       file: { filename: 'README.md', status: 'modified', additions: '1', deletions: 0 },
     },
   ])('rejects $label', ({ file }) => {
-    const result = parser.parseCommitFilesData({ files: [file] })
+    const result = () => parser.parseCommitFilesData({ files: [file] })
 
-    expectInvalidParserResult(result, 'parseCommitFilesData', file)
+    expectInvalidParserResult(result, 'parseCommitFilesData')
   })
 })

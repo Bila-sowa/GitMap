@@ -6,7 +6,7 @@ import { Storage } from '@/js/data/storage'
 
 let activeController = null
 
-function createController({ history = [], renderResult = { success: true } } = {}) {
+function createController({ history = [], renderResult = { currentBranch: 'main' } } = {}) {
   const container = document.createElement('div')
   container.className = 'link-history-container'
 
@@ -25,7 +25,7 @@ function createController({ history = [], renderResult = { success: true } } = {
   storage.setData({ history, localStorage: { saveLink: false, saveToken: false } })
 
   const graph = { render: vi.fn(async () => renderResult) }
-  const localStorage = { save: vi.fn(async () => ({ success: true })) }
+  const localStorage = { save: vi.fn(async () => undefined) }
   const controller = new LinkController(input, container, list, graph, storage, localStorage)
 
   controller.init()
@@ -232,7 +232,7 @@ describe('LinkController history', () => {
 
   test('does not record a failed render', async () => {
     const { input, graph, storage, localStorage } = createController({
-      renderResult: { success: false },
+      renderResult: null,
     })
 
     input.value = 'https://github.com/example/project'

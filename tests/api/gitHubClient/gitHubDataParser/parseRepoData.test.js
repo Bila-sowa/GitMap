@@ -17,7 +17,6 @@ describe('parseRepoData', () => {
     const result = parser.parseRepoData(raw)
 
     expect(result).toStrictEqual({
-      success: true,
       defaultBranch: 'main',
       commitsDetails: [
         {
@@ -49,7 +48,6 @@ describe('parseRepoData', () => {
 
     const result = parser.parseRepoData(raw)
 
-    expect(result.success).toBe(true)
     expect(result.defaultBranch).toBe('feature/a&b')
     expect(result.branchesDetails).toStrictEqual(['feature/a&b', 'main'])
   })
@@ -63,7 +61,6 @@ describe('parseRepoData', () => {
 
     const result = parser.parseRepoData(raw)
 
-    expect(result.success).toBe(true)
     expect(result.defaultBranch).toBe('dev')
     expect(result.branchesDetails).toStrictEqual(['dev', 'main'])
   })
@@ -75,9 +72,9 @@ describe('parseRepoData', () => {
       commits: [createCommit()],
     }
 
-    const result = parser.parseRepoData(raw)
+    const result = () => parser.parseRepoData(raw)
 
-    expectInvalidParserResult(result, 'parseBranchesData', raw.branches)
+    expectInvalidParserResult(result, 'parseBranchesData')
   })
 
   test('returns the commit parsing error', () => {
@@ -87,16 +84,16 @@ describe('parseRepoData', () => {
       commits: [],
     }
 
-    const result = parser.parseRepoData(raw)
+    const result = () => parser.parseRepoData(raw)
 
-    expectInvalidParserResult(result, 'parseCommitsData', raw.commits)
+    expectInvalidParserResult(result, 'parseCommitsData')
   })
 
   test('rejects a non-object response', () => {
     const raw = null
 
-    const result = parser.parseRepoData(raw)
+    const result = () => parser.parseRepoData(raw)
 
-    expectInvalidParserResult(result, 'parseRepoData', raw)
+    expectInvalidParserResult(result, 'parseRepoData')
   })
 })

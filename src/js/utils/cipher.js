@@ -1,4 +1,6 @@
-import { isNonEmptyString, isPlainObject, isString } from './matchers.js'
+import { assert, assertString } from './assertions.js'
+import { isNonEmptyString, isPlainObject } from './matchers.js'
+import { CryptoError } from '@/js/errors'
 
 const ALGORITHM = 'AES-GCM'
 const IV_LENGTH = 12
@@ -23,11 +25,19 @@ function fromBase64(value) {
 }
 
 async function generateKey() {
-  return await globalThis.crypto.subtle.generateKey(
-    { name: ALGORITHM, length: KEY_LENGTH },
-    false,
-    ['encrypt', 'decrypt'],
-  )
+  try {
+    return await globalThis.crypto.subtle.generateKey(
+      { name: ALGORITHM, length: KEY_LENGTH },
+      false,
+      ['encrypt', 'decrypt'],
+    )
+  } catch (cause) {
+    throw new CryptoError('generateKey: unable to generate an encryption key', {
+      cause,
+      userMessage: 'Unable to create the encryption key.',
+      context: 'cipher.generateKey',
+    })
+  }
 }
 
 function isEncryptedValue(value) {
@@ -40,40 +50,56 @@ function isEncryptedValue(value) {
 }
 
 function assertEncryptedValue(value) {
-  if (!isEncryptedValue(value)) {
-    throw new TypeError('decrypt: expected an encrypted value envelope')
-  }
+  assert(isEncryptedValue(value), 'decrypt: expected an encrypted value envelope', {
+    context: 'cipher.decrypt',
+  })
 }
 
 async function encrypt(plaintext, key) {
-  if (!isString(plaintext)) {
-    throw new TypeError(`encrypt: plaintext must be a string, got ${typeof plaintext}`)
-  }
+  assertString(plaintext, `encrypt: plaintext must be a string, got ${typeof plaintext}`, {
+    context: 'cipher.encrypt',
+  })
 
-  const iv = globalThis.crypto.getRandomValues(new Uint8Array(IV_LENGTH))
-  const encrypted = await globalThis.crypto.subtle.encrypt(
-    { name: ALGORITHM, iv },
-    key,
-    new TextEncoder().encode(plaintext),
-  )
+  try {
+    const iv = globalThis.crypto.getRandomValues(new Uint8Array(IV_LENGTH))
+    const encrypted = await globalThis.crypto.subtle.encrypt(
+      { name: ALGORITHM, iv },
+      key,
+      new TextEncoder().encode(plaintext),
+    )
 
-  return {
-    v: ENVELOPE_VERSION,
-    iv: toBase64(iv),
-    data: toBase64(new Uint8Array(encrypted)),
+    return {
+      v: ENVELOPE_VERSION,
+      iv: toBase64(iv),
+      data: toBase64(new Uint8Array(encrypted)),
+    }
+  } catch (cause) {
+    throw new CryptoError('encrypt: unable to encrypt the value', {
+      cause,
+      userMessage: 'Unable to encrypt the token for local storage.',
+      context: 'cipher.encrypt',
+    })
   }
 }
 
 async function decrypt(envelope, key) {
   assertEncryptedValue(envelope)
 
-  const decrypted = await globalThis.crypto.subtle.decrypt(
-    { name: ALGORITHM, iv: fromBase64(envelope.iv) },
-    key,
-    fromBase64(envelope.data),
-  )
+  try {
+    const decrypted = await globalThis.crypto.subtle.decrypt(
+      { name: ALGORITHM, iv: fromBase64(envelope.iv) },
+      key,
+      fromBase64(envelope.data),
+    )
 
-  return new TextDecoder().decode(decrypted)
+    return new TextDecoder().decode(decrypted)
+  } catch (cause) {
+    throw new CryptoError('decrypt: unable to decrypt the value', {
+      cause,
+      userMessage: 'Unable to decrypt the saved token. Please enter the token again.',
+      context: 'cipher.decrypt',
+    })
+  }
 }
 
 export { decrypt, encrypt, generateKey, isEncryptedValue }

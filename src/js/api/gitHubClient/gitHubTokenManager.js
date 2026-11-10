@@ -1,5 +1,5 @@
-import notifications from '@/js/utils/notificationManager'
 import storage from '@/js/data/storage'
+import { AbortError } from '@/js/errors'
 import GitHubTransport from './gitHubTransport'
 import { GITHUB_API_ORIGIN } from './gitHubConstants'
 
@@ -16,11 +16,11 @@ class GitHubTokenManager {
   }
 
   async #validateToken(token, options = {}) {
-    return this.#transport.getJson(`${GITHUB_API_ORIGIN}/rate_limit`, {
+    await this.#transport.getJson(`${GITHUB_API_ORIGIN}/rate_limit`, {
       signal: options.signal,
       authorization: `Bearer ${token}`,
       parseJson: false,
-      error: 'Failed to validate GitHub token',
+      userMessage: 'Failed to validate GitHub token',
       context: '#validateToken',
     })
   }
@@ -31,24 +31,27 @@ class GitHubTokenManager {
     if (!token) {
       delete this.#headers.Authorization
       this.#storage.setData({ token: '' })
-      return { success: true }
+      return
     }
 
-    const validation = await this.#validateToken(token, options)
+    let validationError = null
+
+    try {
+      await this.#validateToken(token, options)
+    } catch (error) {
+      validationError = error
+    }
 
     if (operationId !== this.#tokenOperationId) {
-      return { success: false, cancelled: true }
+      throw new AbortError('Token operation was superseded by a newer request', {
+        context: 'GitHubTokenManager.setToken',
+      })
     }
 
-    if (!validation.success) {
-      notifications.notify(validation.error, 'error')
-      return validation
-    }
+    if (validationError) throw validationError
 
     this.#storage.setData({ token })
     this.#headers.Authorization = `Bearer ${token}`
-    notifications.notify('The token has been successfully set', 'success')
-    return { success: true }
   }
 
   getHeaders() {

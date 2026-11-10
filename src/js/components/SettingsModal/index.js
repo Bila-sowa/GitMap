@@ -1,4 +1,9 @@
 import { normalizeRateLimitData } from '@/js/utils/rateLimit'
+import notifications from '@/js/utils/notificationManager'
+import { isAbortError } from '@/js/utils/matchers'
+import { getUserMessage } from '@/js/errors'
+import { logger } from '@/js/utils/logger'
+import { notifyIfRateLimitHigh } from '@/js/utils/rateLimitWarning'
 import styles from './styles.module.scss'
 
 const UNAVAILABLE_RATE_LIMIT_TITLE = 'Rate limit data is unavailable.'
@@ -26,10 +31,10 @@ const tokenStatusDetails = {
   },
 }
 
-function getTokenStatusState(tokenResult, hasToken) {
+function getTokenStatusState(tokenError, hasToken) {
   if (!hasToken) return 'no-token'
-  if (tokenResult?.success) return 'valid'
-  if (tokenResult?.devError?.status === 401) return 'invalid'
+  if (!tokenError) return 'valid'
+  if (tokenError.status === 401) return 'invalid'
 
   return 'unavailable'
 }
@@ -47,13 +52,13 @@ function renderTokenStatus(modal, tokenState) {
   status.setAttribute('aria-busy', String(tokenState === 'checking'))
 }
 
-function renderRateLimitProgressBar(modal, rateLimitResponse) {
+function renderRateLimitProgressBar(modal, rateLimitData) {
   const progress = modal.querySelector('#settings-rest-api-limit-progress')
   const bar = modal.querySelector('#settings-rest-api-limit-bar')
 
   if (!progress || !bar) return
 
-  if (!rateLimitResponse?.success) {
+  if (!rateLimitData) {
     const title = UNAVAILABLE_RATE_LIMIT_TITLE
 
     bar.style.width = '0%'
@@ -63,9 +68,7 @@ function renderRateLimitProgressBar(modal, rateLimitResponse) {
     return
   }
 
-  const { usedPerNumber, limitPerNumber, usedPerPercent } = normalizeRateLimitData(
-    rateLimitResponse.data,
-  )
+  const { usedPerNumber, limitPerNumber, usedPerPercent } = normalizeRateLimitData(rateLimitData)
   const title = `Used: ${usedPerNumber} / ${limitPerNumber}`
 
   bar.style.width = `${usedPerPercent}%`
@@ -74,12 +77,10 @@ function renderRateLimitProgressBar(modal, rateLimitResponse) {
   progress.setAttribute('aria-valuenow', String(usedPerPercent))
 }
 
-const generateSettingsModalHTML = (rateLimitResponse, tokenState, versionDetails) => {
-  const { usedPerNumber, limitPerNumber, usedPerPercent } = normalizeRateLimitData(
-    rateLimitResponse?.data,
-  )
+const generateSettingsModalHTML = (rateLimitData, tokenState, versionDetails) => {
+  const { usedPerNumber, limitPerNumber, usedPerPercent } = normalizeRateLimitData(rateLimitData)
   const tokenStatus = tokenStatusDetails[tokenState] || tokenStatusDetails.unavailable
-  const rateLimitAvailable = rateLimitResponse?.success
+  const rateLimitAvailable = Boolean(rateLimitData)
   const rateLimitLabel = rateLimitAvailable
     ? `Used: ${usedPerNumber} / ${limitPerNumber}`
     : UNAVAILABLE_RATE_LIMIT_TITLE
@@ -183,21 +184,52 @@ function bindSettingsModalEvents(
 
     renderTokenStatus(modal, 'checking')
 
-    const result = await gitHubClient.setToken(token)
+    let tokenError = null
 
-    if (signal.aborted || result.cancelled) return
+    try {
+      await gitHubClient.setToken(token)
+      if (signal.aborted) return
+      if (token) notifications.notify('The token has been successfully set', 'success')
+    } catch (error) {
+      if (signal.aborted || isAbortError(error)) return
 
-    const tokenState = getTokenStatusState(result, Boolean(token))
-    renderTokenStatus(modal, tokenState)
-
-    if (result.success && storage.getData().localStorage.saveToken) {
-      await localStorage.save()
+      tokenError = error
+      logger.error('Failed to validate the GitHub token:', error)
+      notifications.notify(getUserMessage(error, 'Failed to validate GitHub token'), 'error')
     }
 
-    const rateLimitResponse = await gitHubClient.getRateLimitData({ signal })
+    if (signal.aborted) return
 
-    if (!signal.aborted && !rateLimitResponse.cancelled) {
-      renderRateLimitProgressBar(modal, rateLimitResponse)
+    const tokenState = getTokenStatusState(tokenError, Boolean(token))
+    renderTokenStatus(modal, tokenState)
+
+    if (!tokenError && storage.getData().localStorage.saveToken) {
+      await saveLocalStorage()
+    }
+
+    let rateLimitData = null
+
+    try {
+      rateLimitData = await gitHubClient.getRateLimitData({ signal })
+    } catch (error) {
+      if (signal.aborted || isAbortError(error)) return
+
+      logger.error('Failed to fetch rate limit data:', error)
+      notifications.notify(getUserMessage(error, 'Failed to fetch rate limit data'), 'error')
+    }
+
+    if (!signal.aborted) {
+      notifyIfRateLimitHigh(rateLimitData)
+      renderRateLimitProgressBar(modal, rateLimitData)
+    }
+  }
+
+  async function saveLocalStorage() {
+    try {
+      await localStorage.save()
+    } catch (error) {
+      // save() reports the failure at its own boundary.
+      logger.debug('Failed to save the local storage state.', error)
     }
   }
 
@@ -224,12 +256,12 @@ function bindSettingsModalEvents(
 
   async function toggleSaveLink() {
     storage.setData({ localStorage: { saveLink: saveLinkToggle.checked } })
-    await localStorage.save()
+    await saveLocalStorage()
   }
 
   async function toggleSaveToken() {
     storage.setData({ localStorage: { saveToken: saveTokenToggle.checked } })
-    await localStorage.save()
+    await saveLocalStorage()
   }
 
   tokenInput.addEventListener('blur', saveToken, { signal })

@@ -1,8 +1,10 @@
-import { loadConfig } from './api/config.js'
+import { config, loadConfig } from './api/config.js'
 import storage from './data/storage.js'
 import notifications from './utils/notificationManager.js'
 import { getDomElements } from './controllers/dom.js'
-import { isNonEmptyString } from './utils/matchers.js'
+import { isAbortError, isNonEmptyString } from './utils/matchers.js'
+import { getUserMessage } from './errors/index.js'
+import { logger } from './utils/logger.js'
 import { LocalStorageController } from './controllers/localStorage.js'
 import { CanvasController } from './controllers/canvas.js'
 import { ScaleController } from './controllers/scale.js'
@@ -21,15 +23,28 @@ async function bootstrap() {
 
   bootstrapPromise = (async () => {
     await loadConfig()
+    logger.setDebug(config.debug)
     const dom = getDomElements()
     const localStorage = new LocalStorageController(storage, notifications)
     await localStorage.init()
 
     const { default: gitHubClient } = await import('./api/gitHubClient')
     const { token } = storage.getData()
-    const tokenResult = isNonEmptyString(token)
-      ? await gitHubClient.setToken(token)
-      : { success: true }
+    let isTokenValid = true
+
+    if (isNonEmptyString(token)) {
+      try {
+        await gitHubClient.setToken(token)
+        notifications.notify('The token has been successfully set', 'success')
+      } catch (error) {
+        isTokenValid = false
+
+        if (!isAbortError(error)) {
+          logger.error('Failed to validate the saved GitHub token:', error)
+          notifications.notify(getUserMessage(error, 'Failed to validate GitHub token'), 'error')
+        }
+      }
+    }
     const canvas = new CanvasController(dom.viewport, dom.canvas)
     const scale = new ScaleController(
       dom.scaleIncreaseButton,
@@ -77,7 +92,7 @@ async function bootstrap() {
     }
     application = app
 
-    if (isNonEmptyString(storage.getData().link) && tokenResult.success) graph.render()
+    if (isNonEmptyString(storage.getData().link) && isTokenValid) graph.render()
 
     return application
   })().catch((error) => {

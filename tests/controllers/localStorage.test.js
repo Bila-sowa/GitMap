@@ -2,6 +2,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { LocalStorageController } from '@/js/controllers/localStorage'
 import { Storage } from '@/js/data/storage'
 import { decrypt, generateKey, isEncryptedValue } from '@/js/utils/cipher'
+import { CryptoError, ParseError } from '@/js/errors'
 
 const notifications = { notify: vi.fn() }
 
@@ -52,7 +53,7 @@ describe('LocalStorageController', () => {
     const stored = readStoredData()
     const decrypted = await decrypt(stored.token, key)
 
-    expect(result).toStrictEqual({ success: true })
+    expect(result).toBeUndefined()
     expect(isEncryptedValue(stored.token)).toBe(true)
     expect(JSON.stringify(stored)).not.toContain('ghp_secretToken')
     expect(decrypted).toBe('ghp_secretToken')
@@ -66,7 +67,7 @@ describe('LocalStorageController', () => {
     const restored = new LocalStorageController(restoredStorage, notifications, keyStore)
     const result = await restored.init()
 
-    expect(result.data.token).toBe('ghp_secretToken')
+    expect(result.token).toBe('ghp_secretToken')
   })
 
   test('persists repository history independently of the saved link', async () => {
@@ -78,7 +79,7 @@ describe('LocalStorageController', () => {
     const result = await controller.save()
     const stored = readStoredData()
 
-    expect(result).toStrictEqual({ success: true })
+    expect(result).toBeUndefined()
     expect(stored.link).toBe('')
     expect(stored.history).toStrictEqual(['https://github.com/example/project'])
   })
@@ -94,7 +95,7 @@ describe('LocalStorageController', () => {
     const restored = new LocalStorageController(restoredStorage, notifications, keyStore)
     const result = await restored.init()
 
-    expect(result.data.history).toStrictEqual(['https://github.com/example/project'])
+    expect(result.history).toStrictEqual(['https://github.com/example/project'])
   })
 
   test('persists the system theme', async () => {
@@ -106,7 +107,7 @@ describe('LocalStorageController', () => {
     const restored = new LocalStorageController(restoredStorage, notifications, keyStore)
     const result = await restored.init()
 
-    expect(result.data.theme).toBe('system')
+    expect(result.theme).toBe('system')
   })
 
   test('migrates a legacy plaintext token', async () => {
@@ -121,7 +122,7 @@ describe('LocalStorageController', () => {
     const result = await controller.init()
     const stored = readStoredData()
 
-    expect(result.data.token).toBe('ghp_legacyToken')
+    expect(result.token).toBe('ghp_legacyToken')
     expect(isEncryptedValue(stored.token)).toBe(true)
   })
 
@@ -137,7 +138,7 @@ describe('LocalStorageController', () => {
     const result = await controller.init()
     const stored = readStoredData()
 
-    expect(result.data.token).toBe('')
+    expect(result.token).toBe('')
     expect(stored.token).toBe('')
   })
 
@@ -153,7 +154,7 @@ describe('LocalStorageController', () => {
     const result = await controller.init()
     const stored = readStoredData()
 
-    expect(result.data.token).toBe('')
+    expect(result.token).toBe('')
     expect(stored.token).toBe('')
     expect(notifications.notify).toHaveBeenCalledWith(
       'Unable to decrypt the saved token. Please enter the token again.',
@@ -165,9 +166,9 @@ describe('LocalStorageController', () => {
     keyStore.getKey.mockRejectedValue(new Error('IndexedDB is not available'))
     storage.setData({ token: 'ghp_secretToken', localStorage: { saveToken: true } })
 
-    const result = await controller.save()
+    const result = controller.save()
 
-    expect(result).toStrictEqual({ error: 'Error', success: false })
+    await expect(result).rejects.toThrow(CryptoError)
     expect(globalThis.localStorage.getItem('GitMap')).toBe(null)
     expect(notifications.notify).toHaveBeenCalledWith(
       'Unable to encrypt the token for local storage.',
@@ -188,7 +189,7 @@ describe('LocalStorageController', () => {
     const result = await controller.init()
     const stored = readStoredData()
 
-    expect(result.data.token).toBe('ghp_legacyToken')
+    expect(result.token).toBe('ghp_legacyToken')
     expect(stored.token).toBe('')
     expect(notifications.notify).toHaveBeenCalledWith(
       'Unable to encrypt the token for local storage.',
@@ -202,7 +203,7 @@ describe('LocalStorageController', () => {
     const result = await controller.save()
     const stored = readStoredData()
 
-    expect(result).toStrictEqual({ success: true })
+    expect(result).toBeUndefined()
     expect(stored.token).toBe('')
   })
 
@@ -225,6 +226,34 @@ describe('LocalStorageController', () => {
   test('returns no data when storage is empty', async () => {
     const result = await controller.init()
 
-    expect(result).toStrictEqual({ success: false, data: null })
+    expect(result).toBeNull()
+  })
+
+  test('throws a ParseError when the stored value is not valid JSON', () => {
+    globalThis.localStorage.setItem('GitMap', '{invalid')
+
+    const result = () => controller.get()
+
+    expect(result).toThrow(ParseError)
+
+    try {
+      result()
+    } catch (error) {
+      expect(error.userMessage).toBe(
+        'Invalid local storage parse. Please check your data in the local storage or delete its data.',
+      )
+    }
+  })
+
+  test('notifies and returns null when the stored value cannot be parsed', async () => {
+    globalThis.localStorage.setItem('GitMap', '[1, 2, 3]')
+
+    const result = await controller.init()
+
+    expect(result).toBeNull()
+    expect(notifications.notify).toHaveBeenCalledWith(
+      'Invalid local storage parse. Please check your data in the local storage or delete its data.',
+      'error',
+    )
   })
 })

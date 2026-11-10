@@ -13,6 +13,10 @@ import { buildCommitGraphLayout } from '../utils/commitGraph.js'
 import { toTrimmedString } from '../utils/coercions.js'
 import notifications from '../utils/notificationManager.js'
 import { appendHTML, positionModalNearElement, truncateTitle } from '../utils/utils.js'
+import { getUserMessage } from '../errors/index.js'
+import { logger } from '../utils/logger.js'
+import { isAbortError } from '../utils/matchers.js'
+import { notifyIfRateLimitHigh } from '../utils/rateLimitWarning.js'
 
 const BRANCH_COLOR_COUNT = 4
 
@@ -29,6 +33,7 @@ class GraphController {
   #detailsRequestController = null
   #requestId = 0
   #currentBranch = null
+  #wasRateLimitHigh = false
 
   constructor(graphElement, body, storage, gitHubClient, dropDown) {
     this.#graph = graphElement
@@ -56,7 +61,7 @@ class GraphController {
 
   async render() {
     const link = this.#storage.getData().link
-    if (!link) return { success: false, error: 'Missing repository URL' }
+    if (!link) return null
 
     const request = this.#startRequest()
 
@@ -65,24 +70,24 @@ class GraphController {
     try {
       const data = await this.#gitHubClient.getData(link, { signal: request.signal })
 
-      if (!this.#isCurrentRequest(request.id, link)) {
-        return { success: false, cancelled: true }
-      }
-
-      if (!data.success) return data
+      if (!this.#isCurrentRequest(request.id, link)) return null
 
       this.#link = link
       this.#data = data
       this.#currentBranch = data.defaultBranch || data.branchesDetails[0] || null
 
+      this.#checkRateLimitWarning()
       this.#generateGraph(data.commitsDetails, this.#currentBranch)
       this.#dropDown.render(data.branchesDetails, this.#currentBranch)
       this.#bindEvents()
 
-      return { success: true, currentBranch: this.#currentBranch }
+      return { currentBranch: this.#currentBranch }
     } catch (error) {
-      notifications.notify('Failed to render the repository graph', 'error')
-      return { success: false, error: error.message }
+      if (isAbortError(error)) return null
+
+      logger.error('Failed to render the repository graph:', error)
+      notifications.notify(getUserMessage(error, 'Failed to render the repository graph'), 'error')
+      return null
     } finally {
       removeLoader(loader)
     }
@@ -92,9 +97,7 @@ class GraphController {
     const branchName = toTrimmedString(branch)
     const link = this.#storage.getData().link
 
-    if (!link || !branchName || !this.#data?.success || this.#link !== link) {
-      return { success: false, error: 'Repository data or branch name is missing' }
-    }
+    if (!link || !branchName || !this.#data || this.#link !== link) return null
 
     const request = this.#startRequest()
 
@@ -105,26 +108,26 @@ class GraphController {
         signal: request.signal,
       })
 
-      if (!this.#isCurrentRequest(request.id, link)) {
-        return { success: false, cancelled: true }
-      }
-
-      if (!commits.success) return commits
+      if (!this.#isCurrentRequest(request.id, link)) return null
 
       this.#data = {
         ...this.#data,
-        commitsDetails: commits.commitsDetails,
+        commitsDetails: commits,
       }
       this.#currentBranch = branchName
 
+      this.#checkRateLimitWarning()
       this.#generateGraph(this.#data.commitsDetails, branchName)
       this.#dropDown.setSelectedBranch(branchName)
       this.#bindEvents()
 
-      return { success: true, currentBranch: branchName }
+      return { currentBranch: branchName }
     } catch (error) {
-      notifications.notify('Failed to render the selected branch', 'error')
-      return { success: false, error: error.message }
+      if (isAbortError(error)) return null
+
+      logger.error('Failed to render the selected branch:', error)
+      notifications.notify(getUserMessage(error, 'Failed to render the selected branch'), 'error')
+      return null
     } finally {
       removeLoader(loader)
     }
@@ -151,6 +154,17 @@ class GraphController {
 
   #isCurrentRequest(requestId, link) {
     return requestId === this.#requestId && link === this.#storage.getData().link
+  }
+
+  #checkRateLimitWarning() {
+    if (!this.#gitHubClient.getCachedRateLimitData) return
+
+    const rateLimitData = this.#gitHubClient.getCachedRateLimitData()
+    const isHigh = this.#gitHubClient.checkIsRateLimitHigh?.(rateLimitData) ?? false
+
+    if (isHigh && !this.#wasRateLimitHigh) notifyIfRateLimitHigh(rateLimitData)
+
+    this.#wasRateLimitHigh = isHigh
   }
 
   #getFilesData = async (sha, options = {}) => {
@@ -369,13 +383,17 @@ class GraphController {
           const filesData = await this.#getFilesData(sha, { signal: detailsRequest.signal })
 
           if (detailsRequest !== this.#detailsRequestController || !commitButton.isConnected) return
-          if (!filesData?.success) return
 
           const modal = generateFullCommitModalHTML(commit, filesData)
           if (!modal) return
 
           appendHTML(modal)
           bindFullComitEvents(commitButton)
+        } catch (error) {
+          if (!isAbortError(error)) {
+            logger.error('Failed to load commit files:', error)
+            notifications.notify(getUserMessage(error, 'Failed to load commit files'), 'error')
+          }
         } finally {
           if (detailsRequest === this.#detailsRequestController) {
             this.#detailsRequestController = null

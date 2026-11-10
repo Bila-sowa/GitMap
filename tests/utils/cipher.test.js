@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { decrypt, encrypt, generateKey, isEncryptedValue } from '@/js/utils/cipher'
+import { CryptoError, ValidationError } from '@/js/errors'
 
 describe('cipher', () => {
   test('encrypts and decrypts a string', async () => {
@@ -33,7 +34,7 @@ describe('cipher', () => {
     const tampered = { ...envelope, data: btoa('tampered') }
     const result = decrypt(tampered, key)
 
-    await expect(result).rejects.toThrow()
+    await expect(result).rejects.toThrow(CryptoError)
   })
 
   test('rejects a different key', async () => {
@@ -42,7 +43,7 @@ describe('cipher', () => {
     const envelope = await encrypt('ghp_secretToken', key)
     const result = decrypt(envelope, otherKey)
 
-    await expect(result).rejects.toThrow()
+    await expect(result).rejects.toThrow(CryptoError)
   })
 
   test.each([
@@ -56,14 +57,14 @@ describe('cipher', () => {
     const key = await generateKey()
     const result = decrypt(value, key)
 
-    await expect(result).rejects.toThrow(TypeError)
+    await expect(result).rejects.toThrow(ValidationError)
   })
 
   test('rejects a non-string plaintext', async () => {
     const key = await generateKey()
     const result = encrypt(42, key)
 
-    await expect(result).rejects.toThrow(TypeError)
+    await expect(result).rejects.toThrow(ValidationError)
   })
 
   test.each([

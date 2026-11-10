@@ -23,26 +23,23 @@ describe('parseCommitsData', () => {
 
     const result = parser.parseCommitsData([commit])
 
-    expect(result).toStrictEqual({
-      success: true,
-      commitsDetails: [
-        {
-          author: {
-            name: 'O&#39;Brien &amp; &lt;dev&gt;',
-            email: 'dev@example.com',
-            avatar: 'https://avatars.githubusercontent.com/u/2?v=4',
-            url: 'https://github.com/dev-user',
-            date: '2026-08-28T12:58:44Z',
-          },
-          title: 'Merge &lt;feature&gt; &amp; cleanup',
-          description: '\nSecond line with &quot;quotes&quot;',
-          hash: '51c497d',
-          url: 'https://github.com/example/project/commit/51c497d0faee027f4b124401823c59416bda590a',
-          sha: '51c497d0faee027f4b124401823c59416bda590a',
-          parents: ['282fa46d7bdd39f183a8aa924211106fa250f9a3'],
+    expect(result).toStrictEqual([
+      {
+        author: {
+          name: 'O&#39;Brien &amp; &lt;dev&gt;',
+          email: 'dev@example.com',
+          avatar: 'https://avatars.githubusercontent.com/u/2?v=4',
+          url: 'https://github.com/dev-user',
+          date: '2026-08-28T12:58:44Z',
         },
-      ],
-    })
+        title: 'Merge &lt;feature&gt; &amp; cleanup',
+        description: '\nSecond line with &quot;quotes&quot;',
+        hash: '51c497d',
+        url: 'https://github.com/example/project/commit/51c497d0faee027f4b124401823c59416bda590a',
+        sha: '51c497d0faee027f4b124401823c59416bda590a',
+        parents: ['282fa46d7bdd39f183a8aa924211106fa250f9a3'],
+      },
+    ])
   })
 
   test('falls back to empty avatar and URL when the GitHub author is missing', () => {
@@ -50,8 +47,7 @@ describe('parseCommitsData', () => {
 
     const result = parser.parseCommitsData([commit])
 
-    expect(result.success).toBe(true)
-    expect(result.commitsDetails[0].author).toStrictEqual({
+    expect(result[0].author).toStrictEqual({
       name: 'Test User',
       email: 'test@example.com',
       avatar: '',
@@ -64,9 +60,9 @@ describe('parseCommitsData', () => {
     { label: 'an empty array', input: [] },
     { label: 'a missing list', input: undefined },
   ])('rejects $label', ({ input }) => {
-    const result = parser.parseCommitsData(input)
+    const result = () => parser.parseCommitsData(input)
 
-    expectInvalidParserResult(result, 'parseCommitsData', input)
+    expectInvalidParserResult(result, 'parseCommitsData')
   })
 
   test.each([
@@ -88,8 +84,8 @@ describe('parseCommitsData', () => {
   ])('rejects $label', ({ buildCommit }) => {
     const commit = buildCommit()
 
-    const result = parser.parseCommitsData([commit])
+    const result = () => parser.parseCommitsData([commit])
 
-    expectInvalidParserResult(result, 'parseCommitsData', commit)
+    expectInvalidParserResult(result, 'parseCommitsData')
   })
 })

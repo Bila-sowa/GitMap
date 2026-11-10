@@ -1,4 +1,5 @@
 import { generateKey } from '../utils/cipher.js'
+import { StorageError } from '@/js/errors'
 
 const DATABASE_NAME = 'GitMap'
 const DATABASE_VERSION = 1
@@ -16,9 +17,9 @@ function openDatabase(indexedDB) {
     }
     request.onsuccess = () => resolve(request.result)
     request.onerror = () =>
-      reject(request.error ?? new Error('Unable to open the encryption key database'))
+      reject(request.error ?? new StorageError('Unable to open the encryption key database'))
     request.onblocked = () =>
-      reject(new Error('The encryption key database is blocked by another tab'))
+      reject(new StorageError('The encryption key database is blocked by another tab'))
   })
 }
 
@@ -28,7 +29,8 @@ function readValue(database, id) {
     const request = transaction.objectStore(STORE_NAME).get(id)
 
     request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error ?? new Error('Unable to read the encryption key'))
+    request.onerror = () =>
+      reject(request.error ?? new StorageError('Unable to read the encryption key'))
   })
 }
 
@@ -38,11 +40,12 @@ function writeValue(database, id, value) {
 
     transaction.oncomplete = () => resolve()
     transaction.onerror = () =>
-      reject(transaction.error ?? new Error('Unable to store the encryption key'))
+      reject(transaction.error ?? new StorageError('Unable to store the encryption key'))
 
     const request = transaction.objectStore(STORE_NAME).put(value, id)
 
-    request.onerror = () => reject(request.error ?? new Error('Unable to store the encryption key'))
+    request.onerror = () =>
+      reject(request.error ?? new StorageError('Unable to store the encryption key'))
   })
 }
 
@@ -52,12 +55,12 @@ function deleteValue(database, id) {
 
     transaction.oncomplete = () => resolve()
     transaction.onerror = () =>
-      reject(transaction.error ?? new Error('Unable to delete the encryption key'))
+      reject(transaction.error ?? new StorageError('Unable to delete the encryption key'))
 
     const request = transaction.objectStore(STORE_NAME).delete(id)
 
     request.onerror = () =>
-      reject(request.error ?? new Error('Unable to delete the encryption key'))
+      reject(request.error ?? new StorageError('Unable to delete the encryption key'))
   })
 }
 
@@ -103,7 +106,14 @@ class EncryptionKeyStore {
   }
 
   #getDatabase() {
-    if (!this.#indexedDB) return Promise.reject(new Error('IndexedDB is not available'))
+    if (!this.#indexedDB) {
+      return Promise.reject(
+        new StorageError('IndexedDB is not available', {
+          userMessage: 'Unable to access the encryption key storage.',
+          context: 'EncryptionKeyStore.getDatabase',
+        }),
+      )
+    }
 
     if (!this.#databasePromise) {
       this.#databasePromise = openDatabase(this.#indexedDB).catch((error) => {

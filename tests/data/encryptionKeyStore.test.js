@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest'
 import { EncryptionKeyStore } from '@/js/data/encryptionKeyStore'
 import { decrypt, encrypt } from '@/js/utils/cipher'
+import { StorageError } from '@/js/errors'
 
 function createFakeIndexedDB() {
   const databases = new Map()
@@ -123,6 +124,6 @@ describe('EncryptionKeyStore', () => {
     const store = new EncryptionKeyStore(null)
     const result = store.getKey()
 
-    await expect(result).rejects.toThrow(Error)
+    await expect(result).rejects.toThrow(StorageError)
   })
 })

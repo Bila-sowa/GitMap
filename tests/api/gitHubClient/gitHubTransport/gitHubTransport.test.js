@@ -1,6 +1,8 @@
-import { describe, test, expect } from 'vitest'
+import { describe, test, expect, vi, afterEach } from 'vitest'
 import GitHubTransport from '@/js/api/gitHubClient/gitHubTransport'
 import GitHubRateLimiter from '@/js/api/gitHubClient/gitHubRateLimiter'
+import { config } from '@/js/api/config'
+import { AbortError, HttpError, NetworkError, ParseError, TimeoutError } from '@/js/errors'
 
 const BRANCHES_URL = 'https://api.github.com/repos/example/project/branches'
 const NEXT_PAGE_URL = `${BRANCHES_URL}?page=2`
@@ -11,10 +13,19 @@ const createHeaders = () => ({
 })
 
 const createHttpApi = () => ({
-  createHttpError: async (response) => ({ error: `HTTP ${response.status}` }),
+  createHttpError: async (response, url) =>
+    new HttpError(`HTTP ${response.status}`, {
+      status: response.status,
+      url,
+      userMessage: `HTTP ${response.status}`,
+    }),
 })
 
 describe('GitHubTransport', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   test('follows the Link header and collects every page', async () => {
     const requests = []
     const fetcher = async (url) => {
@@ -34,10 +45,7 @@ describe('GitHubTransport', () => {
 
     const result = await transport.getJson(BRANCHES_URL, { paginate: true })
 
-    expect(result).toStrictEqual({
-      success: true,
-      data: [{ name: 'main' }, { name: 'dev' }],
-    })
+    expect(result).toStrictEqual([{ name: 'main' }, { name: 'dev' }])
     expect(requests).toStrictEqual([BRANCHES_URL, NEXT_PAGE_URL])
   })
 
@@ -62,8 +70,8 @@ describe('GitHubTransport', () => {
         headers: { Accept: 'application/vnd.github+json' },
       },
     ])
-    expect(gitHubResult).toStrictEqual({ success: true, data: [] })
-    expect(externalResult).toStrictEqual({ success: true, data: [] })
+    expect(gitHubResult).toStrictEqual([])
+    expect(externalResult).toStrictEqual([])
   })
 
   test('skips JSON parsing when it is disabled', async () => {
@@ -78,7 +86,7 @@ describe('GitHubTransport', () => {
 
     const result = await transport.getJson('https://example.com/data', { parseJson: false })
 
-    expect(result).toStrictEqual({ success: true })
+    expect(result).toBeUndefined()
   })
 
   test('updates the cached rate limit from response headers without an implicit refresh', async () => {
@@ -102,10 +110,7 @@ describe('GitHubTransport', () => {
     const result = rateLimiter.getCachedRateLimitData()
     const rateLimitRequests = requests.filter((url) => url.endsWith('/rate_limit'))
 
-    expect(result).toStrictEqual({
-      success: true,
-      data: { limitPerNumber: 60, usedPerNumber: 12, usedPerPercent: 20 },
-    })
+    expect(result).toStrictEqual({ limitPerNumber: 60, usedPerNumber: 12, usedPerPercent: 20 })
     expect(rateLimitRequests).toStrictEqual([])
   })
 
@@ -125,14 +130,11 @@ describe('GitHubTransport', () => {
 
     const result = await rateLimiter.getRateLimitData()
 
-    expect(result).toStrictEqual({
-      success: true,
-      data: { limitPerNumber: 60, usedPerNumber: 13, usedPerPercent: 21.67 },
-    })
+    expect(result).toStrictEqual({ limitPerNumber: 60, usedPerNumber: 13, usedPerPercent: 21.67 })
     expect(requests).toStrictEqual(['https://api.github.com/rate_limit'])
   })
 
-  test('returns a cancelled result for an already aborted signal', async () => {
+  test('throws AbortError for an already aborted signal', async () => {
     const controller = new AbortController()
     controller.abort()
     const fetcher = async () => {
@@ -140,19 +142,66 @@ describe('GitHubTransport', () => {
     }
     const transport = new GitHubTransport(createHeaders(), createHttpApi(), { fetcher })
 
-    const result = await transport.getJson('https://api.github.com/data', {
+    const result = transport.getJson('https://api.github.com/data', {
       signal: controller.signal,
     })
 
-    expect(result).toStrictEqual({ success: false, cancelled: true })
+    await expect(result).rejects.toThrow(AbortError)
   })
 
-  test('returns the HTTP API error for a failed response', async () => {
+  test('throws HttpError for a failed response', async () => {
     const fetcher = async () => ({ ok: false, status: 403 })
     const transport = new GitHubTransport(createHeaders(), createHttpApi(), { fetcher })
 
-    const result = await transport.getJson('https://api.github.com/data')
+    const result = transport.getJson('https://api.github.com/data')
 
-    expect(result).toStrictEqual({ success: false, error: 'HTTP 403' })
+    await expect(result).rejects.toThrow(HttpError)
+  })
+
+  test('throws TimeoutError when the request exceeds the timeout', async () => {
+    vi.useFakeTimers()
+    const fetcher = (url, { signal }) =>
+      new Promise((resolve, reject) => {
+        signal.addEventListener('abort', () => reject(signal.reason), { once: true })
+      })
+    const transport = new GitHubTransport(createHeaders(), createHttpApi(), { fetcher })
+    const result = transport.getJson('https://api.github.com/data')
+    const assertion = expect(result).rejects.toThrow(TimeoutError)
+
+    await vi.advanceTimersByTimeAsync(config.settings.gitHub.REQUEST_TIMEOUT_MS)
+    await assertion
+  })
+
+  test('throws NetworkError with the configured user message', async () => {
+    const fetcher = async () => {
+      throw new TypeError('Failed to fetch')
+    }
+    const transport = new GitHubTransport(createHeaders(), createHttpApi(), { fetcher })
+
+    const result = transport.getJson('https://api.github.com/data', {
+      userMessage: 'Failed to fetch repository data',
+    })
+
+    await expect(result).rejects.toThrow(NetworkError)
+
+    try {
+      await result
+    } catch (error) {
+      expect(error.userMessage).toBe('Failed to fetch repository data')
+      expect(error.cause).toBeInstanceOf(TypeError)
+    }
+  })
+
+  test('throws ParseError for an invalid paginated payload', async () => {
+    const fetcher = async () => ({
+      ok: true,
+      headers: new Headers(),
+      json: async () => ({ message: 'not an array' }),
+    })
+    const transport = new GitHubTransport(createHeaders(), createHttpApi(), { fetcher })
+
+    const result = transport.getJson('https://api.github.com/data', { paginate: true })
+
+    await expect(result).rejects.toThrow(ParseError)
   })
 })
