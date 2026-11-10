@@ -1,4 +1,5 @@
 import { DEFAULT_THEME, normalizeTheme, THEME_STATES } from '../utils/theme.js'
+import { logger } from '../utils/logger.js'
 
 const THEME_DETAILS = {
   system: { icon: 'system', label: 'System', next: 'dark' },
@@ -52,7 +53,22 @@ class ThemeController {
 
     this.#applyTheme(normalizedTheme)
     this.#storage.setData({ theme: normalizedTheme })
-    this.#localStorage.save()
+    this.#saveTheme()
+  }
+
+  #saveTheme() {
+    let saveResult
+
+    try {
+      saveResult = this.#localStorage.save()
+    } catch (error) {
+      logger.error('Failed to save the theme:', error)
+      return
+    }
+
+    Promise.resolve(saveResult).catch((error) => {
+      logger.error('Failed to save the theme:', error)
+    })
   }
 
   #applyTheme(theme) {

@@ -45,7 +45,7 @@ function createController({ theme = 'system', matches = true } = {}) {
   const storage = new Storage()
   storage.setData({ theme })
 
-  const localStorage = { save: vi.fn(async () => ({ success: true })) }
+  const localStorage = { save: vi.fn(async () => undefined) }
   const controller = new ThemeController(button, document.body, storage, localStorage)
 
   controller.init()

@@ -2,6 +2,7 @@ import { describe, test, expect, vi, afterEach, beforeEach } from 'vitest'
 import GitHubTokenManager from '@/js/api/gitHubClient/gitHubTokenManager'
 import { Storage } from '@/js/data/storage'
 import notifications from '@/js/utils/notificationManager'
+import { AbortError, HttpError } from '@/js/errors'
 
 const ACTIVE_TOKEN = 'ghp_activeToken'
 
@@ -17,7 +18,8 @@ const createStorage = () => {
 }
 
 const createHttpApi = () => ({
-  createHttpError: async () => ({ error: 'Unauthorized' }),
+  createHttpError: async (response) =>
+    new HttpError('Unauthorized', { status: response.status, userMessage: 'Unauthorized' }),
 })
 
 const createDeferredFetcher = () => {
@@ -39,6 +41,8 @@ const createDeferredFetcher = () => {
 }
 
 describe('setToken', () => {
+  const { fetcher, findRequest, resolveRequest } = createDeferredFetcher()
+
   beforeEach(() => {
     vi.spyOn(notifications, 'notify').mockResolvedValue()
   })
@@ -49,26 +53,27 @@ describe('setToken', () => {
 
   test('preserves the current authorization and storage when the token is rejected', async () => {
     const storage = createStorage()
-    const { fetcher, resolveRequest } = createDeferredFetcher()
     const tokenManager = new GitHubTokenManager(createHeaders(), createHttpApi(), storage, fetcher)
-
     const pendingRequest = tokenManager.setToken('ghp_invalidToken')
-    resolveRequest('ghp_invalidToken', { ok: false, status: 401 })
-    const result = await pendingRequest
+    const assertion = expect(pendingRequest).rejects.toThrow(HttpError)
 
-    expect(result).toStrictEqual({ success: false, error: 'Unauthorized' })
+    resolveRequest('ghp_invalidToken', { ok: false, status: 401 })
+    await assertion
+
+    const error = await pendingRequest.catch((caught) => caught)
+
+    expect(error.userMessage).toBe('Unauthorized')
     expect(tokenManager.getAuthorizationHeader()).toBe(`Bearer ${ACTIVE_TOKEN}`)
     expect(storage.getData().token).toBe(ACTIVE_TOKEN)
-    expect(notifications.notify).toHaveBeenCalledWith('Unauthorized', 'error')
+    expect(notifications.notify).not.toHaveBeenCalled()
   })
 
   test('applies only the latest successful token and isolates candidate headers', async () => {
     const storage = createStorage()
-    const { fetcher, findRequest, resolveRequest } = createDeferredFetcher()
     const tokenManager = new GitHubTokenManager(createHeaders(), createHttpApi(), storage, fetcher)
-
     const staleRequest = tokenManager.setToken('ghp_staleSuccessToken')
     const latestRequest = tokenManager.setToken('ghp_latestSuccessToken')
+    const staleAssertion = expect(staleRequest).rejects.toThrow(AbortError)
     const staleCandidate = findRequest('ghp_staleSuccessToken')
     const latestCandidate = findRequest('ghp_latestSuccessToken')
 
@@ -79,50 +84,42 @@ describe('setToken', () => {
     resolveRequest('ghp_latestSuccessToken', { ok: true })
     const latestResult = await latestRequest
     resolveRequest('ghp_staleSuccessToken', { ok: true })
-    const staleResult = await staleRequest
+    await staleAssertion
 
-    expect(latestResult).toStrictEqual({ success: true })
-    expect(staleResult).toStrictEqual({ success: false, cancelled: true })
+    expect(latestResult).toBeUndefined()
     expect(tokenManager.getAuthorizationHeader()).toBe('Bearer ghp_latestSuccessToken')
     expect(storage.getData().token).toBe('ghp_latestSuccessToken')
-    expect(notifications.notify).toHaveBeenCalledTimes(1)
-    expect(notifications.notify).toHaveBeenCalledWith(
-      'The token has been successfully set',
-      'success',
-    )
+    expect(notifications.notify).not.toHaveBeenCalled()
   })
 
   test('cancels a stale failure after the latest token succeeds', async () => {
     const storage = createStorage()
-    const { fetcher, resolveRequest } = createDeferredFetcher()
     const tokenManager = new GitHubTokenManager(createHeaders(), createHttpApi(), storage, fetcher)
-
     const staleRequest = tokenManager.setToken('ghp_staleFailureToken')
     const latestRequest = tokenManager.setToken('ghp_latestFailureToken')
+    const staleAssertion = expect(staleRequest).rejects.toThrow(AbortError)
 
     resolveRequest('ghp_latestFailureToken', { ok: true })
     await latestRequest
     resolveRequest('ghp_staleFailureToken', { ok: false, status: 401 })
-    const result = await staleRequest
+    await staleAssertion
 
-    expect(result).toStrictEqual({ success: false, cancelled: true })
     expect(tokenManager.getAuthorizationHeader()).toBe('Bearer ghp_latestFailureToken')
     expect(storage.getData().token).toBe('ghp_latestFailureToken')
-    expect(notifications.notify).not.toHaveBeenCalledWith('Unauthorized', 'error')
+    expect(notifications.notify).not.toHaveBeenCalled()
   })
 
   test('clears the authorization and storage and cancels a pending request for an empty token', async () => {
     const storage = createStorage()
-    const { fetcher, resolveRequest } = createDeferredFetcher()
     const tokenManager = new GitHubTokenManager(createHeaders(), createHttpApi(), storage, fetcher)
-
     const pendingRequest = tokenManager.setToken('ghp_pendingToken')
+    const pendingAssertion = expect(pendingRequest).rejects.toThrow(AbortError)
     const result = await tokenManager.setToken('')
-    resolveRequest('ghp_pendingToken', { ok: true })
-    const pendingResult = await pendingRequest
 
-    expect(result).toStrictEqual({ success: true })
-    expect(pendingResult).toStrictEqual({ success: false, cancelled: true })
+    resolveRequest('ghp_pendingToken', { ok: true })
+    await pendingAssertion
+
+    expect(result).toBeUndefined()
     expect(tokenManager.getAuthorizationHeader()).toBe(null)
     expect(storage.getData().token).toBe('')
   })

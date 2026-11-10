@@ -1,14 +1,15 @@
 import { expect } from 'vitest'
+import { ParseError } from '@/js/errors'
 
-const expectInvalidParserResult = (result, method, rawResponse) => {
-  expect(result).toStrictEqual({
-    success: false,
-    error: 'Unexpected response format from GitHub',
-    devError: {
-      message: `Invalid response data in ${method}`,
-      rawResponse,
-    },
-  })
+const expectInvalidParserResult = (action, method) => {
+  expect(action).toThrow(ParseError)
+
+  try {
+    action()
+  } catch (error) {
+    expect(error.userMessage).toBe('Unexpected response format from GitHub')
+    expect(error.context).toBe(method)
+  }
 }
 
 export { expectInvalidParserResult }

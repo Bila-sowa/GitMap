@@ -2,6 +2,7 @@ import { config } from '../api/config.js'
 import { addLinkToHistory } from '../utils/linkHistory.js'
 import { isNonEmptyString } from '../utils/matchers.js'
 import { toTrimmedString } from '../utils/coercions.js'
+import { logger } from '../utils/logger.js'
 
 class LinkController {
   #input
@@ -269,15 +270,23 @@ class LinkController {
 
     if (!this.#abortController || this.#abortController.signal.aborted) return
 
-    if (result.success) {
+    if (result) {
       const history = addLinkToHistory(this.#storage.getData().history, value)
 
       this.#storage.setData({ history })
       this.#renderHistory()
     }
 
-    if (result.success || this.#storage.getData().localStorage.saveLink)
+    if (result || this.#storage.getData().localStorage.saveLink) await this.#save()
+  }
+
+  async #save() {
+    try {
       await this.#localStorage.save()
+    } catch (error) {
+      // save() reports the failure at its own boundary.
+      logger.debug('Failed to persist the link state.', error)
+    }
   }
 
   destroy() {

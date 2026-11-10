@@ -4,7 +4,8 @@ import notifications from '@/js/utils/notificationManager'
 import {
   TEST_REPO_URL,
   PINNED_COMMIT_SHA,
-  getHttpErrorStatus,
+  getApiWarning,
+  isSkippableApiError,
 } from '#/fixtures/github/gitHubClient'
 
 describe('getCommitFiles (live GitHub API)', () => {
@@ -15,18 +16,17 @@ describe('getCommitFiles (live GitHub API)', () => {
   test('returns commit files for a pinned commit SHA', { timeout: 20000 }, async () => {
     vi.spyOn(notifications, 'notify').mockResolvedValue()
     const client = new GitHubClient()
+    let result
 
-    const result = await client.getCommitFiles(TEST_REPO_URL, PINNED_COMMIT_SHA)
-    const httpErrorStatus = getHttpErrorStatus(result)
+    try {
+      result = await client.getCommitFiles(TEST_REPO_URL, PINNED_COMMIT_SHA)
+    } catch (error) {
+      if (!isSkippableApiError(error)) throw error
 
-    if (httpErrorStatus !== null) {
-      console.log(`[WARN] GitHub API error (HTTP ${httpErrorStatus}): ${result.error}`)
-
-      expect(result.success).toBe(false)
+      console.log(`[WARN] ${getApiWarning(error)}`)
       return
     }
 
-    expect(result.success, result.error).toBe(true)
     expect(Array.isArray(result.files)).toBe(true)
     expect(result.files.length).toBeGreaterThan(0)
     expect(typeof result.truncated).toBe('boolean')

@@ -6,6 +6,8 @@ import {
   isPlainObject,
   isPositiveInteger,
 } from '@/js/utils/matchers'
+import { ConfigError } from '@/js/errors'
+import { logger } from '@/js/utils/logger'
 
 const getDefaultConfig = () => {
   return {
@@ -124,19 +126,37 @@ const mergeConfigs = (invalidConfig) => {
   }
 }
 
-const getConfigData = async (url = `${import.meta.env.BASE_URL}config.json`) => {
+const CONFIG_ERROR_MESSAGE = 'Failed to load the application configuration.'
+
+const loadConfigData = async (url) => {
   try {
     const configRes = await fetch(url)
 
     if (!configRes.ok) {
-      throw new Error(`Failed to load config.json: ${configRes.status}`)
+      throw new ConfigError(`Failed to load config.json: ${configRes.status}`, {
+        userMessage: CONFIG_ERROR_MESSAGE,
+        context: 'getConfigData',
+        status: configRes.status,
+      })
     }
 
-    const configData = await configRes.json()
+    return await configRes.json()
+  } catch (cause) {
+    if (cause instanceof ConfigError) throw cause
 
-    return mergeConfigs(configData)
+    throw new ConfigError('Failed to fetch or parse config.json', {
+      cause,
+      userMessage: CONFIG_ERROR_MESSAGE,
+      context: 'getConfigData',
+    })
+  }
+}
+
+const getConfigData = async (url = `${import.meta.env.BASE_URL}config.json`) => {
+  try {
+    return mergeConfigs(await loadConfigData(url))
   } catch (error) {
-    console.error('Returning default config, error fetching config:', error)
+    logger.error('Returning default config, error fetching config:', error)
     return getDefaultConfig()
   }
 }

@@ -1,5 +1,7 @@
 import { describe, test, expect, vi, afterEach } from 'vitest'
 import GitHubHttpApi from '@/js/api/gitHubClient/gitHubHttpApi'
+import { logger } from '@/js/utils/logger'
+import { HttpError } from '@/js/errors'
 
 describe('createHttpError', () => {
   const httpApi = new GitHubHttpApi()
@@ -17,15 +19,14 @@ describe('createHttpError', () => {
 
     const result = await httpApi.createHttpError(response, url)
 
-    expect(result).toStrictEqual({
-      error: 'Not Found (404): Repository or resource not found.',
-      devError: {
-        status: 404,
-        message:
-          'Not Found (404): Repository or resource not found. [API Message: "Not Found", URL: https://api.github.com/repos/octocat/hello-world]',
-        url,
-      },
-    })
+    expect(result).toBeInstanceOf(HttpError)
+    expect(result.status).toBe(404)
+    expect(result.url).toBe(url)
+    expect(result.apiMessage).toBe('Not Found')
+    expect(result.userMessage).toBe('Not Found (404): Repository or resource not found.')
+    expect(result.message).toBe(
+      'Not Found (404): Repository or resource not found. [API Message: "Not Found", URL: https://api.github.com/repos/octocat/hello-world]',
+    )
   })
 
   test('returns only the user error when the response body and URL are empty', async () => {
@@ -36,17 +37,19 @@ describe('createHttpError', () => {
 
     const result = await httpApi.createHttpError(response)
 
-    expect(result).toStrictEqual({
-      error: 'Internal Server Error (500): GitHub encountered an internal error.',
-      devError: {
-        status: 500,
-        message: 'Internal Server Error (500): GitHub encountered an internal error.',
-        url: '',
-      },
-    })
+    expect(result).toBeInstanceOf(HttpError)
+    expect(result.status).toBe(500)
+    expect(result.url).toBe('')
+    expect(result.apiMessage).toBe('')
+    expect(result.userMessage).toBe(
+      'Internal Server Error (500): GitHub encountered an internal error.',
+    )
+    expect(result.message).toBe(
+      'Internal Server Error (500): GitHub encountered an internal error.',
+    )
   })
 
-  test('keeps the user error null when the status is invalid', async () => {
+  test('keeps the user message null when the status is invalid', async () => {
     const url = 'https://api.github.com/rate_limit'
     const response = {
       status: 96,
@@ -55,18 +58,15 @@ describe('createHttpError', () => {
 
     const result = await httpApi.createHttpError(response, url)
 
-    expect(result).toStrictEqual({
-      error: null,
-      devError: {
-        status: 96,
-        message: null,
-        url,
-      },
-    })
+    expect(result).toBeInstanceOf(HttpError)
+    expect(result.status).toBe(96)
+    expect(result.url).toBe(url)
+    expect(result.userMessage).toBe(null)
+    expect(result.message).toBe('GitHub API error (HTTP 96).')
   })
 
   test('falls back to the user error and warns when the JSON body is invalid', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {})
     const url = 'https://api.github.com/rate_limit'
     const response = {
       status: 403,
@@ -77,15 +77,15 @@ describe('createHttpError', () => {
 
     const result = await httpApi.createHttpError(response, url)
 
-    expect(result).toStrictEqual({
-      error: 'Forbidden (403): Access denied, SAML enforcement, or rate limit exceeded.',
-      devError: {
-        status: 403,
-        message:
-          'Forbidden (403): Access denied, SAML enforcement, or rate limit exceeded. [URL: https://api.github.com/rate_limit]',
-        url,
-      },
-    })
+    expect(result).toBeInstanceOf(HttpError)
+    expect(result.status).toBe(403)
+    expect(result.apiMessage).toBe('')
+    expect(result.userMessage).toBe(
+      'Forbidden (403): Access denied, SAML enforcement, or rate limit exceeded.',
+    )
+    expect(result.message).toBe(
+      'Forbidden (403): Access denied, SAML enforcement, or rate limit exceeded. [URL: https://api.github.com/rate_limit]',
+    )
     expect(warnSpy).toHaveBeenCalledTimes(1)
   })
 })

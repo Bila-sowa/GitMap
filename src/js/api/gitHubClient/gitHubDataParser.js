@@ -2,6 +2,7 @@ import formatter from '@/js/utils/formatter'
 import { isFiniteNumber, isNonEmptyString, isRecord, isValidDate } from '@/js/utils/matchers'
 import { toArray } from '@/js/utils/coercions'
 import { escapeHTML } from '@/js/utils/utils'
+import { ParseError } from '@/js/errors'
 
 const isValidCommitAuthor = (author) => {
   return (
@@ -36,45 +37,41 @@ const isValidCommitFile = (file) => {
 }
 
 class GitHubDataParser {
-  #createInvalidDataResult(method, rawResponse) {
-    return {
-      success: false,
-      error: 'Unexpected response format from GitHub',
-      devError: {
-        message: `Invalid response data in ${method}`,
-        rawResponse,
-      },
-    }
+  #throwInvalidData(method) {
+    throw new ParseError(`Invalid response data in ${method}`, {
+      userMessage: 'Unexpected response format from GitHub',
+      context: method,
+    })
   }
 
   parseBranchesData(branches) {
     if (!Array.isArray(branches) || !branches.length) {
-      return this.#createInvalidDataResult('parseBranchesData', branches)
+      this.#throwInvalidData('parseBranchesData')
     }
 
     const branchesDetails = []
 
     for (const branch of branches) {
       if (!isRecord(branch) || !isNonEmptyString(branch.name)) {
-        return this.#createInvalidDataResult('parseBranchesData', branch)
+        this.#throwInvalidData('parseBranchesData')
       }
 
       branchesDetails.push(branch.name)
     }
 
-    return { success: true, branchesDetails }
+    return branchesDetails
   }
 
   parseCommitsData(commits) {
     if (!Array.isArray(commits) || !commits.length) {
-      return this.#createInvalidDataResult('parseCommitsData', commits)
+      this.#throwInvalidData('parseCommitsData')
     }
 
     const commitsDetails = []
 
     for (const commit of commits) {
       if (!isValidCommit(commit)) {
-        return this.#createInvalidDataResult('parseCommitsData', commit)
+        this.#throwInvalidData('parseCommitsData')
       }
 
       const commitData = commit.commit
@@ -105,21 +102,16 @@ class GitHubDataParser {
       commitsDetails.push(details)
     }
 
-    return { success: true, commitsDetails }
+    return commitsDetails
   }
 
   parseRepoData(raw) {
-    if (!isRecord(raw)) return this.#createInvalidDataResult('parseRepoData', raw)
+    if (!isRecord(raw)) this.#throwInvalidData('parseRepoData')
 
-    const branchesResult = this.parseBranchesData(raw.branches)
+    const branchNames = this.parseBranchesData(raw.branches)
+    const commitsDetails = this.parseCommitsData(raw.commits)
 
-    if (!branchesResult.success) return branchesResult
-
-    const commitsResult = this.parseCommitsData(raw.commits)
-
-    if (!commitsResult.success) return commitsResult
-
-    const branchesDetails = [...branchesResult.branchesDetails]
+    const branchesDetails = [...branchNames]
     const hasDefaultBranch = isNonEmptyString(raw.defaultBranch)
     const defaultBranch = hasDefaultBranch ? raw.defaultBranch.trim() : branchesDetails[0]
 
@@ -128,16 +120,15 @@ class GitHubDataParser {
     }
 
     return {
-      success: true,
       defaultBranch,
-      commitsDetails: commitsResult.commitsDetails,
+      commitsDetails,
       branchesDetails,
     }
   }
 
   parseCommitFilesData(raw) {
     if (!isRecord(raw) || !Array.isArray(raw.files)) {
-      return this.#createInvalidDataResult('parseCommitFilesData', raw)
+      this.#throwInvalidData('parseCommitFilesData')
     }
 
     const { files } = raw
@@ -145,7 +136,7 @@ class GitHubDataParser {
 
     for (const file of files) {
       if (!isValidCommitFile(file)) {
-        return this.#createInvalidDataResult('parseCommitFilesData', file)
+        this.#throwInvalidData('parseCommitFilesData')
       }
 
       const extension = formatter.getFormattedExtension(file.filename)
@@ -164,7 +155,6 @@ class GitHubDataParser {
     }
 
     return {
-      success: true,
       files: formattedData,
       truncated: files.length >= 300,
     }

@@ -5,7 +5,7 @@ import GitHubDataParser from './gitHubDataParser'
 import parseGitHubUrl from './gitHubUrlParser'
 import { isNonEmptyString } from '@/js/utils/matchers'
 import { toTrimmedString } from '@/js/utils/coercions'
-import notifications from '@/js/utils/notificationManager'
+import { ValidationError } from '@/js/errors'
 import storage from '@/js/data/storage'
 import GitHubTransport from './gitHubTransport'
 
@@ -33,24 +33,12 @@ class GitHubClient extends GitHubHttpApi {
     this.#parser = new GitHubDataParser()
   }
 
-  #notifyFailure(result) {
-    if (!result.cancelled) notifications.notify(result.error, 'error')
-    return result
-  }
-
-  #createMissingParameterResult(error, message) {
-    notifications.notify(error, 'error')
-    return { success: false, error, devError: { message } }
-  }
-
   async #getRawData(url, options = {}) {
     const formatted = parseGitHubUrl(url)
 
-    if (!formatted.success) return formatted
-
     const requestOptions = {
       signal: options.signal,
-      error: 'Failed to fetch repository data',
+      userMessage: 'Failed to fetch repository data',
       context: '#getRawData',
     }
     const [repository, branches, commits] = await Promise.all([
@@ -59,80 +47,58 @@ class GitHubClient extends GitHubHttpApi {
       this.#transport.getJson(formatted.commitsLink, requestOptions),
     ])
 
-    for (const result of [repository, branches, commits]) {
-      if (!result.success) return result
-    }
-
     return {
-      success: true,
-      defaultBranch: repository.data?.default_branch,
-      branches: branches.data,
-      commits: commits.data,
+      defaultBranch: repository?.default_branch,
+      branches,
+      commits,
     }
   }
 
   async getData(url, options = {}) {
     const data = await this.#getRawData(url, options)
 
-    if (!data.success) return this.#notifyFailure(data)
-
-    const parsed = this.#parser.parseRepoData(data)
-
-    if (!parsed.success) return this.#notifyFailure(parsed)
-
-    return parsed
+    return this.#parser.parseRepoData(data)
   }
 
   async getDataByBranch(name, url = storage.getData().link, options = {}) {
     const branchName = toTrimmedString(name)
 
     if (!isNonEmptyString(branchName)) {
-      return this.#createMissingParameterResult(
-        'Missing branch name',
-        'getDataByBranch requires a valid branch name parameter',
-      )
+      throw new ValidationError('getDataByBranch requires a valid branch name parameter', {
+        userMessage: 'Missing branch name',
+        context: 'getDataByBranch',
+      })
     }
 
     const formatted = parseGitHubUrl(url)
-
-    if (!formatted.success) return this.#notifyFailure(formatted)
-
     const commitsUrl = `${formatted.commitsLink}?sha=${encodeURIComponent(branchName)}`
-    const result = await this.#transport.getJson(commitsUrl, {
+    const commits = await this.#transport.getJson(commitsUrl, {
       signal: options.signal,
-      error: 'Failed to fetch branch commits',
+      userMessage: 'Failed to fetch branch commits',
       context: 'getDataByBranch',
     })
 
-    if (!result.success) return this.#notifyFailure(result)
-
-    const parsed = this.#parser.parseCommitsData(result.data)
-    if (!parsed.success) return this.#notifyFailure(parsed)
-    return parsed
+    return this.#parser.parseCommitsData(commits)
   }
 
   async getCommitFiles(url, sha, options = {}) {
     const formatted = parseGitHubUrl(url)
 
-    if (!formatted.success) return this.#notifyFailure(formatted)
-
     if (!isNonEmptyString(sha)) {
-      return this.#createMissingParameterResult(
-        'Missing commit SHA',
-        'getCommitFiles requires a valid commit SHA parameter',
-      )
+      throw new ValidationError('getCommitFiles requires a valid commit SHA parameter', {
+        userMessage: 'Missing commit SHA',
+        context: 'getCommitFiles',
+      })
     }
 
     const commitUrl = `${formatted.commitsLink}/${sha}`
-    const result = await this.#transport.getJson(commitUrl, {
+    const commit = await this.#transport.getJson(commitUrl, {
       signal: options.signal,
-      error: 'Failed to fetch commit files',
+      userMessage: 'Failed to fetch commit files',
       context: 'getCommitFiles',
     })
 
-    if (!result.success) return this.#notifyFailure(result)
-
-    return this.#parser.parseCommitFilesData(result.data)
+    return this.#parser.parseCommitFilesData(commit)
   }
 
   async setToken(token, options = {}) {
@@ -143,8 +109,12 @@ class GitHubClient extends GitHubHttpApi {
     return await this.#rateLimiter.getRateLimitData(options)
   }
 
-  checkIsRateLimitHigh(response, percent = 70) {
-    return this.#rateLimiter.checkIsRateLimitHigh(response, percent)
+  getCachedRateLimitData() {
+    return this.#rateLimiter.getCachedRateLimitData()
+  }
+
+  checkIsRateLimitHigh(rateLimitData, percent = 70) {
+    return this.#rateLimiter.checkIsRateLimitHigh(rateLimitData, percent)
   }
 }
 

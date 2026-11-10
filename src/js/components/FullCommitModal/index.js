@@ -56,7 +56,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
     url: commitUrl,
   } = commitData
 
-  const { success, files, truncated } = filesData
+  const { files, truncated } = filesData
 
   closeFullCommitModals()
 
@@ -96,7 +96,7 @@ const generateFullCommitModalHTML = (commitData, filesData) => {
             <h3>Changes</h3>
             <div class="${styles['modal-files']}">
                 ${
-                  success && Array.isArray(files)
+                  Array.isArray(files)
                     ? files
                         .map(
                           (file) => `

@@ -3,6 +3,7 @@ import { GitHubClient } from '@/js/api/gitHubClient'
 import notifications from '@/js/utils/notificationManager'
 import { createBranch, createCommit } from '#/fixtures/github/dataParser'
 import { TEST_REPO_URL, createResponse, useFetchRoutes } from '#/fixtures/github/gitHubClient'
+import { AbortError, HttpError, ParseError, ValidationError } from '@/js/errors'
 
 const REPOSITORY_URL = 'https://api.github.com/repos/Bila-sowa/GitMap'
 const BRANCHES_URL = `${REPOSITORY_URL}/branches`
@@ -13,6 +14,8 @@ const createRepositoryResponse = (defaultBranch) =>
   createResponse({ body: { default_branch: defaultBranch }, url: REPOSITORY_URL })
 
 describe('getData', () => {
+  const client = new GitHubClient()
+
   beforeEach(() => {
     vi.spyOn(notifications, 'notify').mockResolvedValue()
   })
@@ -37,12 +40,10 @@ describe('getData', () => {
       { url: COMMITS_URL, response: createResponse({ body: [createCommit()], url: COMMITS_URL }) },
       { url: NEXT_BRANCHES_URL, response: secondPage },
     ])
-    const client = new GitHubClient()
 
     const result = await client.getData(TEST_REPO_URL)
 
     expect(result).toStrictEqual({
-      success: true,
       defaultBranch: 'main',
       commitsDetails: [
         {
@@ -76,31 +77,26 @@ describe('getData', () => {
       },
       { url: COMMITS_URL, response: createResponse({ body: [createCommit()], url: COMMITS_URL }) },
     ])
-    const client = new GitHubClient()
 
     const result = await client.getData(TEST_REPO_URL)
 
-    expect(result.success).toBe(true)
     expect(result.defaultBranch).toBe('feature/a&b')
     expect(result.branchesDetails).toStrictEqual(['feature/a&b', 'main'])
     expect(notifications.notify).not.toHaveBeenCalled()
   })
 
-  test('notifies and rejects an invalid GitHub repository URL', async () => {
-    const client = new GitHubClient()
+  test('rejects an invalid GitHub repository URL without notifying', async () => {
+    const result = client.getData('https://example.com/invalid')
 
-    const result = await client.getData('https://example.com/invalid')
+    await expect(result).rejects.toThrow(ValidationError)
 
-    expect(result).toStrictEqual({
-      success: false,
-      error: 'Invalid GitHub URL',
-      devError:
-        'Failed to parse GitHub URL: "https://example.com/invalid". Expected HTTPS or SSH format.',
-    })
-    expect(notifications.notify).toHaveBeenCalledWith('Invalid GitHub URL', 'error')
+    const error = await result.catch((caught) => caught)
+
+    expect(error.userMessage).toBe('Invalid GitHub URL')
+    expect(notifications.notify).not.toHaveBeenCalled()
   })
 
-  test('returns the repository HTTP error from parallel requests', async () => {
+  test('throws the repository HTTP error from parallel requests', async () => {
     const userError = 'Not Found (404): Repository or resource not found.'
     useFetchRoutes([
       {
@@ -117,23 +113,20 @@ describe('getData', () => {
       },
       { url: COMMITS_URL, response: createResponse({ body: [createCommit()], url: COMMITS_URL }) },
     ])
-    const client = new GitHubClient()
 
-    const result = await client.getData(TEST_REPO_URL)
+    const result = client.getData(TEST_REPO_URL)
 
-    expect(result).toStrictEqual({
-      success: false,
-      error: userError,
-      devError: {
-        status: 404,
-        message: `${userError} [API Message: "Repository not found", URL: ${REPOSITORY_URL}]`,
-        url: REPOSITORY_URL,
-      },
-    })
-    expect(notifications.notify).toHaveBeenCalledWith(userError, 'error')
+    await expect(result).rejects.toThrow(HttpError)
+
+    const error = await result.catch((caught) => caught)
+
+    expect(error.status).toBe(404)
+    expect(error.userMessage).toBe(userError)
+    expect(error.url).toBe(REPOSITORY_URL)
+    expect(notifications.notify).not.toHaveBeenCalled()
   })
 
-  test('handles parser failure for an invalid commit payload', async () => {
+  test('throws ParseError for an invalid commit payload without notifying', async () => {
     const invalidCommit = createCommit({ sha: '' })
     useFetchRoutes([
       { url: REPOSITORY_URL, response: createRepositoryResponse('main') },
@@ -143,38 +136,28 @@ describe('getData', () => {
       },
       { url: COMMITS_URL, response: createResponse({ body: [invalidCommit], url: COMMITS_URL }) },
     ])
-    const client = new GitHubClient()
 
-    const result = await client.getData(TEST_REPO_URL)
+    const result = client.getData(TEST_REPO_URL)
 
-    expect(result).toStrictEqual({
-      success: false,
-      error: 'Unexpected response format from GitHub',
-      devError: {
-        message: 'Invalid response data in parseCommitsData',
-        rawResponse: invalidCommit,
-      },
-    })
-    expect(notifications.notify).toHaveBeenCalledWith(
-      'Unexpected response format from GitHub',
-      'error',
-    )
+    await expect(result).rejects.toThrow(ParseError)
+
+    const error = await result.catch((caught) => caught)
+
+    expect(error.userMessage).toBe('Unexpected response format from GitHub')
+    expect(error.context).toBe('parseCommitsData')
+    expect(notifications.notify).not.toHaveBeenCalled()
   })
 
-  test('handles request cancellation via AbortSignal without notifying', async () => {
+  test('throws AbortError for request cancellation without notifying', async () => {
     const controller = new AbortController()
     controller.abort()
     vi.stubGlobal('fetch', async () => {
       throw new DOMException('The operation was aborted.', 'AbortError')
     })
-    const client = new GitHubClient()
 
-    const result = await client.getData(TEST_REPO_URL, { signal: controller.signal })
+    const result = client.getData(TEST_REPO_URL, { signal: controller.signal })
 
-    expect(result).toStrictEqual({
-      success: false,
-      cancelled: true,
-    })
+    await expect(result).rejects.toThrow(AbortError)
     expect(notifications.notify).not.toHaveBeenCalled()
   })
 })

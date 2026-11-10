@@ -1,5 +1,5 @@
 import { toFiniteNumber } from './coercions.js'
-import { isRecord } from './matchers.js'
+import { isFiniteNumber, isRecord } from './matchers.js'
 
 const EMPTY_RATE_LIMIT_DATA = Object.freeze({
   limitPerNumber: 0,
@@ -26,4 +26,10 @@ const normalizeRateLimitData = (rateLimit) => {
   }
 }
 
-export { EMPTY_RATE_LIMIT_DATA, createRateLimitData, normalizeRateLimitData }
+const isRateLimitHigh = (rateLimitData, percent = 70) => {
+  if (!isFiniteNumber(rateLimitData?.usedPerPercent)) return false
+
+  return rateLimitData.usedPerPercent >= percent && rateLimitData.usedPerPercent !== 100
+}
+
+export { EMPTY_RATE_LIMIT_DATA, createRateLimitData, isRateLimitHigh, normalizeRateLimitData }

@@ -27,6 +27,7 @@ export default mergeConfig(
               'tests/components/loader.test.js',
               'tests/components/settingsModal.test.js',
               'tests/api/gitHubClient/gitHubHttpApi/getHttpErrorMessage.test.js',
+              'tests/api/gitHubClient/gitHubUrlParser.test.js',
               'tests/api/gitHubClient/gitHubHttpApi/createHttpError.test.js',
               'tests/api/gitHubClient/requestControl/requestControl.test.js',
               'tests/api/gitHubClient/gitHubTransport/gitHubTransport.test.js',

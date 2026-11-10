@@ -8,6 +8,7 @@ import {
   createResponse,
   useFetch,
 } from '#/fixtures/github/gitHubClient'
+import { AbortError, HttpError, ValidationError } from '@/js/errors'
 
 const TEST_COMMIT_SHA = PINNED_COMMIT_SHA
 const COMMIT_URL = `https://api.github.com/repos/Bila-sowa/GitMap/commits/${TEST_COMMIT_SHA}`
@@ -16,6 +17,8 @@ const createFiles = (count) =>
   Array.from({ length: count }, (_, index) => createFile({ filename: `src/file-${index}.js` }))
 
 describe('getCommitFiles', () => {
+  const client = new GitHubClient()
+
   beforeEach(() => {
     vi.spyOn(notifications, 'notify').mockResolvedValue()
   })
@@ -33,12 +36,10 @@ describe('getCommitFiles', () => {
       createResponse({ body: { files: rawFiles }, url: COMMIT_URL }),
       COMMIT_URL,
     )
-    const client = new GitHubClient()
 
     const result = await client.getCommitFiles(TEST_REPO_URL, TEST_COMMIT_SHA)
 
     expect(result).toStrictEqual({
-      success: true,
       files: [
         {
           name: 'src/js/&lt;app&gt;.js',
@@ -65,43 +66,40 @@ describe('getCommitFiles', () => {
 
   test('marks the result as truncated when commit contains 300 files', async () => {
     useFetch(createResponse({ body: { files: createFiles(300) }, url: COMMIT_URL }), COMMIT_URL)
-    const client = new GitHubClient()
 
     const result = await client.getCommitFiles(TEST_REPO_URL, TEST_COMMIT_SHA)
 
-    expect(result.success).toBe(true)
     expect(result.truncated).toBe(true)
     expect(result.files).toHaveLength(300)
   })
 
-  test('notifies and rejects an invalid GitHub repository URL', async () => {
-    const client = new GitHubClient()
+  test('rejects an invalid GitHub repository URL without notifying', async () => {
+    const result = client.getCommitFiles('https://example.com/invalid', TEST_COMMIT_SHA)
 
-    const result = await client.getCommitFiles('https://example.com/invalid', TEST_COMMIT_SHA)
+    await expect(result).rejects.toThrow(ValidationError)
 
-    expect(result.success).toBe(false)
-    expect(result.error).toBe('Invalid GitHub URL')
-    expect(notifications.notify).toHaveBeenCalledWith('Invalid GitHub URL', 'error')
+    const error = await result.catch((caught) => caught)
+
+    expect(error.userMessage).toBe('Invalid GitHub URL')
+    expect(notifications.notify).not.toHaveBeenCalled()
   })
 
   test.each([
     { label: 'an empty string', sha: '' },
     { label: 'null', sha: null },
     { label: 'undefined', sha: undefined },
-  ])('notifies and rejects $label as a commit SHA', async ({ sha }) => {
-    const client = new GitHubClient()
+  ])('rejects $label as a commit SHA without notifying', async ({ sha }) => {
+    const result = client.getCommitFiles(TEST_REPO_URL, sha)
 
-    const result = await client.getCommitFiles(TEST_REPO_URL, sha)
+    await expect(result).rejects.toThrow(ValidationError)
 
-    expect(result).toStrictEqual({
-      success: false,
-      error: 'Missing commit SHA',
-      devError: { message: 'getCommitFiles requires a valid commit SHA parameter' },
-    })
-    expect(notifications.notify).toHaveBeenCalledWith('Missing commit SHA', 'error')
+    const error = await result.catch((caught) => caught)
+
+    expect(error.userMessage).toBe('Missing commit SHA')
+    expect(notifications.notify).not.toHaveBeenCalled()
   })
 
-  test('handles HTTP error responses from GitHub API', async () => {
+  test('throws HttpError for GitHub API error responses', async () => {
     useFetch(
       createResponse({
         status: 404,
@@ -110,39 +108,32 @@ describe('getCommitFiles', () => {
       }),
       COMMIT_URL,
     )
-    const client = new GitHubClient()
+
     const userError = 'Not Found (404): Repository or resource not found.'
 
-    const result = await client.getCommitFiles(TEST_REPO_URL, TEST_COMMIT_SHA)
+    const result = client.getCommitFiles(TEST_REPO_URL, TEST_COMMIT_SHA)
 
-    expect(result).toStrictEqual({
-      success: false,
-      error: userError,
-      devError: {
-        status: 404,
-        message: `${userError} [API Message: "No commit found for SHA", URL: ${COMMIT_URL}]`,
-        url: COMMIT_URL,
-      },
-    })
-    expect(notifications.notify).toHaveBeenCalledWith(userError, 'error')
+    await expect(result).rejects.toThrow(HttpError)
+
+    const error = await result.catch((caught) => caught)
+
+    expect(error.status).toBe(404)
+    expect(error.userMessage).toBe(userError)
+    expect(notifications.notify).not.toHaveBeenCalled()
   })
 
-  test('handles request cancellation via AbortSignal without notifying', async () => {
+  test('throws AbortError for request cancellation without notifying', async () => {
     const controller = new AbortController()
     controller.abort()
     vi.stubGlobal('fetch', async () => {
       throw new DOMException('The operation was aborted.', 'AbortError')
     })
-    const client = new GitHubClient()
 
-    const result = await client.getCommitFiles(TEST_REPO_URL, TEST_COMMIT_SHA, {
+    const result = client.getCommitFiles(TEST_REPO_URL, TEST_COMMIT_SHA, {
       signal: controller.signal,
     })
 
-    expect(result).toStrictEqual({
-      success: false,
-      cancelled: true,
-    })
+    await expect(result).rejects.toThrow(AbortError)
     expect(notifications.notify).not.toHaveBeenCalled()
   })
 })

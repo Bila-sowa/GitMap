@@ -1,9 +1,7 @@
 import { describe, test, expect, vi, afterEach } from 'vitest'
 import { GitHubClient } from '@/js/api/gitHubClient'
 import notifications from '@/js/utils/notificationManager'
-import { getHttpErrorStatus } from '#/fixtures/github/gitHubClient'
-
-const EMPTY_RATE_LIMIT_DATA = { limitPerNumber: 0, usedPerNumber: 0, usedPerPercent: 0 }
+import { getApiWarning, isSkippableApiError } from '#/fixtures/github/gitHubClient'
 
 describe('getRateLimitData (live GitHub API)', () => {
   afterEach(() => {
@@ -13,29 +11,24 @@ describe('getRateLimitData (live GitHub API)', () => {
   test('returns numeric core rate limit values', { timeout: 20000 }, async () => {
     vi.spyOn(notifications, 'notify').mockResolvedValue()
     const client = new GitHubClient()
+    let result
 
-    const result = await client.getRateLimitData()
-    const httpErrorStatus = getHttpErrorStatus(result)
+    try {
+      result = await client.getRateLimitData()
+    } catch (error) {
+      if (!isSkippableApiError(error)) throw error
 
-    if (httpErrorStatus !== null) {
-      console.log(`[WARN] GitHub API error (HTTP ${httpErrorStatus}): ${result.error}`)
-
-      expect(result.success).toBe(false)
-      expect(result.data).toStrictEqual(EMPTY_RATE_LIMIT_DATA)
+      console.log(`[WARN] ${getApiWarning(error)}`)
       return
     }
 
-    expect(result.success, result.error).toBe(true)
-
-    const { limitPerNumber, usedPerNumber, usedPerPercent } = result.data
-
-    expect(Number.isInteger(limitPerNumber)).toBe(true)
-    expect(limitPerNumber).toBeGreaterThan(0)
-    expect(Number.isInteger(usedPerNumber)).toBe(true)
-    expect(usedPerNumber).toBeGreaterThanOrEqual(0)
-    expect(usedPerNumber).toBeLessThanOrEqual(limitPerNumber)
-    expect(typeof usedPerPercent).toBe('number')
-    expect(usedPerPercent).toBeGreaterThanOrEqual(0)
-    expect(usedPerPercent).toBeLessThanOrEqual(100)
+    expect(Number.isInteger(result.limitPerNumber)).toBe(true)
+    expect(result.limitPerNumber).toBeGreaterThan(0)
+    expect(Number.isInteger(result.usedPerNumber)).toBe(true)
+    expect(result.usedPerNumber).toBeGreaterThanOrEqual(0)
+    expect(result.usedPerNumber).toBeLessThanOrEqual(result.limitPerNumber)
+    expect(typeof result.usedPerPercent).toBe('number')
+    expect(result.usedPerPercent).toBeGreaterThanOrEqual(0)
+    expect(result.usedPerPercent).toBeLessThanOrEqual(100)
   })
 })
