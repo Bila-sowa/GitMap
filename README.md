@@ -76,6 +76,7 @@ Run commands from the repository root after installing dependencies.
 | `npm test` or `npm run test:local` | Run the same offline Vitest `local` project. |
 | `npm run test:e2e` | Run the explicitly selected Vitest `e2e` project. |
 | `npm run check:all` | Run ESLint and Stylelint checks. |
+| `npm run type:check` | Check JavaScript types with TypeScript using JSDoc annotations. |
 | `npm run ES:check` / `npm run style:check` | Run either lint check separately. |
 | `npm run fix:all` | Run ESLint and Stylelint fixes, then format `src/` with Prettier; this edits files. |
 | `npm run ES:fix` / `npm run style:fix` | Apply either linter's fixes separately; these edit files. |
@@ -100,7 +101,7 @@ For maintainers publishing to GitHub Pages, run `npm run deploy` only after prod
 
 1. Read [RULES.md](./RULES.md) for project conventions, approval requirements, and verification rules.
 2. Fork the repository and create a branch for your feature or fix.
-3. Keep changes focused and run the checks appropriate to the change. Code changes require lint checks, local tests, and a production build; documentation-only changes require text, link, and whitespace checks.
+3. Keep changes focused and run the checks appropriate to the change. Code changes require lint checks, type checks, local tests, and a production build; documentation-only changes require text, link, and whitespace checks.
 4. Commit the changes and open a pull request explaining the problem, resulting behavior, and verification results.
 
 ## License

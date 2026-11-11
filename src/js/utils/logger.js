@@ -20,7 +20,7 @@ const sanitize = (value, seen = new WeakSet()) => {
     return {
       name: value.name,
       message: redact(value.message),
-      code: value.code,
+      code: /** @type {Error & { code?: string }} */ (value).code,
       cause: value.cause === undefined ? undefined : sanitize(value.cause, seen),
     }
   }

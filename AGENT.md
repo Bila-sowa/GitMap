@@ -6,7 +6,7 @@
 - `src/styles.scss`, `src/scss/`, and component `styles.module.scss` files: application styles.
 - `src/assets/` and `src/fonts/`: source assets processed by the build; `public/`: files served without processing, including runtime configuration.
 - `tests/` and `tests/vitest/`: test scenarios and shared Vitest setup; `vitest.config.js`: test projects and discovery.
-- `vite.config.js`, `package.json`, and formatter and linter configuration: build setup, commands, dependencies, and code conventions.
+- `jsconfig.json`, `vite.config.js`, `package.json`, and formatter and linter configuration: type checking setup, build setup, commands, dependencies, and code conventions.
 - `README.md` and `documentation/`: usage documentation and engineering records. `dist/` is generated build output.
 - Confirm the relevant paths before editing and update this map when an approved change makes it inaccurate.
 

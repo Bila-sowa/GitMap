@@ -163,6 +163,21 @@ function getSettingsModal() {
   return document.querySelector('#settings-content')?.closest('.overlay')
 }
 
+/**
+ * @param {Element | null} [modal]
+ * @param {() => void} [onClose]
+ * @param {{
+ *   storage?: {
+ *     getData: () => { localStorage: { saveLink: boolean, saveToken: boolean } },
+ *     setData: (data: object) => void,
+ *   },
+ *   localStorage?: { save: () => Promise<void> },
+ *   gitHubClient?: {
+ *     setToken: (token: string, options?: { signal?: AbortSignal }) => Promise<unknown>,
+ *     getRateLimitData: (options?: { signal?: AbortSignal }) => Promise<unknown>,
+ *   },
+ * }} [options]
+ */
 function bindSettingsModalEvents(
   modal = getSettingsModal(),
   onClose,
@@ -176,8 +191,11 @@ function bindSettingsModalEvents(
   const { signal } = controller
 
   const closeButton = modal.querySelector('#close-settings-button')
+  /** @type {HTMLInputElement | null} */
   const tokenInput = modal.querySelector('#token-input')
+  /** @type {HTMLInputElement | null} */
   const saveLinkToggle = modal.querySelector('#save-link')
+  /** @type {HTMLInputElement | null} */
   const saveTokenToggle = modal.querySelector('#save-token')
   async function saveToken() {
     const token = tokenInput.value.trim()

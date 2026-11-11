@@ -144,6 +144,7 @@ function bindFullComitEvents(trigger) {
   activeModalTrigger = trigger
   const { signal } = controller
 
+  /** @type {HTMLElement | null} */
   const closeButton = modal.querySelector('#close-full-commit-button')
   const icons = [...modal.querySelectorAll('.modal-file-icon')]
   const copyableItems = [...modal.querySelectorAll('.copyable')]

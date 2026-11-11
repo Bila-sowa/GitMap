@@ -8,9 +8,15 @@ import { isGitHubApiUrl } from './gitHubConstants'
 class GitHubTransport {
   #headers
   #httpApi
+  /** @type {typeof fetch} */
   #fetch
   #onResponse
 
+  /**
+   * @param {Record<string, string>} headers
+   * @param {object} httpApi
+   * @param {{ fetcher?: typeof fetch, onResponse?: (response: Response) => void }} [options]
+   */
   constructor(headers, httpApi, { fetcher, onResponse } = {}) {
     this.#headers = headers
     this.#httpApi = httpApi
