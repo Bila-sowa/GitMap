@@ -44,6 +44,9 @@ class GitHubDataParser {
     })
   }
 
+  /**
+   * @returns {string[]}
+   */
   parseBranchesData(branches) {
     if (!Array.isArray(branches) || !branches.length) {
       this.#throwInvalidData('parseBranchesData')
@@ -62,6 +65,9 @@ class GitHubDataParser {
     return branchesDetails
   }
 
+  /**
+   * @returns {CommitDetails[]}
+   */
   parseCommitsData(commits) {
     if (!Array.isArray(commits) || !commits.length) {
       this.#throwInvalidData('parseCommitsData')
@@ -105,6 +111,9 @@ class GitHubDataParser {
     return commitsDetails
   }
 
+  /**
+   * @returns {RepoData}
+   */
   parseRepoData(raw) {
     if (!isRecord(raw)) this.#throwInvalidData('parseRepoData')
 
@@ -126,6 +135,9 @@ class GitHubDataParser {
     }
   }
 
+  /**
+   * @returns {CommitFilesData}
+   */
   parseCommitFilesData(raw) {
     if (!isRecord(raw) || !Array.isArray(raw.files)) {
       this.#throwInvalidData('parseCommitFilesData')

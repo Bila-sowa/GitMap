@@ -90,6 +90,13 @@ const generateSettingsModalHTML = (rateLimitData, tokenState, versionDetails) =>
 
   const { version, versionIsStable } = versionDetails
 
+  const stabilityLabel =
+    versionIsStable === 'unknown'
+      ? '<span class="text-small">(unknown)</span>'
+      : versionIsStable === false
+        ? `<span title="${notStableMessage}" class="text-small cursor-help">(not stable)</span>`
+        : ''
+
   return `
         <div class="overlay">
             <div class="${styles.settings}" id="settings-content" role="dialog">
@@ -151,7 +158,7 @@ const generateSettingsModalHTML = (rateLimitData, tokenState, versionDetails) =>
                     <div class="${styles['settings-version-text-container']}">
                         <span class="text-small">Version: </span>
                         <a class="text-small link is-disabled" href="#" target="_blank" title="View in changelog" aria-disabled="true">${version}</a>
-                        ${versionIsStable ? '' : `<span title="${notStableMessage}" class="text-small cursor-help">${versionIsStable ? '' : '(not stable)'}</span>`}
+                        ${stabilityLabel}
                     </div>
                 </div>
             </div>
