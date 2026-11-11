@@ -90,6 +90,13 @@ const generateSettingsModalHTML = (rateLimitData, tokenState, versionDetails) =>
 
   const { version, versionIsStable } = versionDetails
 
+  const stabilityLabel =
+    versionIsStable === 'unknown'
+      ? '<span class="text-small">(unknown)</span>'
+      : versionIsStable === false
+        ? `<span title="${notStableMessage}" class="text-small cursor-help">(not stable)</span>`
+        : ''
+
   return `
         <div class="overlay">
             <div class="${styles.settings}" id="settings-content" role="dialog">
@@ -151,7 +158,7 @@ const generateSettingsModalHTML = (rateLimitData, tokenState, versionDetails) =>
                     <div class="${styles['settings-version-text-container']}">
                         <span class="text-small">Version: </span>
                         <a class="text-small link is-disabled" href="#" target="_blank" title="View in changelog" aria-disabled="true">${version}</a>
-                        ${versionIsStable ? '' : `<span title="${notStableMessage}" class="text-small cursor-help">${versionIsStable ? '' : '(not stable)'}</span>`}
+                        ${stabilityLabel}
                     </div>
                 </div>
             </div>
@@ -163,6 +170,21 @@ function getSettingsModal() {
   return document.querySelector('#settings-content')?.closest('.overlay')
 }
 
+/**
+ * @param {Element | null} [modal]
+ * @param {() => void} [onClose]
+ * @param {{
+ *   storage?: {
+ *     getData: () => { localStorage: { saveLink: boolean, saveToken: boolean } },
+ *     setData: (data: object) => void,
+ *   },
+ *   localStorage?: { save: () => Promise<void> },
+ *   gitHubClient?: {
+ *     setToken: (token: string, options?: { signal?: AbortSignal }) => Promise<unknown>,
+ *     getRateLimitData: (options?: { signal?: AbortSignal }) => Promise<unknown>,
+ *   },
+ * }} [options]
+ */
 function bindSettingsModalEvents(
   modal = getSettingsModal(),
   onClose,
@@ -176,8 +198,11 @@ function bindSettingsModalEvents(
   const { signal } = controller
 
   const closeButton = modal.querySelector('#close-settings-button')
+  /** @type {HTMLInputElement | null} */
   const tokenInput = modal.querySelector('#token-input')
+  /** @type {HTMLInputElement | null} */
   const saveLinkToggle = modal.querySelector('#save-link')
+  /** @type {HTMLInputElement | null} */
   const saveTokenToggle = modal.querySelector('#save-token')
   async function saveToken() {
     const token = tokenInput.value.trim()

@@ -12,11 +12,11 @@ import { logger } from '@/js/utils/logger'
 const getDefaultConfig = () => {
   return {
     name: 'GitMap',
-    debug: true,
+    debug: false,
     versionDetails: {
-      version: '2.14.1',
-      versionType: 'beta',
-      versionIsStable: true,
+      version: 'unknown',
+      versionType: 'unknown',
+      versionIsStable: 'unknown',
     },
 
     settings: {

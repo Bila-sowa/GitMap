@@ -94,6 +94,7 @@ class SettingsController {
       if (!modal) return
 
       document.body.append(modal)
+      /** @type {HTMLInputElement | null} */
       const tokenInput = modal.querySelector('#token-input')
       if (tokenInput) tokenInput.value = token
       this.#modal = modal

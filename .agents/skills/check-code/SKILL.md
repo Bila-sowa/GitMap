@@ -7,7 +7,7 @@ description: Manually inspect changed code for architectural, semantic, and proj
 
 ## Purpose and Philosophy
 
-Automated tools (`ESLint`, `Stylelint`, `Prettier`) catch surface-level syntax, code formatting, and standard lint warnings. They do not understand business logic, architectural constraints, test conventions, or project-specific principles codified in `AGENT.md`.
+Automated tools (`ESLint`, `Stylelint`, `Prettier`, `TypeScript`) catch surface-level syntax, code formatting, types, and standard lint warnings. They do not understand business logic, architectural constraints, test conventions, or project-specific principles codified in `AGENT.md`.
 
 `check-code` performs a deep, human-like manual code review of modified code and applies targeted, hands-on refactoring. The agent actively inspects changed code and its surrounding context against project rules, detects semantic and structural deficiencies, and fixes them directly.
 
@@ -87,15 +87,11 @@ After applying manual fixes, run all required project verification checks:
    ```bash
    npm run check:all
    ```
-2. **Local Tests**:
-   ```bash
-   npm test
-   ```
-3. **Build Check**:
+2. **Build Check**:
    ```bash
    npm run build
    ```
-4. If any check fails as a result of the changes, diagnose the root cause, fix it within the approved scope, and rerun the checks until clean.
+3. If any check fails as a result of the changes, diagnose the root cause, fix it within the approved scope, and rerun the checks until clean.
 
 ---
 

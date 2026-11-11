@@ -59,6 +59,34 @@ describe('SettingsModal', () => {
     expect(progress.hasAttribute('aria-valuenow')).toBe(false)
   })
 
+  test('marks an unknown version stability without the not-stable warning', () => {
+    const template = document.createElement('template')
+
+    template.innerHTML = generateSettingsModalHTML(rateLimitData, 'valid', {
+      version: 'unknown',
+      versionIsStable: 'unknown',
+    }).trim()
+
+    const modal = template.content.firstElementChild
+
+    expect(modal.textContent).toContain('(unknown)')
+    expect(modal.textContent).not.toContain('(not stable)')
+  })
+
+  test('marks an unstable version', () => {
+    const template = document.createElement('template')
+
+    template.innerHTML = generateSettingsModalHTML(rateLimitData, 'valid', {
+      version: '2.11.26',
+      versionIsStable: false,
+    }).trim()
+
+    const modal = template.content.firstElementChild
+
+    expect(modal.textContent).toContain('(not stable)')
+    expect(modal.textContent).not.toContain('(unknown)')
+  })
+
   test('clears the token input when the modal closes', () => {
     const modal = createModal()
     const tokenInput = modal.querySelector('#token-input')

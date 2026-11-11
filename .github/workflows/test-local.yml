@@ -28,6 +28,9 @@ jobs:
       - name: Run lint checks
         run: npm run check:all
 
+      - name: Run type checks
+        run: npm run type:check
+
       - name: Run local test suite
         run: npm run test:local
 

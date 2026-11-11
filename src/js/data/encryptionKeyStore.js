@@ -34,6 +34,12 @@ function readValue(database, id) {
   })
 }
 
+/**
+ * @param {IDBDatabase} database
+ * @param {IDBValidKey} id
+ * @param {unknown} value
+ * @returns {Promise<void>}
+ */
 function writeValue(database, id, value) {
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(STORE_NAME, 'readwrite')
@@ -49,6 +55,11 @@ function writeValue(database, id, value) {
   })
 }
 
+/**
+ * @param {IDBDatabase} database
+ * @param {IDBValidKey} id
+ * @returns {Promise<void>}
+ */
 function deleteValue(database, id) {
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(STORE_NAME, 'readwrite')

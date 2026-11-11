@@ -38,7 +38,7 @@ const sanitizerConfig = {
 const sanitizeMarkdown = (markdown) => {
   if (!markdown) return ''
 
-  const parsedMarkdown = marked.parse(String(markdown))
+  const parsedMarkdown = marked.parse(String(markdown), { async: false })
   return DOMPurify.sanitize(parsedMarkdown, sanitizerConfig)
 }
 

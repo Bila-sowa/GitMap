@@ -33,6 +33,12 @@ class NotificationManager {
     this.#processQueue()
   }
 
+  /**
+   * @param {string} message
+   * @param {string} type
+   * @param {number} COOLDOWN_MS
+   * @returns {Promise<void>}
+   */
   #showNotification(message, type, COOLDOWN_MS) {
     return new Promise((resolve) => {
       const notificationId = getRandomID('notification')
